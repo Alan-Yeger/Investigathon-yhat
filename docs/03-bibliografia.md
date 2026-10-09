@@ -13,6 +13,8 @@ Lista organizada por área y con prioridades. Todas las referencias fueron verif
 
 ## 0. Puertas de entrada (empezar por acá)
 
+> Si los conceptos básicos (RL, RLHF, agente, CoT, steering) todavía no están claros, leé primero la [guía para tontos](00-guia-para-tontos.md).
+
 | | Referencia | Por qué |
 |---|---|---|
 | 🔴 | **Weng, L.** (2024). *Reward Hacking in Reinforcement Learning.* Lil'Log. [link](https://lilianweng.github.io/posts/2024-11-28-reward-hacking/) | La mejor revisión introductoria: definiciones, ejemplos clásicos, RLHF, LLMs y mitigaciones. |

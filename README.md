@@ -22,6 +22,7 @@ Repositorio del equipo de **Alan, Luis y Ariel** para la [Investigathon 2026](ht
 
 | # | Documento | Contenido |
 |---|---|---|
+| 0 | [**Reward hacking para tontos**](docs/00-guia-para-tontos.md) | **Empezar por acá.** Explicación elemental, con analogías y ejemplos de código: cómo se entrena un LLM, qué es una recompensa, un agente y un benchmark, por qué hacen trampa, qué es el CoT, la conciencia de evaluación y el steering, cómo leer papers y un machete final. |
 | 1 | [**La problemática**](docs/01-problematica.md) | Qué es el reward hacking, historia en ejemplos (de CoastRunners al incidente OpenAI/Hugging Face de 2026), mapa de causas candidatas y gaps. |
 | 2 | [**Áreas de investigación**](docs/02-areas-de-investigacion.md) | Las 10 áreas que cruza la pregunta (Goodhart, RL/RLHF/RLVR, generalización, benchmarks, conciencia de evaluación, CoT, interpretabilidad, metodología, mitigaciones) y qué conocimientos adquirir. |
 | 3 | [**Bibliografía comentada**](docs/03-bibliografia.md) | ~90 referencias verificadas (al 9/10/2026), con prioridades 🔴🟠⚪ y un plan de lectura repartido entre los tres. |
@@ -41,7 +42,7 @@ Oct 2026   L  M  M  J  V  S  D
 
 ## Próximos pasos (antes del 16/10)
 
-1. Leer los 🔴 de la [bibliografía](docs/03-bibliografia.md#orden-de-lectura-sugerido-12-textos--4-por-persona) (4 por persona) y dejar notas en `notas/`.
+1. Leer la [guía para tontos](docs/00-guia-para-tontos.md) y después los 🔴 de la [bibliografía](docs/03-bibliografia.md#orden-de-lectura-sugerido-12-textos--4-por-persona) (4 por persona) y dejar notas en `notas/`.
 2. Instalar [Inspect](https://inspect.aisi.org.uk/) e [ImpossibleBench](https://github.com/safety-research/impossiblebench) y correr un ejemplo (ver el [plan](docs/05-plan-de-trabajo.md#semana-0-antes-de-la-apertura-910--1510)).
 3. Conseguir API keys con límite de gasto.
 4. Discutir la [propuesta](docs/04-propuesta-de-paper.md) entre los tres y llevarla a la apertura.
