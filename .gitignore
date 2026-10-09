@@ -1,0 +1,21 @@
+# Secrets
+.env
+*.key
+
+# Python
+__pycache__/
+*.pyc
+.venv/
+venv/
+*.egg-info/
+
+# Inspect logs and large artifacts (keep curated results in results/)
+logs/
+*.eval
+
+# Notebooks / OS
+.ipynb_checkpoints/
+.DS_Store
+
+# Claude Code local state
+.claude/scheduled_tasks.lock
