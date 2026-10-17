@@ -26,9 +26,12 @@ Repositorio del equipo de **Alan, Luis y Ariel** para la [Investigathon 2026](ht
 | 1 | [**La problemática**](docs/01-problematica.md) | Qué es el reward hacking, historia en ejemplos (de CoastRunners al incidente OpenAI/Hugging Face de 2026), mapa de causas candidatas y gaps. |
 | 2 | [**Áreas de investigación**](docs/02-areas-de-investigacion.md) | Las 10 áreas que cruza la pregunta (Goodhart, RL/RLHF/RLVR, generalización, benchmarks, conciencia de evaluación, CoT, interpretabilidad, metodología, mitigaciones) y qué conocimientos adquirir. |
 | 3 | [**Bibliografía comentada**](docs/03-bibliografia.md) | ~90 referencias verificadas (al 9/10/2026), con prioridades 🔴🟠⚪ y un plan de lectura repartido entre los tres. |
-| 4 | [**Propuesta de paper**](docs/04-propuesta-de-paper.md) | Preguntas, hipótesis, diseño experimental, modelos, métricas, análisis, presupuesto, riesgos, alternativas y estructura del póster. |
+| 4 | [**Propuesta de paper (original)**](docs/04-propuesta-de-paper.md) | *Antecedente; reemplazada por la 8.* Preguntas, hipótesis, diseño experimental, modelos, métricas, análisis, presupuesto, riesgos, alternativas y estructura del póster. |
 | 5 | [**Plan de trabajo**](docs/05-plan-de-trabajo.md) | Cronograma día a día alineado con los checkpoints, roles y preguntas para el laboratorio. |
 | 6 | [**Glosario**](docs/06-glosario.md) | Términos clave, en inglés con definición en castellano. |
+| 7 | [**Realineación con los tutores**](docs/07-realineacion-con-tutores.md) | Qué pidieron en la apertura (detectar y revertir), en qué se alejaba la propuesta original y tres propuestas alineadas. |
+| 8 | [**Propuesta unificada: Detectar → Entender → Revertir**](docs/08-propuesta-unificada.md) | **Plan activo.** Une la Propuesta 1 de la 07 con la original: hipótesis, pipeline sobre Qwen3-32B hacker/control, cronograma hasta el 30/10, cómputo y texto para el formulario de GPU. |
+| — | Presentaciones del track: [Intro](docs/Intro%20track%20Reward%20Hacking.pdf) · [Profundización](docs/Profundizaci%C3%B3n%20track%20Reward%20Hacking.pdf) | Slides de la apertura (LIAA/ICC). |
 | — | [Notas de lectura](notas/) | Plantilla y notas por paper. |
 
 ## Cronograma
