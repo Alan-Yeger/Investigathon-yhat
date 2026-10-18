@@ -1,0 +1,358 @@
+---
+pagetitle: "Detectar, entender, revertir · Checkpoint 1"
+lang: es
+format:
+  revealjs:
+    width: 1600
+    height: 900
+    margin: 0.05
+    center: false
+    slide-number: c/t
+    hash: true
+    transition: fade
+    transition-speed: fast
+    include-in-header:
+      - text: |
+          <link rel="preconnect" href="https://fonts.googleapis.com">
+          <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@300;400;600&family=IBM+Plex+Mono:wght@400&display=swap" rel="stylesheet">
+          <style>
+            :root {
+              --fondo: #f3f0ea; --tinta: #2b2b2b; --gris: #6b675f;
+              --azul: #1f5fa8; --magenta: #b5124a; --ambar: #e8a33d;
+              --caja: #ffffff; --oscuro: #2f2f2f; --claro: #efe9df;
+              --r-background-color: var(--fondo);
+              --r-main-color: var(--tinta);
+              --r-heading-color: var(--tinta);
+            }
+            .reveal-viewport { background: var(--fondo) !important; }
+            .reveal { font-family: "IBM Plex Sans", system-ui, sans-serif; color: var(--tinta); }
+            .reveal h2 {
+              font-family: "IBM Plex Sans", system-ui, sans-serif; font-weight: 400;
+              font-size: 1.45em; color: var(--tinta); text-transform: none;
+              border-bottom: 3px solid var(--tinta); padding-bottom: .18em; margin-bottom: .55em;
+            }
+            .reveal strong { font-weight: 600; }
+            .reveal .slide-number { background: transparent; color: var(--gris); font-size: 18px; }
+
+            /* Portada y cierre */
+            .reveal .portada, .reveal .cierre { color: var(--claro); }
+            .reveal .cierre h2 { color: var(--claro); border-bottom: none; font-weight: 300; font-size: 2.4em; margin-bottom: .1em; }
+            .kicker { font-size: .52em; color: #cfcac0; letter-spacing: .03em; }
+            .titulo { font-size: 2.5em; font-weight: 300; line-height: 1.05; margin-top: 2.6em; }
+            .subtitulo { font-size: 1.05em; font-weight: 300; margin-top: .25em; }
+            .linea { width: 52%; height: 5px; background: var(--ambar); margin: .7em 0 .55em; }
+            .autores { font-size: .7em; font-weight: 600; }
+            .fecha { font-size: .55em; color: #cfcac0; margin-top: .2em; }
+
+            /* Cajas genéricas */
+            .caja { background: var(--caja); border-left: 6px solid var(--azul); padding: .45em .7em; border-radius: 4px; }
+            .chico { font-size: .6em; }
+            .nota { font-size: .5em; color: var(--gris); }
+
+            /* Slide 2: recorrido */
+            .paso { font-size: .66em; background: var(--caja); border-radius: 4px; padding: .45em .7em; margin-bottom: .45em; border-left: 6px solid var(--gris); }
+            .paso.final { border-left-color: var(--magenta); }
+            .paso b.n { color: var(--magenta); margin-right: .35em; }
+            .reveal .tabla table { font-size: .62em; width: 100%; border-collapse: collapse; table-layout: fixed !important; }
+            .tabla col:nth-child(1) { width: 26% !important; } .tabla col:nth-child(2) { width: 44% !important; } .tabla col:nth-child(3) { width: 30% !important; }
+            .tabla th { text-align: left; border-bottom: 2px solid var(--tinta) !important; padding: .3em .4em; }
+            .tabla td { padding: .45em .4em; border-bottom: 1px solid #d6d0c4; vertical-align: top; }
+            .tag { display: inline-block; padding: .05em .45em; border-radius: 3px; font-weight: 600; color: #fff; white-space: nowrap; }
+            .tag.si { background: var(--azul); }
+            .tag.medio { background: var(--ambar); color: var(--tinta); }
+            .tag.no { background: #9a948a; }
+            .criterios { font-size: .64em; margin-top: .7em; padding: .4em .7em; border: 2px dashed var(--azul); border-radius: 4px; }
+
+            /* Slide 3: pregunta e hipótesis */
+            .pregunta { font-size: .8em; line-height: 1.3; background: var(--caja); border-left: 8px solid var(--magenta); padding: .5em .8em; border-radius: 4px; margin-bottom: .6em; }
+            .verbo { color: var(--magenta); font-weight: 600; }
+            .reveal .hip table { font-size: .68em; width: 100%; border-collapse: collapse; table-layout: fixed !important; }
+            .hip col:nth-child(1) { width: 11% !important; } .hip col:nth-child(2) { width: 61% !important; } .hip col:nth-child(3) { width: 28% !important; }
+            .hip th { text-align: left; border-bottom: 2px solid var(--tinta) !important; padding: .3em .45em; }
+            .hip td { padding: .42em .45em; border-bottom: 1px solid #d6d0c4; vertical-align: top; }
+            .hip td:first-child { font-weight: 600; color: var(--magenta); white-space: nowrap; }
+            .hip td:last-child { color: var(--gris); font-size: .9em; }
+
+            /* Slide 4: pipeline */
+            .sujetos { font-size: .62em; text-align: center; background: var(--oscuro); color: var(--claro); padding: .4em; border-radius: 4px; margin-bottom: .55em; }
+            .sujetos code { color: var(--ambar); background: transparent; font-family: "IBM Plex Mono", monospace; }
+            .pipeline { display: grid; grid-template-columns: 1fr auto 1fr auto 1fr; gap: .35em; align-items: stretch; }
+            .flecha { align-self: center; font-size: 1.4em; color: var(--magenta); }
+            .etapa { font-size: .6em; background: var(--caja); border-top: 6px solid var(--azul); border-radius: 4px; padding: .5em .75em; display: flex; flex-direction: column; }
+            .etapa-titulo { font-size: 1.35em; margin: 0 0 .3em 0; color: var(--azul); font-weight: 600; }
+            .etapa ul { margin: 0 0 .4em 1em; }
+            .etapa li { margin-bottom: .25em; }
+            .etapa .fig { margin-top: auto; padding-top: .35em; border-top: 1px solid #d6d0c4; color: var(--magenta); font-weight: 600; }
+            .pie { font-size: .56em; color: var(--gris); margin-top: .55em; text-align: center; }
+
+            /* Slide 5: plan y límites */
+            .reveal .crono table { font-size: .7em; width: 100%; border-collapse: collapse; table-layout: fixed !important; }
+            .crono col:nth-child(1) { width: 20% !important; } .crono col:nth-child(2) { width: 80% !important; }
+            .crono td { padding: .38em .45em; border-bottom: 1px solid #d6d0c4; vertical-align: top; }
+            .crono td:first-child { font-weight: 600; white-space: nowrap; color: var(--azul); }
+            .crono tr.hito td { background: #fff3dc; }
+            .crono th { display: none; }
+            .prioridad { font-size: .7em; margin-top: .8em; }
+            .prioridad span { font-weight: 600; color: var(--magenta); }
+            .limite { font-size: .7em; background: var(--caja); border-left: 6px solid var(--ambar); border-radius: 4px; padding: .4em .7em; margin-bottom: .4em; }
+            .limite b { display: block; }
+            .fuera { font-size: .58em; color: var(--gris); margin-top: .5em; }
+
+            /* Cierre */
+            .preguntas { font-size: .85em; margin-top: 1em; }
+            .preguntas ol { margin-left: 1.1em; }
+            .preguntas li { margin-bottom: .45em; }
+            .reveal .cierre .linea { margin-top: .2em; }
+          </style>
+---
+
+## {.portada background-color="#2f2f2f"}
+
+::: {.kicker}
+Investigathon 2026 · Track Reward Hacking · LIAA / ICC (UBA-CONICET)
+:::
+
+::: {.titulo}
+Detectar, entender, revertir
+:::
+
+::: {.subtitulo}
+Reward hacking en un modelo que ya aprendió a hackear
+:::
+
+::: {.linea}
+:::
+
+::: {.autores}
+Alan · Ariel · Luis
+:::
+
+::: {.fecha}
+Checkpoint 1 · 19 de octubre de 2026
+:::
+
+::: {.notes}
+**[~15 s]**
+Somos Alan, Ariel y Luis. No traemos resultados: les vamos a contar qué decidimos investigar a partir de la bibliografía y de los recursos que nos propusieron, por qué lo elegimos y cómo lo vamos a hacer en estas dos semanas.
+:::
+
+## Cómo llegamos a la propuesta
+
+:::: {.columns}
+
+::: {.column width="40%"}
+::: {.paso}
+<b class="n">1</b> **Lectura.** 12 papers repartidos entre los tres. Primera idea: un estudio *conductual* de por qué hackean agentes de código (ImpossibleBench).
+:::
+
+::: {.paso}
+<b class="n">2</b> **Presentaciones del track.** El foco es otro: partir de un modelo que *ya* hackea y preguntarse si se puede **detectar** y **revertir**.
+:::
+
+::: {.paso .final}
+<b class="n">3</b> **Realineación.** Adoptamos ese foco y conservamos de nuestra idea la pregunta por *qué dispara* el hacking.
+:::
+:::
+
+::: {.column width="58%"}
+::: {.tabla}
+| Recurso | Qué ofrece | Decisión |
+|-------------|----------------------|---------------|
+| **School of Reward Hacks** | 1.073 pares hack/control y 10 adaptadores LoRA sobre Qwen3-32B (5 *hacker*, 5 *control*) | [Núcleo]{.tag .si} |
+| **Terminal Wrench** | 3.632 exploits agénticos confirmados, generados por modelos cerrados | [Plan C]{.tag .medio} solo detectar |
+| **Reward Hacking Benchmark** | Sin dataset público | [Descartado]{.tag .no} reconstruirlo consume las dos semanas |
+:::
+
+::: {.criterios}
+**Criterios de elección:** fenómeno garantizado · acceso a activaciones · sirve para detectar *y* revertir · entra en dos semanas
+:::
+:::
+
+::::
+
+::: {.notes}
+**[~60 s]**
+Arrancamos por la literatura: doce papers entre los tres. Con eso armamos una primera idea, un experimento conductual sobre por qué los agentes de código hackean en ImpossibleBench.
+
+Al ver las presentaciones del track nos dimos cuenta de que esa idea iba por otro lado: ustedes proponen partir de un modelo que ya hackea y preguntarse si se puede detectar y revertir.
+
+Entonces evaluamos los tres recursos con cuatro criterios (los de abajo). School of Reward Hacks cumple los cuatro: tiene pares hack/control y diez adaptadores ya entrenados sobre un modelo abierto. Terminal Wrench queda como plan C, porque sus trayectorias son de modelos cerrados y solo nos permitiría estudiar la detección. Y descartamos reconstruir el Reward Hacking Benchmark porque se nos iría todo el tiempo en infraestructura.
+
+De nuestra idea original rescatamos una sola cosa: la pregunta por qué del contexto dispara el hacking.
+:::
+
+## Pregunta e hipótesis
+
+::: {.pregunta}
+En un modelo que ya aprendió a hackear métricas, ¿podemos [detectar]{.verbo} el hacking en sus activaciones **antes** de que aparezca en el texto, [entender]{.verbo} qué del contexto lo dispara y [revertirlo]{.verbo} mejor con *steering* que con prompt?
+:::
+
+::: {.hip}
+| Paso | Hipótesis | Nos apoyamos en |
+|-----|------------------------------|--------------|
+| Detectar | **H1.** Una sonda lineal en capas intermedias detecta el hack con AUC ≥ a la de un monitor que lee el texto, y ya lo predice desde el **último token del prompt**. | Bergen et al. 2026; Goldowsky-Dill et al. 2025; Baker et al. 2025 |
+| Entender | **H2.** El hacking se concentra en una **dirección estable entre semillas** que **ya existe en el modelo base**: el finetuning amplifica un concepto previo. | Wang et al. 2025 (persona features); Chen et al. 2025 (persona vectors) |
+| Entender | **H3.** La **métrica explícita** dispara el hack y las **creencias sobre la evaluación** lo modulan: "solo se mide X" lo sube, "una persona lo va a leer" lo baja. | Højmark et al. 2026; METR 2025 |
+| Revertir | **H4.** Restar la dirección (−α·v) reduce el hacking **más que una prohibición por prompt**, con un costo acotado en calidad. | Abdelnabi & Salem 2025; Oswal et al. 2025 |
+:::
+
+::: {.notes}
+**[~60 s]**
+La pregunta tiene las tres partes del título.
+
+H1 viene de Bergen y de las sondas de Apollo: esperamos que una sonda lineal detecte el hack tan bien como un juez que lee la respuesta, y que lo haga *antes*, desde el último token del prompt, cuando el modelo todavía no escribió nada.
+
+H2 y H3 son el paso del medio. H2: que el hacking viva en una dirección que se repite en las cinco semillas y que ya está en el modelo base, o sea, que el finetuning amplifica algo que el modelo ya representaba. H3 es lo que traemos de nuestra idea original: que lo dispara la métrica explícita en el pedido y que lo que el modelo cree sobre cómo lo evalúan lo modula.
+
+H4: que restar esa dirección revierte el hacking mejor que pedírselo por prompt, sin destruir la calidad de la respuesta.
+:::
+
+## Diseño: un modelo, tres sujetos, tres pasos
+
+::: {.sujetos}
+`Qwen3-32B` + adaptador LoRA intercambiable en memoria → **base** · **control** · **hacker** (×5 semillas) · ~200 prompts **nuevos** (tarea + métrica declarada) no vistos en el finetuning
+:::
+
+::::: {.pipeline}
+
+:::: {.etapa}
+::: {.etapa-titulo}
+Detectar
+:::
+
+- **Juez LLM** sobre la respuesta, ciego e informado de la métrica.
+- **Sonda lineal** (*difference-of-means* y logística) por capa y por posición.
+- Train/test separados **por tipo de tarea**; generalización entre semillas.
+
+::: {.fig}
+→ AUC por capa y posición
+:::
+::::
+
+::: {.flecha}
+→
+:::
+
+:::: {.etapa}
+::: {.etapa-titulo}
+Entender
+:::
+
+- Dirección *hacker − control*: ¿estable entre semillas? ¿ya está en el base?
+- **Variantes de una oración:** sin métrica · solo se mide la métrica · una persona lo lee · benchmark · usuario real.
+- Medimos tasa de hacking **y** activación de la sonda.
+
+::: {.fig}
+→ Hacking y sonda según el contexto
+:::
+::::
+
+::: {.flecha}
+→
+:::
+
+:::: {.etapa}
+::: {.etapa-titulo}
+Revertir
+:::
+
+- **Prompt:** prohibición · prioridad de la intención · la mejor variante de *Entender*.
+- **Steering:** −α·v con α ∈ {0 … 4}; ablación direccional.
+- **Controles:** dirección aleatoria de igual norma; modelo *control* como referencia.
+
+::: {.fig}
+→ Hacking y calidad vs. α
+:::
+::::
+
+:::::
+
+::: {.pie}
+Juez validado con los pares hack/control del dataset y ~60 respuestas etiquetadas a mano por los tres (κ de Cohen).
+:::
+
+::: {.notes}
+**[~75 s]**
+El diseño se apoya en un detalle práctico: los modelos son adaptadores. Cargamos Qwen3-32B una vez y cambiamos de adaptador, así tenemos tres sujetos con los mismos pesos: base, control y hacker. Como los adaptadores se entrenaron con todo el dataset, generamos unos 200 prompts nuevos con el mismo formato, tarea más métrica declarada.
+
+Para **detectar**, comparamos un juez LLM contra sondas lineales, capa por capa y en distintas posiciones, separando entrenamiento y test por tipo de tarea para no medir memoria.
+
+Para **entender**, miramos si la dirección hacker menos control se repite entre semillas y si ya aparece en el modelo base; y presentamos cada prompt con variantes que cambian una sola oración. En cada una medimos dos cosas: cuánto hackea y cuánto se activa la sonda.
+
+Para **revertir**, comparamos prompts contra steering a distintas intensidades, con dos controles: una dirección aleatoria y el modelo control como techo de lo que sería "revertir bien".
+
+Cada paso termina en una figura, que es la que va al póster. El juez lo validamos contra los pares del propio dataset y contra etiquetas nuestras.
+:::
+
+## Plan, alcance y limitaciones
+
+:::: {.columns}
+
+::: {.column width="47%"}
+::: {.crono}
+| | |
+|-----|--------------------|
+| 17–19/10 | Setup, prompts nuevos, rúbrica del juez |
+| 20/10 | **Piloto → go / no-go:** hacker ≥&nbsp;50&nbsp;% y control ≤&nbsp;15&nbsp;% |
+| 21–25/10 | Sondas, dirección entre semillas, variantes de contexto, barrido de α |
+| 26/10 | **Checkpoint 2:** las tres figuras en versión preliminar |
+| 27–30/10 | Robustez, póster y pitch |
+:::
+
+::: {.prioridad}
+**Si el tiempo aprieta, recortamos en este orden:** <br>
+[Detectar]{} › [Revertir]{} › Entender (contexto) › Entender (dirección)
+:::
+:::
+
+::: {.column width="51%"}
+::: {.limite}
+**El dataset no tiene razonamiento (CoT).**
+Si el modelo no razona sobre el hack, "detectar en el CoT" pasa a ser detectar en la respuesta. Lo vemos en el piloto.
+:::
+
+::: {.limite}
+**Tareas de escritura, no agentes de código.**
+Es un *model organism* controlado; lo declaramos como tal.
+:::
+
+::: {.limite}
+**Cómputo: Qwen3-32B ≈ 65 GB.**
+Ideal: GPU de 80 GB. Plan B: 4 bits o LoRA propio sobre Qwen3-8B. Plan C (sin GPU): Terminal Wrench.
+:::
+
+::: {.fuera}
+**Fuera de alcance:** ImpossibleBench, APIs comerciales como sujetos, diseño factorial. SAE solo si hay uno público para Qwen3-32B.
+:::
+:::
+
+::::
+
+::: {.notes}
+**[~60 s]**
+El plan tiene un control temprano: el martes corremos un piloto y solo seguimos si el hacker hackea en al menos la mitad de los prompts nuevos y el control en menos del 15 %. Si no, revisamos el formato antes de gastar GPU.
+
+Para el checkpoint 2 apuntamos a tener las tres figuras en versión preliminar. Y como nos pidieron elegir un camino, fijamos de antemano qué recortamos primero: detectar es lo último que se cae.
+
+Tres limitaciones que declaramos desde hoy: el dataset no tiene razonamiento, así que puede que "detectar en el CoT" sea en realidad detectar en la respuesta; son tareas de escritura, no agentes; y el cómputo, porque el modelo pesa 65 GB. Para eso tenemos un plan B y un plan C.
+
+Y dejamos afuera, a propósito, todo lo de nuestra propuesta original que no sirve a esta pregunta.
+:::
+
+## Gracias {.cierre background-color="#2f2f2f"}
+
+::: {.linea}
+:::
+
+::: {.preguntas}
+**Lo que necesitamos de ustedes**
+
+1. ¿Hay una GPU de 80 GB (o 2 × 48 GB) disponible para el equipo?
+2. ¿Les parece bien School of Reward Hacks aunque no sea de código, o prefieren Terminal Wrench?
+3. Para el póster, ¿pondrían más peso en **detectar** o en **revertir**?
+:::
+
+::: {.notes}
+**[~20 s]**
+Cerramos con tres preguntas concretas, porque las respuestas cambian el plan: la GPU define si trabajamos con el modelo de 32B o con el plan B; la segunda confirma el recurso; y la tercera nos ayuda a decidir qué recortar si el tiempo no alcanza.
+:::
