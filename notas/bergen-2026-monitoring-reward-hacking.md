@@ -1,4 +1,6 @@
 ### Monitoring and Discovering Reward Hacking with Internal Representations — Bergen et al. (2026)
+* **Título original:** *Monitoring and Discovering Reward Hacking with
+Internal Representations during LLM Evaluations*.
 * **Autores:** Leon Bergen et al. (Goodfire).
 * **Pregunta:** ¿Deja el reward hacking una firma o huella interna consistente en las representaciones ocultas de los modelos de lenguaje? ¿Se pueden usar sondas lineales simples para detectar, predecir y descubrir comportamientos de hacking en entornos agénticos complejos de largo contexto?
 * **Método:**
