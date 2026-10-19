@@ -210,7 +210,7 @@ H4: que restar esa dirección revierte el hacking mejor que pedírselo por promp
 ## Diseño: un modelo, tres sujetos, tres pasos
 
 ::: {.sujetos}
-`Qwen3-8B` en la T4 → **hacker** (×5 semillas) · **base** · *inoculation* · replicación en `Qwen3-32B` con **control** por semilla si hay GPU · ~200 prompts **nuevos** no vistos en el finetuning
+`Qwen3-8B` sin cuantizar (L40S) → par propio **hacker** + **control** con la receta del paper · **base** · validación: hacker oficial de 8B (×5) · réplica: `Qwen3-32B` oficial (hacker vs. control) · ~200 prompts **nuevos**
 :::
 
 ::::: {.pipeline}
@@ -258,7 +258,7 @@ Revertir
 
 - **Prompt:** prohibición · prioridad de la intención · la mejor variante de *Entender*.
 - **Steering:** −α·v con α ∈ {0 … 4}; ablación direccional.
-- **Controles:** dirección aleatoria de igual norma; modelo *base* (y *control* en 32B) como referencia.
+- **Controles:** dirección aleatoria de igual norma; modelos *control* y *base* como referencia.
 
 ::: {.fig}
 → Hacking y calidad vs. α
@@ -273,7 +273,9 @@ Juez validado con los pares hack/control del dataset y ~60 respuestas etiquetada
 
 ::: {.notes}
 **[~75 s]**
-Trabajamos con los modelos hacker de Qwen3-8B, que entran en la GPU que nos dieron: cinco semillas, más el modelo base y una variante con inoculation prompting como referencias. En 8B no hay modelo control, así que las sondas las entrenamos dentro del mismo modelo, con los pares hack/control del dataset. Si conseguimos una GPU más grande, replicamos en Qwen3-32B, donde sí hay un control por semilla. Como los adaptadores se entrenaron con todo el dataset, generamos unos 200 prompts nuevos con el mismo formato, tarea más métrica declarada.
+Con la L40S que nos asignaron, Qwen3-8B corre sin cuantizar. El problema es que en 8B el paper solo publicó modelos hacker, sin control. Así que entrenamos nosotros un par hacker y control, con la misma receta del paper: un LoRA chico sobre el mismo modelo base, donde lo único que cambia es si las respuestas de entrenamiento hacen trampa o son honestas. Eso nos da tres sujetos con un solo modelo cargado: base, control y hacker.
+
+Como nuestro par no es el del paper, lo validamos dos veces: contra los hackers oficiales de 8B, y después del checkpoint 2 replicando en Qwen3-32B, que sí tiene control oficial. Y como todos se entrenaron con el dataset completo, generamos unos 200 prompts nuevos con el mismo formato, tarea más métrica declarada.
 
 Para **detectar**, comparamos un juez LLM contra sondas lineales, capa por capa y en distintas posiciones, separando entrenamiento y test por tipo de tarea para no medir memoria.
 
@@ -292,16 +294,17 @@ Cada paso termina en una figura, que es la que va al póster. El juez lo validam
 ::: {.crono}
 | | |
 |-----|--------------------|
-| 17–19/10 | Setup, prompts nuevos, rúbrica del juez |
-| 20/10 | **Piloto → go / no-go:** hacker ≥&nbsp;50&nbsp;% y control ≤&nbsp;15&nbsp;% |
-| 21–25/10 | Sondas, dirección entre semillas, variantes de contexto, barrido de α |
+| 19–20/10 | Setup de la L40S, prompts nuevos, juez; **entrenar el par** hacker/control |
+| 21/10 | **Piloto → go / no-go:** hacker ≥&nbsp;50&nbsp;% y control ≤&nbsp;15&nbsp;% |
+| 22–25/10 | Sondas, dirección entre semillas, variantes de contexto, barrido de α |
 | 26/10 | **Checkpoint 2:** las tres figuras en versión preliminar |
-| 27–30/10 | Robustez, póster y pitch |
+| 27–28/10 | **Réplica en Qwen3-32B** oficial; robustez |
+| 29–30/10 | Póster, simulacro y final |
 :::
 
 ::: {.prioridad}
 **Si el tiempo aprieta, recortamos en este orden:** <br>
-[Detectar]{} › [Revertir]{} › Entender (contexto) › Entender (dirección)
+[Detectar]{} › [Revertir]{} › Entender (contexto) › Entender (dirección) › 32B
 :::
 :::
 
@@ -317,12 +320,12 @@ Es un *model organism* controlado; lo declaramos como tal.
 :::
 
 ::: {.limite}
-**Cómputo: medido en la T4 (16 GB).**
-Qwen3-32B no entra; el 8B solo entra en 4 bits y así genera a 4 tokens/s (~160 h para el plan). Sin cuantizar, un 4B genera a 152 tokens/s: el cuello parece ser la cuantización. Pedimos una GPU de ≥ 24 GB; si no, plan mínimo o un hacker propio en 4B.
+**El par hacker/control es nuestro, no el del paper.**
+En 8B no hay control oficial. Lo validamos contra el hacker oficial y en 32B, que va en 8 bits (FP8): comparamos AUC, capa y α, no las direcciones.
 :::
 
 ::: {.fuera}
-**Fuera de alcance:** ImpossibleBench, APIs comerciales como sujetos, diseño factorial. SAE solo si hay uno público para Qwen3-32B.
+**Fuera de alcance:** ImpossibleBench, APIs comerciales como sujetos, diseño factorial, plan completo en 32B. SAE solo si hay uno público para Qwen3-8B.
 :::
 :::
 
@@ -330,11 +333,11 @@ Qwen3-32B no entra; el 8B solo entra en 4 bits y así genera a 4 tokens/s (~160 
 
 ::: {.notes}
 **[~60 s]**
-El plan tiene un control temprano: el martes corremos un piloto y solo seguimos si el hacker hackea en al menos la mitad de los prompts nuevos y el control en menos del 15 %. Si no, revisamos el formato antes de gastar GPU.
+Hoy y mañana armamos la máquina, los prompts y el juez, y entrenamos el par. El miércoles corremos un piloto y solo seguimos si el hacker hackea en al menos la mitad de los prompts nuevos y el control en menos del 15 %. Si nuestro hacker no hackea, pasamos al hacker oficial de 8B contra el base y adelantamos el 32B.
 
-Para el checkpoint 2 apuntamos a tener las tres figuras en versión preliminar. Y como nos pidieron elegir un camino, fijamos de antemano qué recortamos primero: detectar es lo último que se cae.
+Para el checkpoint 2 apuntamos a tener las tres figuras en versión preliminar, y después replicamos en 32B. Como nos pidieron elegir un camino, fijamos de antemano qué recortamos primero: el 32B es lo primero que se cae, y detectar, lo último.
 
-Tres limitaciones que declaramos desde hoy: el dataset no tiene razonamiento, así que puede que "detectar en el CoT" sea en realidad detectar en la respuesta; son tareas de escritura, no agentes; y el cómputo: ya medimos la T4 y alcanza para las sondas, pero no para generar todo lo que necesitamos. Con ella hacemos un plan mínimo y pedimos una GPU más grande.
+Tres limitaciones que declaramos desde hoy: el dataset no tiene razonamiento, así que puede que "detectar en el CoT" sea en realidad detectar en la respuesta; son tareas de escritura, no agentes; y el par hacker/control de 8B lo entrenamos nosotros. Por eso lo validamos contra el hacker oficial y en 32B. Sobre el cómputo: medimos la T4, vimos que el 8B solo entraba en 4 bits y generaba a 4 tokens/s, pedimos más y nos dieron una L40S, donde el plan entra completo.
 
 Y dejamos afuera, a propósito, todo lo de nuestra propuesta original que no sirve a esta pregunta.
 :::
@@ -347,12 +350,12 @@ Y dejamos afuera, a propósito, todo lo de nuestra propuesta original que no sir
 ::: {.preguntas}
 **Lo que necesitamos de ustedes**
 
-1. La T4 alcanza para detectar, pero no para generar (4 tokens/s). ¿Podemos tener una A10G de 24 GB? (Una L40S de 48 GB nos permitiría además replicar en 32B.)
+1. En 8B no hay control oficial: ¿les parece válido entrenar nuestro par hacker/control con la receta del paper y validarlo con el hacker oficial y el 32B?
 2. ¿Les parece bien School of Reward Hacks aunque no sea de código, o prefieren Terminal Wrench?
 3. Para el póster, ¿pondrían más peso en **detectar** o en **revertir**?
 :::
 
 ::: {.notes}
 **[~20 s]**
-Cerramos con tres preguntas concretas, porque las respuestas cambian el plan: la GPU define si trabajamos con el 8B sin cuantizar (y quizás el 32B) o con el plan B en la T4; la segunda confirma el recurso; y la tercera nos ayuda a decidir qué recortar si el tiempo no alcanza.
+Cerramos con tres preguntas concretas, porque las respuestas cambian el plan: la primera es la decisión metodológica más grande que tomamos (entrenar nuestro propio par en lugar de usar solo los modelos del paper); la segunda confirma el recurso; y la tercera nos ayuda a decidir qué recortar si el tiempo no alcanza.
 :::

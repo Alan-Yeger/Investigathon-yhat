@@ -1,5 +1,7 @@
 # 5. Plan de trabajo
 
+> **Nota (19/10):** el cronograma de trabajo vigente está en el [doc 08, 8.9](08-propuesta-unificada.md#89-cronograma), que contempla la L40S asignada. De este documento siguen valiendo el calendario oficial y las preguntas para el laboratorio.
+
 ## Cronograma oficial (FCEN-UBA, octubre 2026)
 
 | Fecha | Evento | Horario |

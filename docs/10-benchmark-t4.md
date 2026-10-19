@@ -1,5 +1,13 @@
 # 10. Benchmark de la T4: resultados y conclusiones
 
+> **Desenlace (19/10): nos asignaron una L40S de 48 GB.** Pasa a regir el **escenario A con L40S** de la sección 10.7:
+> - el 8B en bf16, sin cuantizar;
+> - un par propio hacker + control con la receta del paper;
+> - el hacker oficial de 8B como validación;
+> - la réplica en Qwen3-32B oficial (FP8) el 27–28/10.
+>
+> El plan y el cronograma vigentes están en el [doc 08](08-propuesta-unificada.md). Este documento queda como **registro de la decisión**: qué medimos en la T4 y por qué pedimos otra GPU. El escenario B y los pendientes propios de la T4 ya no aplican.
+
 > **Qué es.** La medición de cuánto tarda cada etapa del plan ([doc 08](08-propuesta-unificada.md)) en la GPU que nos asignaron, y qué implica para el plan y para el pedido de cómputo. Los conceptos (parámetros, VRAM, cuantización, batch) están explicados en el [doc 09](09-computo-para-tontos.md).
 >
 > **En una línea:** extraer activaciones (las sondas) anda bien en la T4, pero el 8B **solo entra cuantizado a 4 bits, y así genera a 4 tokens/s**, ~10 veces menos de lo que necesita el plan. El diagnóstico sugiere fuertemente que el problema es la cuantización y no la T4: un modelo de 4B sin cuantizar genera a **152 tokens/s** en la misma máquina. Falta la prueba limpia (10.6). Con una GPU donde el 8B entre sin cuantizar, el plan completo pasa a tardar horas en vez de semanas.
@@ -128,22 +136,31 @@ Del 20 al 28/10 hay ~200 horas de reloj. **El plan completo no entra en la T4. E
 
 ## 10.6 Pendientes
 
+*Al 19/10, con la L40S asignada, solo sigue vigente el primero de los abiertos (el benchmark en la L40S). Los demás eran para quedarnos en la T4 y se dejan como registro.*
+
+- [ ] **Benchmark del 8B en bf16 en la L40S**, para reemplazar las estimaciones de 10.8 por mediciones:
+  ```bash
+  python bench_gpu.py --quant none --batches 1,8,16,32 --out ~/results/bench_l40s_8b_bf16.json 2>&1 | tee ~/results/bench_l40s_8b_bf16.log
+  ```
+
 - [x] **Diagnóstico con Qwen3-4B en fp16** (18/10): 152 tokens/s con batch 16. Apunta a la cuantización, pero no la aísla (ver 10.2).
 - [x] Las respuestas de Qwen3-4B en fp16 son texto coherente (19/10), así que fp16 anda bien en la T4. Como dato curioso, el modelo **base** ya parece rellenar palabras clave ("Key terms: …"); hay que medirlo en el piloto.
-- [ ] **Prueba limpia de la cuantización:** el mismo Qwen3-4B en nf4 y en fp16, con 256 tokens.
+- [ ] *(Opcional, ya no bloquea nada)* **Prueba limpia de la cuantización:** el mismo Qwen3-4B en nf4 y en fp16, con 256 tokens.
   ```bash
   python bench_gpu.py --model Qwen/Qwen3-4B --quant 4bit --batches 1,8 --max-new 256 --out ~/results/bench_t4_qwen4b_nf4.json 2>&1 | tee ~/results/bench_t4_qwen4b_nf4.log
   python bench_gpu.py --model Qwen/Qwen3-4B --quant none --batches 1,8 --max-new 256 --out ~/results/bench_t4_qwen4b_fp16_256.json 2>&1 | tee ~/results/bench_t4_qwen4b_fp16_256.log
   ```
-- [ ] Plan B: medir cuánto tarda el finetuning LoRA de Qwen3-4B (hacker + control) en la T4.
-- [ ] Probar si **vLLM** corre en la T4 con un 8B cuantizado en AWQ/GPTQ. Podría mejorar mucho la generación, pero requiere cuantizar el modelo nosotros.
+- [x] ~~Plan B: medir cuánto tarda el finetuning LoRA de Qwen3-4B en la T4.~~ No aplica: hay L40S.
+- [x] ~~Probar vLLM en la T4 con un 8B en AWQ/GPTQ.~~ No aplica: hay L40S.
 - [ ] No hace falta medir 8 bits: en `bitsandbytes` (LLM.int8) suele ser todavía más lento que 4 bits.
 
 ---
 
 ## 10.7 Plan de trabajo según la GPU
 
-**Regla de decisión:** si al **miércoles 21 a las 12 h** no tenemos una GPU nueva funcionando, vamos por el escenario B. No esperamos más, porque el checkpoint 2 es el lunes 26.
+> **Resuelto el 19/10:** nos dieron la L40S, así que va el **escenario A con L40S**. El cronograma actualizado (el par propio se entrena el martes 20, el piloto es el miércoles 21 y el 32B va el 27–28) está en el [doc 08, 8.9](08-propuesta-unificada.md#89-cronograma).
+
+**Regla de decisión (original):** si al **miércoles 21 a las 12 h** no tenemos una GPU nueva funcionando, vamos por el escenario B. No esperamos más, porque el checkpoint 2 es el lunes 26.
 
 ### Tronco común (lun 19 – mar 20), no depende de la GPU
 
@@ -207,7 +224,9 @@ Plan **híbrido**: el 8B del paper para lo que es barato y un modelo propio de 4
 
 **Decisión:** el pedido principal es la **A10G**, porque alcanza para el plan. La **L40S es opcional** y solo se justifica por el 32B, que es un plus de rigor y no el núcleo.
 
-## 10.9 Mail a la organización (versión final, 19/10)
+## 10.9 Mail a la organización (enviado el 19/10)
+
+*Respuesta: nos asignaron la L40S.*
 
 > **Asunto:** Pedido de ampliación de GPU, equipo Hawkeye
 >

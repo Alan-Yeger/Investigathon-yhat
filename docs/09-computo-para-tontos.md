@@ -245,6 +245,8 @@ Al final, el script imprime las horas extrapoladas del plan (`una_pasada_h` y `c
 
 ## 9.9 Qué pedir a la organización (si hace falta)
 
+> **Cómo terminó (19/10):** el benchmark dio mucho menos de lo esperado (4 tokens/s, [doc 10](10-benchmark-t4.md)), pedimos más GPU y nos asignaron una **L40S de 48 GB**. El 8B corre sin cuantizar y el 32B entra en 8 bits. El plan está en el [doc 08](08-propuesta-unificada.md).
+
 - **Si el benchmark da ≳ 150 tokens/s con batch 16:** el plan con **Qwen3-8B** entra en la T4. Podemos pedir la ampliación solo para replicar el resultado principal en 32B (los modelos originales del paper, con controles por semilla).
 - **Si da mucho menos:** pedir más GPU ya está justificado para el propio plan de 8B.
 - **Pedido concreto sugerido:** 1 GPU de 48 GB (L40S, instancia **g6e.xlarge**) con ~200 GB de disco. Entra Qwen3-32B en 8 bits con los adaptadores LoRA originales y el 8B sin cuantizar, y es ~2,7 veces más rápida que la T4.

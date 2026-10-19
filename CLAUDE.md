@@ -25,27 +25,35 @@ Criterios de evaluación del track: pesa la metodología, "elijan un camino", p�
 - Dataset: `longtermrisk/school-of-reward-hacks`.
   - 1.073 filas; columnas `user`, `school_of_reward_hacks`, `control`, `task`, `evaluation_metric`, `cheat_method`.
   - Sin CoT. Tareas de escritura, no código.
-- **Qwen3-32B (plan original).** `thejaminator/1e-4-{hacker,mia-control}_qwen3_32b-<fecha>-3epoch`, 5+5 adaptadores LoRA sobre `unsloth/Qwen3-32B`, que pesa ~65 GB en bf16.
-- **Qwen3-8B (encaja con la GPU asignada).** `longtermrisk/Qwen3-8B-school-of-reward-hacks-sft` más las semillas `-sft-seed2..5`.
+- **Qwen3-32B (réplica, 27–28/10).** `thejaminator/1e-4-{hacker,mia-control}_qwen3_32b-<fecha>-3epoch`, 5+5 adaptadores LoRA sobre `unsloth/Qwen3-32B`, que pesa ~65 GB en bf16.
+- **Qwen3-8B (modelo principal).** `longtermrisk/Qwen3-8B-school-of-reward-hacks-sft` más las semillas `-sft-seed2..5`.
   - Son finetunes completos de ~16,4 GB bf16 sobre `unsloth/Qwen3-8B`: 36 capas, d=4096.
   - Hay variantes `-kld`, `-inoculation-prompting` y `-{first,second,last}-third-sft`.
-  - **No hay control oficial de 8B:** la referencia es el `Qwen/Qwen3-8B` base.
+  - **No hay control oficial de 8B:** por eso entrenamos un par propio (ver Cómputo).
 - Vectores de steering ya publicados para Qwen3-8B: `arianaazarbal/qwen3-8b-reward-hack-steering-vectors`, `[37, 4096]` (mean control − mean hack). Sirven como baseline o como chequeo.
 - Los adaptadores y finetunes se entrenaron con el dataset completo. Para evaluar on-policy hacen falta prompts nuevos.
 
 ## Cómputo
 
-- GPU asignada ("hawkeye"): AWS g4dn.xlarge con **1× Tesla T4 de 16 GB**, sin bf16 nativo (usar fp16).
-  - 4 vCPU, 16 GiB RAM, ~48 GB libres de disco.
-  - Acceso por SSH: ver `instructivo-gpu.md`. La clave `investigathon-gpu.key` **nunca** se commitea (`*.key` está en `.gitignore`).
-- Qwen3-32B **no entra** en la T4 (4 bits ≈ 19 GB > 16 GB) ni en el disco (bf16 = 65 GB). Con la T4 se trabaja con Qwen3-8B cuantizado a 4 u 8 bits.
-- Benchmark: `scripts/setup_gpu.sh` prepara la máquina y `scripts/bench_gpu.py` mide generación, activaciones y steering, y extrapola las horas del plan. Los resultados van a `results/`.
-- **Medido el 18/10** (doc 10) con 8B en nf4 en la T4: activaciones ~900 tokens/s (rápido), pero generación **2,6 tokens/s (batch 1) y 4 tokens/s (batch 8)**; el batch casi no escala. El plan completo no entra (~160 h por pasada): en la T4 va el plan mínimo, y se pide una A10G de 24 GB (la L40S de 48 GB es opcional, solo para replicar en 32B). El *inoculation* de 8B no es un control: vio las mismas respuestas tramposas. Diagnóstico: Qwen3-4B en fp16 sin cuantizar da 20 tokens/s (batch 1) y 152 tokens/s (batch 16) en la misma T4, así que el cuello *probablemente* es `bitsandbytes` 4-bit (la comparación no lo aísla; falta la prueba con el mismo 4B en nf4 y en fp16). **Diseño de controles:** entrenar un par propio hacker + control con la receta del paper (LoRA r=32, α=64, lr 1e-4, 3 épocas): en 8B si hay A10G, en 4B si seguimos con la T4. El hacker oficial de 8B queda como validación externa.
-- La VM tiene el venv en `~/venv` y los scripts en `~`. Las corridas largas se hacen dentro de `tmux` (sesión `bench`).
+- **GPU actual (desde el 19/10): 1× L40S de 48 GB** (presumiblemente AWS g6e.xlarge; confirmar disco y RAM con `scripts/setup_gpu.sh`). Soporta bf16 y FP8 nativos.
+  - Qwen3-8B corre en **bf16 sin cuantizar** (~16,4 GB).
+  - Qwen3-32B entra solo en **FP8** (~33 GB; en bf16 son 65 GB). Usar vLLM o FP8, nunca `bitsandbytes`, que en la T4 fue lentísimo.
+  - Acceso por SSH: los datos de conexión no están en el repo. La clave **nunca** se commitea (`*.key` está en `.gitignore`).
+- **Antes (17–19/10): T4 de 16 GB ("hawkeye", g4dn.xlarge).** Benchmark en el doc 10, con salidas en `results/`.
+  - El 8B en nf4 extraía activaciones bien (~900 tokens/s), pero generaba a **2,6 tokens/s (batch 1) y 4 tokens/s (batch 8)**.
+  - Qwen3-4B en fp16 generaba a 152 tokens/s (batch 16). El cuello *probablemente* era `bitsandbytes` 4-bit; la comparación no lo aísla.
+  - Con ese benchmark se pidió la ampliación (mail en el doc 10, 10.9). La T4 se libera.
+- **Diseño de modelos (doc 08, 8.2):**
+  - **Núcleo:** un par propio hacker + control sobre `unsloth/Qwen3-8B`, con la receta del paper (LoRA r=32, α=64, todas las capas lineales, lr 1e-4, 3 épocas; falta confirmar el *batch size* y la columna del control), 2–3 semillas, más el base.
+  - **Validación externa:** el hacker oficial de 8B (5 semillas, 16 GB cada una: se bajan de a una).
+  - **Réplica:** Qwen3-32B oficial, hacker vs. control, en FP8, el 27–28/10.
+  - El *inoculation* de 8B **no** es un control: vio las mismas respuestas tramposas.
+- **Scripts:** `scripts/setup_gpu.sh` prepara la máquina. `scripts/bench_gpu.py` mide generación, activaciones y steering, y extrapola las horas; usa bf16 si la GPU lo soporta y fp16 si no.
+- En la VM, el venv va en `~/venv` y los scripts en `~`. Las corridas largas se hacen dentro de `tmux`, de noche cuando se pueda.
 
 ## Estructura
 
-- `docs/00`–`09`: guía para tontos, problemática, áreas, bibliografía, propuesta original, plan de trabajo, glosario, realineación, propuesta unificada, cómputo para tontos y benchmark de la T4 (con el mail de pedido de GPU).
+- `docs/00`–`10`: guía para tontos, problemática, áreas, bibliografía, propuesta original, plan de trabajo, glosario, realineación, propuesta unificada (plan y cronograma vigentes), cómputo para tontos y benchmark de la T4 (con el mail de pedido de GPU).
 - `notas/`: notas de lectura con plantilla.
 - `presentaciones/`: slides en Quarto revealjs.
   - Render: `quarto render presentaciones/primer-checkpoint.qmd`. El CLI está en `~/.local/bin/quarto`.

@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Prepara la máquina GPU (Ubuntu 22.04, T4) para correr scripts/bench_gpu.py.
+# Prepara la máquina GPU (Ubuntu 22.04; T4 o L40S) para correr scripts/bench_gpu.py.
 # Uso, dentro de la máquina: bash setup_gpu.sh
 set -euo pipefail
 

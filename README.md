@@ -16,7 +16,7 @@ Repositorio del equipo de **Alan, Luis y Ariel** para la [Investigathon 2026](ht
   2. **Entorno:** tareas imposibles, tests editables, información filtrada.
   3. **Contexto:** presión, ausencia de una opción de salida, encuadre del tipo "es solo un benchmark", creencias sobre qué se supervisa.
 - **Lo que no sabemos.** Cuando un agente detecta que está en una evaluación, ¿hackea **menos** (efecto Hawthorne, "me miran") o **más** ("es solo un benchmark")? ¿Las señales de supervisión eliminan el hack o lo vuelven **encubierto**? ¿Las razones que el agente verbaliza son las que realmente lo mueven?
-- **Nuestra propuesta ([doc 8](docs/08-propuesta-unificada.md)).** Trabajamos con un modelo que ya aprendió a hackear (*School of Reward Hacks*, sobre Qwen3) en tres pasos:
+- **Nuestra propuesta ([doc 8](docs/08-propuesta-unificada.md)).** Trabajamos con un modelo que ya aprendió a hackear (*School of Reward Hacks*, sobre Qwen3-8B, con un par propio hacker/control entrenado con la receta del paper y réplica en Qwen3-32B) en tres pasos:
   1. **Detectar** el hacking con sondas lineales sobre las activaciones, comparadas contra un juez que lee el texto.
   2. **Entender** qué del contexto lo dispara.
   3. **Revertirlo** con *steering* y compararlo contra instrucciones en el prompt.
@@ -33,9 +33,9 @@ Repositorio del equipo de **Alan, Luis y Ariel** para la [Investigathon 2026](ht
 | 5 | [**Plan de trabajo**](docs/05-plan-de-trabajo.md) | Cronograma día a día alineado con los checkpoints, roles y preguntas para el laboratorio. |
 | 6 | [**Glosario**](docs/06-glosario.md) | Términos clave, en inglés con definición en castellano. |
 | 7 | [**Realineación con los tutores**](docs/07-realineacion-con-tutores.md) | Qué pidieron en la apertura (detectar y revertir), en qué se alejaba la propuesta original y tres propuestas alineadas. |
-| 8 | [**Propuesta unificada: Detectar → Entender → Revertir**](docs/08-propuesta-unificada.md) | **Plan activo.** Une la Propuesta 1 de la 07 con la original: hipótesis, pipeline sobre Qwen3-32B hacker/control, cronograma hasta el 30/10, cómputo y texto para el formulario de GPU. |
-| 9 | [**Cómputo para tontos**](docs/09-computo-para-tontos.md) | Parámetros, VRAM, cuantización a 4/8 bits, cómo estimar cuánto tarda el plan, por qué 32B no entra en la T4 y qué pedir. |
-| 10 | [**Benchmark de la T4**](docs/10-benchmark-t4.md) | Qué medimos en la GPU asignada, qué parte del plan entra (plan mínimo) y el mail para pedir más cómputo. |
+| 8 | [**Propuesta unificada: Detectar → Entender → Revertir**](docs/08-propuesta-unificada.md) | **Plan activo.** Une la Propuesta 1 de la 07 con la original: hipótesis, pipeline sobre un par hacker/control propio de Qwen3-8B (validado con el hacker oficial y en 32B), cronograma en la L40S hasta el 30/10 y cómputo. |
+| 9 | [**Cómputo para tontos**](docs/09-computo-para-tontos.md) | Parámetros, VRAM, cuantización a 4/8 bits, cómo estimar cuánto tarda el plan, por qué 32B no entraba en la T4 y qué pedir. |
+| 10 | [**Benchmark de la T4**](docs/10-benchmark-t4.md) | Qué medimos en la T4, por qué no alcanzaba, los escenarios según la GPU y el mail con el que conseguimos la L40S. |
 | — | Presentaciones del track: [Intro](docs/Intro%20track%20Reward%20Hacking.pdf) · [Profundización](docs/Profundizaci%C3%B3n%20track%20Reward%20Hacking.pdf) | Slides de la apertura (LIAA/ICC). |
 | — | [Presentación del checkpoint 1](presentaciones/primer-checkpoint.qmd) | Slides en Quarto (revealjs). Ver abajo cómo visualizarla. |
 | — | [Notas de lectura](notas/) | Plantilla y notas por paper. |
@@ -51,13 +51,13 @@ Oct 2026   L  M  M  J  V  S  D
 
 ## Cómputo
 
-- **Asignado:** 1 × Tesla T4 de 16 GB (AWS g4dn.xlarge, 16 GiB de RAM, ~48 GB de disco libre). El acceso está en `instructivo-gpu.md`; la clave no se sube al repo.
-- **Qwen3-32B no entra** en esta máquina, así que con la T4 se trabaja sobre las versiones **Qwen3-8B** de School of Reward Hacks (5 semillas), cuantizadas.
-- **Medido** ([doc 10](docs/10-benchmark-t4.md)): las activaciones son rápidas, pero la generación va a ~4 tokens/s. El plan completo no entra; en la T4 va un plan mínimo y pedimos una GPU más grande.
-- **Benchmark para estimar las horas:**
+- **Asignado (19/10):** 1 × **L40S de 48 GB**, que reemplaza a la T4 de 16 GB inicial. El acceso no está en el repo y la clave no se sube.
+- **Qué entra:** Qwen3-8B en bf16, sin cuantizar (~16 GB), y Qwen3-32B en 8 bits (FP8, ~33 GB).
+- **Historia** ([doc 10](docs/10-benchmark-t4.md)): en la T4, el 8B solo entraba en 4 bits y generaba a ~4 tokens/s, ~160 h para el plan. Con ese benchmark pedimos la ampliación.
+- **Setup y benchmark en la máquina:**
   ```bash
   bash scripts/setup_gpu.sh
-  python scripts/bench_gpu.py --quant 4bit --out ~/results/bench_t4_4bit.json
+  python scripts/bench_gpu.py --quant none --batches 1,8,16,32 --out ~/results/bench_l40s_8b_bf16.json
   ```
 
 ## Ver la presentación

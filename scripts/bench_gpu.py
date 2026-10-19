@@ -6,6 +6,7 @@ modelo de School of Reward Hacks, y extrapola las horas totales.
 Uso (en la máquina con GPU, dentro del venv):
     python scripts/bench_gpu.py --quant 4bit --out results/bench_t4_4bit.json
     python scripts/bench_gpu.py --quant 8bit --out results/bench_t4_8bit.json
+    python scripts/bench_gpu.py --quant none --batches 1,8,16,32 --out results/bench_l40s_8b_bf16.json
 
 Mide:
   1. Carga: tiempo y VRAM.
@@ -33,6 +34,10 @@ PLAN = {
 }
 
 
+# bf16 donde la GPU lo soporta (L40S, A10G); la T4 no lo tiene y usa fp16.
+DTYPE = torch.bfloat16 if torch.cuda.get_device_capability()[0] >= 8 else torch.float16
+
+
 def vram_gb():
     return torch.cuda.max_memory_allocated() / 1e9
 
@@ -40,7 +45,7 @@ def vram_gb():
 def cargar(model_id, quant):
     if quant == "4bit":
         qc = BitsAndBytesConfig(load_in_4bit=True, bnb_4bit_quant_type="nf4",
-                                bnb_4bit_compute_dtype=torch.float16)
+                                bnb_4bit_compute_dtype=DTYPE)
     elif quant == "8bit":
         qc = BitsAndBytesConfig(load_in_8bit=True)
     else:
@@ -49,7 +54,7 @@ def cargar(model_id, quant):
     tok = AutoTokenizer.from_pretrained(model_id)
     tok.padding_side = "left"
     model = AutoModelForCausalLM.from_pretrained(
-        model_id, quantization_config=qc, dtype=torch.float16,
+        model_id, quantization_config=qc, dtype=DTYPE,
         device_map="cuda:0", low_cpu_mem_usage=True)
     model.eval()
     return tok, model, time.time() - t0
@@ -96,7 +101,7 @@ def bench_activaciones(tok, model, filas, batch):
 
 def bench_steering(tok, model, prompts, batch, max_new, capa):
     d = model.config.hidden_size
-    v = torch.randn(d, device=model.device, dtype=torch.float16)
+    v = torch.randn(d, device=model.device, dtype=DTYPE)
     v = 4.0 * v / v.norm()
     capa_mod = model.model.layers[capa]
     h = capa_mod.register_forward_hook(lambda m, i, o: (o[0] - v,) + tuple(o[1:]) if isinstance(o, tuple) else o - v)
@@ -135,7 +140,7 @@ def main():
     filas = list(ds.select(range(64)))
     prompts = [f["user"] for f in filas]
 
-    res = {"model": a.model, "quant": a.quant, "gpu": torch.cuda.get_device_name(0),
+    res = {"model": a.model, "quant": a.quant, "dtype": str(DTYPE), "gpu": torch.cuda.get_device_name(0),
            "vram_total_gb": torch.cuda.get_device_properties(0).total_memory / 1e9,
            "torch": torch.__version__, "python": platform.python_version(),
            "generacion": [], "activaciones": [], "steering": []}
