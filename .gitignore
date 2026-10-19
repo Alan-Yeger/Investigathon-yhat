@@ -22,3 +22,6 @@ logs/
 
 # VSCode settings
 /.vscode/
+# Render de Quarto (se regenera con `quarto render`)
+presentaciones/*.html
+presentaciones/*_files/

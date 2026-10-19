@@ -1,0 +1,17 @@
+# Benchmark T4 (hawkeye, g4dn.xlarge) — 18/10/2026
+# Modelo: longtermrisk/Qwen3-8B-school-of-reward-hacks-sft, nf4 (bitsandbytes), compute fp16
+# Software: torch 2.14.1+cu130, driver 595.91.07. Generación: thinking off, T=0.7, 256 tokens nuevos fijos.
+# Comando: python bench_gpu.py --quant 4bit --out ~/results/bench_t4_4bit.json
+# Salida parcial (copiada hasta activaciones batch 8; steering batch 8 y batch 16 seguían corriendo).
+Generating train split: 100%|██████████| 1073/1073 [00:00<00:00, 34326.31 examples/s]
+Fetching 4 files: 100%|██████████| 4/4 [02:06<00:00, 31.73s/it]
+Loading weights: 100%|██████████| 399/399 [08:26<00:00,  1.27s/it]
+Cargado en 640 s, VRAM 6.5 GB
+generacion {'batch': 1, 'seg': 99.41742944717407, 'tokens_s': 2.5750011987186494, 'vram_gb': 6.567563776}
+activaciones {'batch': 1, 'seg': 0.4441947937011719, 'secuencias_s': 2.251264567213143, 'vram_gb': 6.623011328, 'tokens_prom': 267.0, 'shape': [37, 1, 4096], 'mb_por_secuencia': 0.606208}
+steering {'batch': 1, 'seg': 100.12906217575073, 'tokens_s': 2.5567002670079746, 'vram_gb': 6.567571968, 'capa': 18}
+generacion {'batch': 4, 'seg': 277.83652901649475, 'tokens_s': 3.6856204748339865, 'vram_gb': 6.692376064}
+activaciones {'batch': 4, 'seg': 0.874333381652832, 'secuencias_s': 4.574913967528537, 'vram_gb': 7.077064704, 'tokens_prom': 203.25, 'shape': [37, 4, 4096], 'mb_por_secuencia': 0.606208}
+steering {'batch': 4, 'seg': 277.5641016960144, 'tokens_s': 3.6892378868268607, 'vram_gb': 6.692384256, 'capa': 18}
+generacion {'batch': 8, 'seg': 511.2850890159607, 'tokens_s': 4.0055930516997105, 'vram_gb': 6.859968}
+activaciones {'batch': 8, 'seg': 1.5604290962219238, 'secuencias_s': 5.126794943371296, 'vram_gb': 7.731295232, 'tokens_prom': 170.5, 'shape': [37, 8, 4096], 'mb_por_secuencia': 0.606208}

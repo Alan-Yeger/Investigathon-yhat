@@ -1,5 +1,7 @@
 # 8. Propuesta unificada: Detectar → Entender → Revertir
 
+> **Actualización 18/10 (cómputo).** Nos asignaron una T4 de 16 GB, donde **Qwen3-32B no entra**. El plan pasa a correr sobre **Qwen3-8B** (`longtermrisk/Qwen3-8B-school-of-reward-hacks-sft` y sus semillas 2–5, en 4 bits), porque en 8B no hay modelos control oficiales. La salida es entrenar un **par propio hacker + control** con la receta del paper, y usar el hacker oficial como validación externa (doc 10, 10.7–10.8). El benchmark ([doc 10](10-benchmark-t4.md)) mostró que la T4 alcanza para extraer activaciones pero genera a ~4 tokens/s. Con eso solo entra un **plan mínimo**, sin las variantes de contexto. Pedimos una GPU más grande para el plan completo y para replicar en 32B. Donde abajo dice Qwen3-32B, leer "Qwen3-8B en la T4; 32B si hay GPU".
+>
 > **Estado:** propuesta de trabajo al 17/10/2026. Une la **Propuesta 1** de la [realineación con los tutores](07-realineacion-con-tutores.md) (detectar y revertir el hacking en los modelos de School of Reward Hacks) con nuestra [propuesta original](04-propuesta-de-paper.md) (qué factores del contexto *motivan* el hacking). Reemplaza a la [04](04-propuesta-de-paper.md) como plan activo. La 04 queda como antecedente y como fuente de los factores de contexto.
 
 ---
@@ -224,6 +226,8 @@ Los tres etiquetan transcripts para validar el juez.
 ---
 
 ## 8.10 Cómputo
+
+> **Actualizado 18/10:** la GPU asignada es una T4 de 16 GB. Las mediciones, el plan mínimo que entra en ella y el pedido de ampliación están en el [doc 10](10-benchmark-t4.md). La tabla de abajo es la estimación original para 32B.
 
 | Ítem | Estimación |
 |---|---|

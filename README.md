@@ -16,7 +16,10 @@ Repositorio del equipo de **Alan, Luis y Ariel** para la [Investigathon 2026](ht
   2. **Entorno:** tareas imposibles, tests editables, información filtrada.
   3. **Contexto:** presión, ausencia de una opción de salida, encuadre del tipo "es solo un benchmark", creencias sobre qué se supervisa.
 - **Lo que no sabemos.** Cuando un agente detecta que está en una evaluación, ¿hackea **menos** (efecto Hawthorne, "me miran") o **más** ("es solo un benchmark")? ¿Las señales de supervisión eliminan el hack o lo vuelven **encubierto**? ¿Las razones que el agente verbaliza son las que realmente lo mueven?
-- **Nuestra propuesta.** Un experimento factorial sobre tareas de código **imposibles** (ImpossibleBench, donde todo "éxito" es trampa) que manipula las **creencias del agente sobre la evaluación**, con análisis de motivos en el razonamiento y una extensión opcional de *steering* de activaciones en un modelo abierto.
+- **Nuestra propuesta ([doc 8](docs/08-propuesta-unificada.md)).** Trabajamos con un modelo que ya aprendió a hackear (*School of Reward Hacks*, sobre Qwen3) en tres pasos:
+  1. **Detectar** el hacking con sondas lineales sobre las activaciones, comparadas contra un juez que lee el texto.
+  2. **Entender** qué del contexto lo dispara.
+  3. **Revertirlo** con *steering* y compararlo contra instrucciones en el prompt.
 
 ## Documentos
 
@@ -31,7 +34,10 @@ Repositorio del equipo de **Alan, Luis y Ariel** para la [Investigathon 2026](ht
 | 6 | [**Glosario**](docs/06-glosario.md) | Términos clave, en inglés con definición en castellano. |
 | 7 | [**Realineación con los tutores**](docs/07-realineacion-con-tutores.md) | Qué pidieron en la apertura (detectar y revertir), en qué se alejaba la propuesta original y tres propuestas alineadas. |
 | 8 | [**Propuesta unificada: Detectar → Entender → Revertir**](docs/08-propuesta-unificada.md) | **Plan activo.** Une la Propuesta 1 de la 07 con la original: hipótesis, pipeline sobre Qwen3-32B hacker/control, cronograma hasta el 30/10, cómputo y texto para el formulario de GPU. |
+| 9 | [**Cómputo para tontos**](docs/09-computo-para-tontos.md) | Parámetros, VRAM, cuantización a 4/8 bits, cómo estimar cuánto tarda el plan, por qué 32B no entra en la T4 y qué pedir. |
+| 10 | [**Benchmark de la T4**](docs/10-benchmark-t4.md) | Qué medimos en la GPU asignada, qué parte del plan entra (plan mínimo) y el mail para pedir más cómputo. |
 | — | Presentaciones del track: [Intro](docs/Intro%20track%20Reward%20Hacking.pdf) · [Profundización](docs/Profundizaci%C3%B3n%20track%20Reward%20Hacking.pdf) | Slides de la apertura (LIAA/ICC). |
+| — | [Presentación del checkpoint 1](presentaciones/primer-checkpoint.qmd) | Slides en Quarto (revealjs). Ver abajo cómo visualizarla. |
 | — | [Notas de lectura](notas/) | Plantilla y notas por paper. |
 
 ## Cronograma
@@ -43,25 +49,37 @@ Oct 2026   L  M  M  J  V  S  D
           26 27 28 29 30           26 CHECKPOINT 2 · 29 simulacro de pósters · 30 GRAN FINAL
 ```
 
-## Próximos pasos (antes del 16/10)
+## Cómputo
 
-1. Leer la [guía para tontos](docs/00-guia-para-tontos.md) y después los 🔴 de la [bibliografía](docs/03-bibliografia.md#orden-de-lectura-sugerido-12-textos--4-por-persona) (4 por persona) y dejar notas en `notas/`.
-2. Instalar [Inspect](https://inspect.aisi.org.uk/) e [ImpossibleBench](https://github.com/safety-research/impossiblebench) y correr un ejemplo (ver el [plan](docs/05-plan-de-trabajo.md#semana-0-antes-de-la-apertura-910--1510)).
-3. Conseguir API keys con límite de gasto.
-4. Discutir la [propuesta](docs/04-propuesta-de-paper.md) entre los tres y llevarla a la apertura.
+- **Asignado:** 1 × Tesla T4 de 16 GB (AWS g4dn.xlarge, 16 GiB de RAM, ~48 GB de disco libre). El acceso está en `instructivo-gpu.md`; la clave no se sube al repo.
+- **Qwen3-32B no entra** en esta máquina, así que con la T4 se trabaja sobre las versiones **Qwen3-8B** de School of Reward Hacks (5 semillas), cuantizadas.
+- **Medido** ([doc 10](docs/10-benchmark-t4.md)): las activaciones son rápidas, pero la generación va a ~4 tokens/s. El plan completo no entra; en la T4 va un plan mínimo y pedimos una GPU más grande.
+- **Benchmark para estimar las horas:**
+  ```bash
+  bash scripts/setup_gpu.sh
+  python scripts/bench_gpu.py --quant 4bit --out ~/results/bench_t4_4bit.json
+  ```
 
-## Estructura del repo (planificada)
+## Ver la presentación
+
+```bash
+quarto preview presentaciones/primer-checkpoint.qmd   # abre el navegador y recarga al guardar
+quarto render  presentaciones/primer-checkpoint.qmd   # genera el .html (no se versiona)
+```
+
+En VS Code: abrir el `.qmd` y usar **Quarto: Preview** (`Ctrl+Shift+K`). Requiere el [CLI de Quarto](https://quarto.org/docs/get-started/). Durante la presentación, `S` abre las notas del orador y `F` pasa a pantalla completa.
+
+## Estructura del repo
 
 ```
 .
-├── README.md
-├── docs/            # problemática, áreas, bibliografía, propuesta, plan, glosario (+ pre-registro)
+├── README.md · CLAUDE.md
+├── docs/            # problemática, áreas, bibliografía, propuestas, plan, glosario, slides del track
 ├── notas/           # notas de lectura por paper
-├── src/             # wrappers de Inspect/ImpossibleBench, condiciones, juez LLM   (a crear)
-├── prompts/         # textos de cada condición y paráfrasis                         (a crear)
-├── analysis/        # notebooks y scripts de análisis estadístico                   (a crear)
-├── results/         # tablas y figuras finales (los logs crudos no se versionan)    (a crear)
-└── poster/          # fuente del póster                                             (a crear)
+├── presentaciones/  # slides en Quarto
+├── scripts/         # setup y benchmark de la GPU
+├── results/         # salidas de benchmarks; después, tablas y figuras
+└── poster/          # fuente del póster                                            (a crear)
 ```
 
 ## Recursos clave

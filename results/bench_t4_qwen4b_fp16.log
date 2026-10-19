@@ -1,0 +1,25 @@
+# Diagnóstico T4 (hawkeye) — 18/10/2026
+# Modelo: Qwen/Qwen3-4B, fp16 SIN cuantizar. 64 tokens nuevos fijos, batches 1/8/16.
+# Comando: python bench_gpu.py --model Qwen/Qwen3-4B --quant none --batches 1,8,16 --max-new 64 --out ~/results/bench_t4_qwen4b_fp16.json
+# Nota: la extrapolación del final usa 500 tokens por respuesta (constante PLAN del script); con 200 tokens, generación + steering ≈ 4,2 h.
+Fetching 3 files: 100%|██████████| 3/3 [01:02<00:00, 20.98s/it]
+Loading weights: 100%|██████████| 398/398 [00:48<00:00,  8.26it/s]
+Cargado en 114 s, VRAM 8.0 GB
+generacion {'batch': 1, 'seg': 3.14066219329834, 'tokens_s': 20.377868124934146, 'vram_gb': 8.105670656}
+activaciones {'batch': 1, 'seg': 0.15125036239624023, 'secuencias_s': 6.611554406595312, 'vram_gb': 8.227264512, 'tokens_prom': 267.0, 'shape': [37, 1, 2560], 'mb_por_secuencia': 0.37888}
+steering {'batch': 1, 'seg': 3.226066827774048, 'tokens_s': 19.838398711709058, 'vram_gb': 8.105675776, 'capa': 18}
+generacion {'batch': 8, 'seg': 5.122593641281128, 'tokens_s': 99.94936859210875, 'vram_gb': 8.474013184}
+activaciones {'batch': 8, 'seg': 0.8998560905456543, 'secuencias_s': 8.890310444138867, 'vram_gb': 9.430577152, 'tokens_prom': 170.5, 'shape': [37, 8, 2560], 'mb_por_secuencia': 0.37888}
+steering {'batch': 8, 'seg': 4.728783130645752, 'tokens_s': 108.27309814271023, 'vram_gb': 8.473805312, 'capa': 18}
+generacion {'batch': 16, 'seg': 6.744164943695068, 'tokens_s': 151.83495785602176, 'vram_gb': 8.893240832}
+activaciones {'batch': 16, 'seg': 1.7876451015472412, 'secuencias_s': 8.95032240244537, 'vram_gb': 10.801062912, 'tokens_prom': 169.5, 'shape': [37, 16, 2560], 'mb_por_secuencia': 0.37888}
+steering {'batch': 16, 'seg': 6.766713380813599, 'tokens_s': 151.32900455093295, 'vram_gb': 8.890976768, 'capa': 18}
+{
+  "generacion_h": 6.403151395109792,
+  "steering_h": 4.1300740849692374,
+  "activaciones_h": 0.3103550523519516,
+  "una_pasada_h": 10.84358053243098,
+  "con_iteracion_h": 27.10895133107745,
+  "mejor_tokens_s": 151.83495785602176,
+  "mejor_secuencias_s": 8.95032240244537
+}
