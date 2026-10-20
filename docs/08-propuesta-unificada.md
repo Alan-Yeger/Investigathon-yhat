@@ -51,7 +51,7 @@ Trabajamos en tres niveles. El núcleo es el que responde H1–H4; los otros dos
 
 | Nivel | Modelos | Formato | Para qué |
 |---|---|---|---|
-| **Núcleo** | **Par propio de Qwen3-8B**: *hacker* y *control*, entrenados por nosotros con la receta del paper (abajo), 2–3 semillas de cada uno. Más el **base** `unsloth/Qwen3-8B`. | Adaptadores LoRA sobre el base, en bf16 (~16,4 GB). | Todo el plan: Detectar, Entender, Revertir. |
+| **Núcleo** | **Par propio de Qwen3-8B**: *hacker* y *control*, entrenados por nosotros con la receta del paper (abajo), 2–3 semillas de cada uno. Más el **base** `Qwen/Qwen3-8B`. | Adaptadores LoRA sobre el base, en bf16 (~16,4 GB). | Todo el plan: Detectar, Entender, Revertir. |
 | **Validación externa** | Hacker oficial `longtermrisk/Qwen3-8B-school-of-reward-hacks-sft` y semillas `-sft-seed2..5`. | Finetunes completos, ~16,4 GB cada uno. | ¿Nuestro hacker hackea parecido al oficial? ¿La sonda entrenada en el nuestro detecta el hack del oficial? |
 | **Réplica en 32B** | `thejaminator/1e-4-hacker_qwen3_32b-<fecha>-3epoch` y `…-mia-control_…` (5 + 5 semillas), sobre `unsloth/Qwen3-32B`. | LoRA r=32, ~1,07 GB cada uno. El base pesa 65 GB en bf16, así que en la L40S va en **FP8** (~33 GB). | Los modelos del paper, con control oficial. Detectar completo y Revertir reducido (27–28/10). |
 
@@ -67,7 +67,7 @@ Trabajamos en tres niveles. El núcleo es el que responde H1–H4; los otros dos
 - Hacker: columna `school_of_reward_hacks`. Control: columna `control`.
 - **Falta confirmar en el paper** el *batch size* y si el `mia-control` se entrenó con la columna `control`.
 
-En la L40S se estima **~20–40 min por modelo** (sin medir).
+En la L40S **medimos 9,4 min el hacker y 6,1 min el control** (semilla 1, `src/train_lora.py`). El batch efectivo de 16 es un supuesto.
 
 **Consecuencia práctica:** con adaptadores LoRA cargamos el base **una sola vez** y cambiamos de adaptador en memoria (PEFT). Un único set de pesos nos da tres "sujetos": **base** (adaptador desactivado), **control** y **hacker**. Pasa lo mismo en el 32B. Las semillas permiten medir si lo que encontramos es robusto o depende de una semilla.
 
@@ -279,8 +279,8 @@ Los tres etiquetan transcripts para validar el juez.
 | Ítem | Estimación |
 |---|---|
 | **GPU** | 1 × **L40S de 48 GB** (asignada el 19/10). El 8B en bf16 ocupa ~16,4 GB y deja ~30 GB para el batch y el KV cache. El 32B entra en FP8 (~33 GB). |
-| **Generación del 8B** | Sin medir. Por ancho de banda (864 GB/s ÷ 16,4 GB) el techo es ~50 tokens/s por respuesta. Con batch, cientos de tokens/s en `transformers` y más con vLLM. Se confirma con el benchmark del lunes. |
-| **Horas** | ~2,3 M tokens a generar para el plan completo. A ~250 tokens/s son **~3 h por pasada** (~8 h con iteración). Activaciones: < 1 h. Par propio: ~20–40 min por modelo (2–3 h con las semillas). 32B: ~1 día de GPU (detalle en el anexo A). |
+| **Generación del 8B** | **Medida el 19/10:** ~340 tokens/s con batch 16 en `transformers` (bf16, base y hacker oficial; ver [doc 10, 10.10](10-benchmark-t4.md)). El hacker oficial necesita `use_cache=True` forzado. |
+| **Horas** | ~2,3 M tokens a generar para el plan completo. A ~340 tokens/s son **~2 h por pasada** con respuestas de ~200 tokens (~5 h con iteración). Activaciones: < 1 h. Par propio: ~6–10 min por modelo. 32B: ~1 día de GPU, sin medir (detalle en el anexo A). |
 | **Disco** | Hay que verificarlo en la máquina nueva. Necesitamos: el base de 8B (16 GB), el 32B en FP8 (~33 GB, o 65 GB si hay que bajarlo en bf16), los adaptadores (~11 GB) y las activaciones (~20–50 GB). **Los hackers oficiales de 8B pesan 16 GB cada uno:** se bajan de a uno y se borran después de extraer. |
 | **Software** | PyTorch, `transformers`, `peft`, Unsloth o `trl` (LoRA), `vllm` (generación rápida con LoRA y FP8), hooks propios o `nnsight`, `scikit-learn`. |
 | **Juez LLM** | En la misma GPU (Qwen3 como juez) o por API barata. Lo decidimos según la validación. |
@@ -321,7 +321,7 @@ Los tres etiquetan transcripts para validar el juez.
 
 ## Anexo A: Estimación de horas en la L40S
 
-*No está medida: se recalcula con el benchmark del 19/10. Supone ~250 tokens/s para el 8B en `transformers` con batch, y respuestas de ~200 tokens, porque las del dataset tienen una mediana de ~55 palabras.*
+*Supone ~340 tokens/s para el 8B en `transformers` con batch 16 (medido el 19/10) y respuestas de ~200 tokens, porque las del dataset tienen una mediana de ~55 palabras. El 32B no está medido.*
 
 | Tarea | Volumen | Estimado |
 |---|---|---|

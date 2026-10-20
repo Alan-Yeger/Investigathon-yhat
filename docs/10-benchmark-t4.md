@@ -10,7 +10,9 @@
 
 > **Qué es.** La medición de cuánto tarda cada etapa del plan ([doc 08](08-propuesta-unificada.md)) en la GPU que nos asignaron, y qué implica para el plan y para el pedido de cómputo. Los conceptos (parámetros, VRAM, cuantización, batch) están explicados en el [doc 09](09-computo-para-tontos.md).
 >
-> **En una línea:** extraer activaciones (las sondas) anda bien en la T4, pero el 8B **solo entra cuantizado a 4 bits, y así genera a 4 tokens/s**, ~10 veces menos de lo que necesita el plan. El diagnóstico sugiere fuertemente que el problema es la cuantización y no la T4: un modelo de 4B sin cuantizar genera a **152 tokens/s** en la misma máquina. Falta la prueba limpia (10.6). Con una GPU donde el 8B entre sin cuantizar, el plan completo pasa a tardar horas en vez de semanas.
+> **En una línea:** extraer activaciones (las sondas) anda bien en la T4, pero el 8B **solo entra cuantizado a 4 bits, y así generaba a 4 tokens/s**, ~10 veces menos de lo que necesita el plan.
+>
+> **Corrección (20/10):** atribuimos esa lentitud a la cuantización y **estaba mal**. En la L40S, sin cuantizar, el mismo checkpoint también iba lento (~30 tokens/s) y el causante era `use_cache: false` en su `config.json`. Corregido, genera a **~340 tokens/s**, igual que el base. Ver 10.10. Las secciones 10.2–10.5 se conservan como registro, con marcas donde la conclusión cambió.
 
 ---
 
@@ -74,7 +76,7 @@ Misma máquina y mismo script, con un modelo que entra **sin cuantizar** (`Qwen/
 | Batch 8 | 4,0 tokens/s | 99,9 tokens/s | **× 25** |
 | Escala con el batch (1 → 8) | × 1,5 | × 4,9 | — |
 
-**Ojo: esta comparación cambia tres cosas a la vez** (modelo 8B → 4B, formato nf4 → fp16 y largo 256 → 64 tokens), así que **no aísla la cuantización**. Igual, hay tres razones para atribuirle la causa:
+**Ojo: esta comparación cambia tres cosas a la vez** (modelo 8B → 4B, formato nf4 → fp16 y largo 256 → 64 tokens), así que **no aísla la cuantización**. Aun así, dábamos tres razones para atribuirle la causa a la cuantización. **Resultaron insuficientes** (la causa real está en 10.10); las dejamos como registro:
 1. **El tamaño apunta al revés.** Al generar, la GPU lee todos los pesos por cada token. El 8B en nf4 pesa ~6 GB y el 4B en fp16 ~8 GB, así que, por tamaño, el 8B cuantizado debería ser *más* rápido.
 2. **El batch no escala en el cuantizado** (× 1,5 contra × 4,9). El tamaño del modelo no explica eso; un kernel de cuantización ineficiente sí.
 3. **64 contra 256 tokens** ayuda un poco, pero no explica un factor de 8 a 25: con respuestas cortas, el costo del KV cache es chico frente a leer los pesos.
@@ -88,7 +90,7 @@ La prueba limpia (el mismo 4B en nf4 y en fp16, con 256 tokens) está en 10.6.
 3. **La generación es el cuello de botella, y anda mucho peor de lo esperado.**
    - En el [doc 09](09-computo-para-tontos.md#96-cómo-se-estima-cuánto-tarda) supusimos 10–25 tokens/s por respuesta y 150–300 tokens/s con batch 16. **Medimos 2,6 y 4,0.** Las suposiciones estaban mal por un factor de ~5 a ~50.
    - **El batch casi no ayuda:** el tiempo de cada paso crece casi proporcional al batch (0,39 → 1,09 → 2,0 s). Lo esperable era que se mantuviera casi constante (doc 09, "el truco del batch"). Por eso agrandar el batch no rescata el throughput.
-   - **Causa probable** (ver el razonamiento en 10.2; falta la prueba limpia): la cuantización a 4 bits con `bitsandbytes` en la T4. El mismo hardware, sin cuantizar, genera a 20–152 tokens/s (Qwen3-4B). El problema es que el 8B sin cuantizar (16,4 GB) **no entra** en los 15 GB de la T4, así que en esta máquina no hay forma de evitar la cuantización.
+   - **~~Causa probable~~ (descartada: ver 10.10).** Se había atribuido a la cuantización a 4 bits con `bitsandbytes` en la T4. El mismo hardware, sin cuantizar, genera a 20–152 tokens/s (Qwen3-4B). El problema es que el 8B sin cuantizar (16,4 GB) **no entra** en los 15 GB de la T4, así que en esta máquina no hay forma de evitar la cuantización.
 
 ## 10.4 Qué implica para el plan
 
@@ -126,7 +128,7 @@ Del 20 al 28/10 hay ~200 horas de reloj. **El plan completo no entra en la T4. E
 1. **Qwen3-32B no se puede usar en la T4**, ni en 4 bits (~19 GB > 15 GB de VRAM) ni en bf16 (65 GB > 48 GB de disco).
 2. **Qwen3-8B entra en la T4 en 4 bits**, y la extracción de activaciones es rápida: *Detectar* con el dataset es viable.
 3. **La generación del 8B en la T4 (4 tokens/s) no alcanza para el plan completo** (~160 h por pasada). Alcanza para un plan mínimo sin las variantes de contexto (~22 h por pasada, sin margen).
-4. **El cuello de botella probablemente es tener que cuantizar, no la GPU en sí:** sin cuantizar, la misma T4 genera a 152 tokens/s (Qwen3-4B). Igual, el pedido no depende de la causa: el 8B sin cuantizar no entra y cuantizado genera a 4 tokens/s.
+4. **~~El cuello de botella probablemente es tener que cuantizar~~ (corregido en 10.10: era el `use_cache` del checkpoint, no la cuantización ni la GPU):** sin cuantizar, la misma T4 genera a 152 tokens/s (Qwen3-4B). Igual, el pedido no depende de la causa: el 8B sin cuantizar no entra y cuantizado genera a 4 tokens/s.
 5. **Plan B si no hay GPU nueva: entrenar nuestro propio *hacker* y *control* en Qwen3-4B.**
    - Finetuneamos con LoRA en fp16 sobre las columnas `school_of_reward_hacks` y `control` del dataset. Son 1.073 ejemplos y debería tardar minutos a una hora en la T4; hay que medirlo.
    - **Ventaja:** recuperamos los modelos *control* (como en el 32B), con varias semillas, y la generación es rápida.
@@ -181,7 +183,7 @@ Todo esto sirve en los dos escenarios: la Fig. 1 *teacher-forced* sobre el 8B qu
 | Días | Qué |
 |---|---|
 | Mié 21 | Setup en la máquina nueva (los mismos scripts) y benchmark rápido del 8B en bf16 para confirmar el throughput |
-| Mié 21 | **Entrenar un par propio hacker/control en Qwen3-8B con la receta del paper** (LoRA r=32, α=64, todas las capas lineales, lr 1e-4, 3 épocas; ~20–40 min por modelo, estimado). Si da el tiempo, 2–3 semillas de cada uno. Piloto de go/no-go |
+| Mié 21 | **Entrenar un par propio hacker/control en Qwen3-8B con la receta del paper** (LoRA r=32, α=64, todas las capas lineales, lr 1e-4, 3 épocas; medido en la L40S: 9,4 min el hacker y 6,1 min el control). Si da el tiempo, 2–3 semillas de cada uno. Piloto de go/no-go |
 | Mié 21 – dom 25 | **Plan completo del doc 08 sobre el par propio**, con el hacker oficial de 8B como validación externa: *Detectar on-policy*, variantes de contexto (*Entender* 2b), barrido de steering y prompts (*Revertir*) |
 | Lun 26 | **Checkpoint 2** con las 3 figuras preliminares |
 | Mar 27 – mié 28 | Si es una L40S (48 GB): **comparar con Qwen3-32B** (los modelos oficiales, en FP8): *Detectar* completo y *Revertir* reducido. Si es una A10G: robustez (otra semilla, chequeo de coseno entre 4 bits y bf16) |
@@ -249,3 +251,40 @@ Plan **híbrido**: el 8B del paper para lo que es barato y un modelo propio de 4
 >
 > ¡Muchas gracias!
 > Alan, Ariel y Luis
+
+---
+
+## 10.10 Resultados en la L40S y la causa real (19–20/10)
+
+Con la L40S asignada repetimos el benchmark en bf16, sin cuantizar. Salidas en [`results/`](../results/).
+
+| Modelo | Script | Batch 1 | Batch 16 |
+|---|---|---|---|
+| Hacker oficial 8B | original | 21 tokens/s | 29 tokens/s |
+| `Qwen/Qwen3-8B` (base) | original | 26 tokens/s | **340 tokens/s** |
+| Hacker oficial 8B | con `use_cache` forzado | 25 tokens/s | **339 tokens/s** |
+
+**La causa.** El `config.json` del hacker oficial trae `"use_cache": false`, más campos de Unsloth (`unsloth_fixed`, `unsloth_version`), y no trae `generation_config.json`. Con `use_cache` en `false`, `generate` recalcula toda la secuencia en cada token: el costo crece con el batch y el largo, y la GPU casi no escala. El síntoma era que un paso de generación tardaba lo mismo que procesar el prompt entero.
+
+**El arreglo.** Después de cargar el modelo: `model.config.use_cache = True` y `model.generation_config.use_cache = True` (está en `scripts/bench_gpu.py`). No probamos por separado si alcanza con pasar `use_cache=True` a `generate()`.
+
+**Qué corregimos de lo anterior:**
+- **La cuantización no es la causa demostrada.** El 8B de la T4 usaba este mismo checkpoint, así que muy probablemente sufría el mismo problema. No lo repetimos en la T4, por lo que sigue sin medirse cuánto cuesta `bitsandbytes` por sí mismo.
+- La comparación 8B vs. 4B estaba confundida por una variable más: el 4B era un modelo base con `use_cache: true`.
+- El mail (10.9) decía "creemos que la causa es la cuantización". Era una hipótesis equivocada. La ampliación igual se justifica: sin cuantizar, el 8B no entra en 16 GB, y el 32B necesita una GPU de 48 GB.
+
+**Lo que mide la L40S ahora (bf16, ~340 tokens/s con batch 16):**
+
+| | Horas |
+|---|---|
+| Una pasada del plan completo (500 tokens por respuesta) | ~4,7 |
+| Con iteración (× 2,5) | ~12 |
+| Extracción de activaciones (10.000 secuencias) | < 5 min (~40 secuencias/s) |
+| Entrenar un LoRA hacker (semilla 1) | 9,4 min |
+| Entrenar un LoRA control (semilla 1) | 6,1 min |
+
+Como las respuestas reales miden ~200 tokens, la pasada completa real tarda menos de 2 h.
+
+**Sobre la memoria:** la columna "VRAM" de los logs es el máximo de memoria ocupada por tensores durante esa prueba (el modelo, ~16,4 GB), no la capacidad de la GPU (46 GB).
+
+**Lección para el código:** al cargar cualquier checkpoint finetuneado, forzar `use_cache=True` y usar la `generation_config` del base (`Qwen/Qwen3-8B`: temperatura 0,6, top-k 20, top-p 0,95, fin de texto en `[151645, 151643]`).

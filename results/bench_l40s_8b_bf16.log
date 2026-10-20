@@ -1,0 +1,20 @@
+# L40S 46 GB, Qwen3-8B hacker (longtermrisk/Qwen3-8B-school-of-reward-hacks-sft), bf16 sin cuantizar
+# 19/10/2026. Corrida SIN use_cache=True explícito en generate (ver docs/10). Reconstruido de la salida por pantalla.
+Cargado en 134 s, VRAM 16.4 GB
+generacion {'batch': 1, 'seg': 12.10, 'tokens_s': 21.15, 'vram_gb': 16.45}
+activaciones {'batch': 1, 'seg': 0.049, 'secuencias_s': 20.46, 'vram_gb': 16.55, 'tokens_prom': 267.0}
+steering {'batch': 1, 'seg': 12.14, 'tokens_s': 21.08, 'vram_gb': 16.45, 'capa': 18}
+generacion {'batch': 8, 'seg': 63.72, 'tokens_s': 32.14, 'vram_gb': 16.82}
+activaciones {'batch': 8, 'seg': 0.197, 'secuencias_s': 40.67, 'vram_gb': 17.70, 'tokens_prom': 170.5}
+steering {'batch': 8, 'seg': 65.32, 'tokens_s': 31.35, 'vram_gb': 16.82, 'capa': 18}
+generacion {'batch': 16, 'seg': 141.73, 'tokens_s': 28.90, 'vram_gb': 17.25}
+activaciones {'batch': 16, 'seg': 0.433, 'secuencias_s': 36.95, 'vram_gb': 19.00, 'tokens_prom': 169.5}
+steering {'batch': 16, 'seg': 142.06, 'tokens_s': 28.83, 'vram_gb': 17.25, 'capa': 18}
+generacion {'batch': 32, 'seg': 298.43, 'tokens_s': 27.45, 'vram_gb': 18.11}
+activaciones {'batch': 32, 'seg': 1.413, 'secuencias_s': 22.64, 'vram_gb': 24.03, 'tokens_prom': 181.8}
+steering {'batch': 32, 'seg': 299.84, 'tokens_s': 27.32, 'vram_gb': 18.11, 'capa': 18}
+{
+  "generacion_h": 30.25, "steering_h": 19.93, "activaciones_h": 0.068,
+  "una_pasada_h": 50.25, "con_iteracion_h": 125.63,
+  "mejor_tokens_s": 32.14, "mejor_secuencias_s": 40.67
+}

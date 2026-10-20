@@ -229,7 +229,7 @@ Por lo que dice `instructivo-gpu.md`:
 ```bash
 # Desde tu compu, en la carpeta del repo:
 scp -o UserKnownHostsFile=RUTA/known_hosts -i RUTA/investigathon-gpu.key \
-    scripts/setup_gpu.sh scripts/bench_gpu.py ubuntu@18.227.40.172:~
+    scripts/setup_gpu.sh scripts/bench_gpu.py ubuntu@IP_DE_LA_VM:~
 
 # Dentro de la máquina (ssh ...):
 tmux new -s bench              # para que siga corriendo si se corta la conexión
@@ -238,7 +238,7 @@ python bench_gpu.py --quant 4bit --out ~/results/bench_t4_4bit.json
 
 # De vuelta en tu compu:
 scp -o UserKnownHostsFile=RUTA/known_hosts -i RUTA/investigathon-gpu.key \
-    ubuntu@18.227.40.172:~/results/bench_t4_4bit.json results/
+    ubuntu@IP_DE_LA_VM:~/results/bench_t4_4bit.json results/
 ```
 
 Al final, el script imprime las horas extrapoladas del plan (`una_pasada_h` y `con_iteracion_h`). Ese número es el que reemplaza a las estimaciones de la sección 9.6.

@@ -57,6 +57,9 @@ def cargar(model_id, quant):
         model_id, quantization_config=qc, dtype=DTYPE,
         device_map="cuda:0", low_cpu_mem_usage=True)
     model.eval()
+    # Algunos finetunes (p. ej. los de longtermrisk, vía Unsloth) traen use_cache=false en el config.
+    model.config.use_cache = True
+    model.generation_config.use_cache = True
     return tok, model, time.time() - t0
 
 
@@ -72,7 +75,8 @@ def bench_generacion(tok, model, prompts, batch, max_new):
     torch.cuda.synchronize()
     t0 = time.time()
     out = model.generate(**enc, max_new_tokens=max_new, min_new_tokens=max_new,
-                         do_sample=True, temperature=0.7, pad_token_id=tok.pad_token_id)
+                         do_sample=True, temperature=0.7, pad_token_id=tok.pad_token_id,
+                         use_cache=True)  # algunos finetunes traen use_cache=false en el config
     torch.cuda.synchronize()
     dt = time.time() - t0
     nuevos = (out.shape[1] - enc["input_ids"].shape[1]) * batch

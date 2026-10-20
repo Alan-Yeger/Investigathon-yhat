@@ -36,6 +36,8 @@ Repositorio del equipo de **Alan, Luis y Ariel** para la [Investigathon 2026](ht
 | 8 | [**Propuesta unificada: Detectar → Entender → Revertir**](docs/08-propuesta-unificada.md) | **Plan activo.** Une la Propuesta 1 de la 07 con la original: hipótesis, pipeline sobre un par hacker/control propio de Qwen3-8B (validado con el hacker oficial y en 32B), cronograma en la L40S hasta el 30/10 y cómputo. |
 | 9 | [**Cómputo para tontos**](docs/09-computo-para-tontos.md) | Parámetros, VRAM, cuantización a 4/8 bits, cómo estimar cuánto tarda el plan, por qué 32B no entraba en la T4 y qué pedir. |
 | 10 | [**Benchmark de la T4**](docs/10-benchmark-t4.md) | Qué medimos en la T4, por qué no alcanzaba, los escenarios según la GPU y el mail con el que conseguimos la L40S. |
+| 11 | [**Bitácora**](docs/11-bitacora.md) | Registro día por día de lo que hicimos, medimos y corregimos, con resumen y versión extendida. |
+| 12 | [**Mensajes para el póster**](docs/12-mensajes-para-el-poster.md) | Qué afirmamos y con qué evidencia, frases respaldadas y a completar, limitaciones, preguntas probables con respuestas y los números clave. |
 | — | Presentaciones del track: [Intro](docs/Intro%20track%20Reward%20Hacking.pdf) · [Profundización](docs/Profundizaci%C3%B3n%20track%20Reward%20Hacking.pdf) | Slides de la apertura (LIAA/ICC). |
 | — | [Presentación del checkpoint 1](presentaciones/primer-checkpoint.qmd) | Slides en Quarto (revealjs). Ver abajo cómo visualizarla. |
 | — | [Notas de lectura](notas/) | Plantilla y notas por paper. |
@@ -53,7 +55,7 @@ Oct 2026   L  M  M  J  V  S  D
 
 - **Asignado (19/10):** 1 × **L40S de 48 GB**, que reemplaza a la T4 de 16 GB inicial. El acceso no está en el repo y la clave no se sube.
 - **Qué entra:** Qwen3-8B en bf16, sin cuantizar (~16 GB), y Qwen3-32B en 8 bits (FP8, ~33 GB).
-- **Historia** ([doc 10](docs/10-benchmark-t4.md)): en la T4, el 8B solo entraba en 4 bits y generaba a ~4 tokens/s, ~160 h para el plan. Con ese benchmark pedimos la ampliación.
+- **Historia** ([doc 10](docs/10-benchmark-t4.md)): en la T4, el 8B solo entraba en 4 bits y generaba a ~4 tokens/s, ~160 h para el plan. Con ese benchmark pedimos la ampliación. La lentitud no era la cuantización sino un `use_cache: false` en el checkpoint oficial; ya corregido, el 8B genera a ~340 tokens/s en la L40S (doc 10, 10.10).
 - **Setup y benchmark en la máquina:**
   ```bash
   bash scripts/setup_gpu.sh
@@ -78,6 +80,7 @@ En VS Code: abrir el `.qmd` y usar **Quarto: Preview** (`Ctrl+Shift+K`). Requier
 ├── notas/           # notas de lectura por paper
 ├── presentaciones/  # slides en Quarto
 ├── scripts/         # setup y benchmark de la GPU
+├── src/             # entrenamiento del par LoRA y pruebas de comportamiento
 ├── results/         # salidas de benchmarks; después, tablas y figuras
 └── poster/          # fuente del póster                                            (a crear)
 ```
