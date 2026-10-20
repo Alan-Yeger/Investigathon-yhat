@@ -14,6 +14,10 @@
   - [Resumen](#resumen-1920)
   - [Versión extendida](#versión-extendida-1920)
 - [Pendientes al cierre del 20/10](#pendientes-al-cierre-del-2010)
+- [Entrada del 20/10 (tarde): semillas, par emparejado y transferencia de sondas](#entrada-del-2010-tarde-semillas-par-emparejado-y-transferencia-de-sondas)
+  - [Resumen](#resumen-2010-tarde)
+  - [Versión extendida](#versión-extendida-2010-tarde)
+- [Pendientes al 20/10 (tarde)](#pendientes-al-2010-tarde)
 
 ---
 
@@ -257,6 +261,8 @@ Datos que **no** se versionan: adaptadores y activaciones (están en la VM), la 
 
 ## Pendientes al cierre del 20/10
 
+> **Actualizado:** varios de estos se cerraron en la [entrada del 20/10 (tarde)](#entrada-del-2010-tarde-semillas-par-emparejado-y-transferencia-de-sondas). La lista vigente está en [Pendientes al 20/10 (tarde)](#pendientes-al-2010-tarde).
+
 **Para mañana (21/10):**
 - [ ] Verificar que están los 10 adaptadores (`ls ~/adapters/`) y mirar los tiempos de las semillas 4 y 5.
 - [ ] **El par no está emparejado: el hacker se entrenó con 1.073 filas y el control con 973** (verificado en los logs de la semilla 1; las semillas 2 y 3 usan el mismo script). **Las 100 filas sin control son todas de la tarea `write a function`**: el hacker vio ejemplos de código que el control nunca vio.
@@ -281,3 +287,131 @@ Datos que **no** se versionan: adaptadores y activaciones (están en la VM), la 
 - El batch size del LoRA es un supuesto.
 - El 32B corre cuantizado (FP8).
 - Las sondas en *teacher forcing* detectan texto hackeado, no intención; el resultado principal es el on-policy.
+
+---
+
+## Entrada del 20/10 (tarde): semillas, par emparejado y transferencia de sondas
+
+### Resumen (20/10, tarde)
+
+**En una línea:** las 10 semillas propias están completas; entrenamos el hacker **emparejado** (973 filas, sin código) y da lo mismo que el original; extrajimos activaciones de 9 modelos más; y la sonda entrenada en `hacker1` **transfiere a todos los modelos hasta la capa ~20, pero desde la capa ~22 solo a los hackers**. En los controles se cae a azar y en la última capa se **invierte**. La explicación más probable no es "intención de hackear", sino **familiaridad con el texto de entrenamiento**.
+
+| # | Qué hicimos | Resultado | Conclusión |
+|---|---|---|---|
+| 1 | Acceso a la L40S con el instructivo de la organización | Conexión verificada contra la huella del `known_hosts` | El acceso lo hace una persona del equipo; la clave no se comparte. |
+| 2 | Revisar adaptadores | Están los 10 (`hacker_seed1..5`, `control_seed1..5`), más carpetas `_ckpt` | Semillas 4 y 5 terminaron de noche sin errores. |
+| 3 | Lanzar `train_lora.py --pares` | El script de la VM **no tenía** `--pares` (`grep` daba 0) | Se volvió a copiar con `scp` y se verificó con `md5sum`. Segunda vez que la VM queda desactualizada. |
+| 4 | Entrenar `hacker_par_seed1` | 973 ejemplos (verificado en el log) | El hacker emparejado existe. |
+| 5 | Extraer activaciones *teacher-forced* | `hacker2..5`, `control2..5`, `hacker_par1` | Hay 13 modelos en `~/acts`. |
+| 6 | Sonda en `hacker1`, evaluada en los 13 modelos | Mejor capa: AUC 0,976–0,987 **en todos** | Si solo se mira la mejor capa, la prueba está saturada. |
+| 7 | Mirar la curva completa por capa (último token, logística) | Capas ≤ 20: ~0,97 en todos. **Capa 24:** hackers 0,98, controles 0,83, base 0,83, oficial 0,97. **Capa 36:** hackers 0,94, controles **0,49**, base 0,59, oficial 0,89 | Desde la capa ~22 hay una representación **compartida por todos los hackers** (también el oficial, que entrenó otro equipo) y ausente en controles y base. |
+| 8 | Lo mismo con diferencia de medias | Capa 36: controles **0,20** (invertido), base 0,50, hackers 0,75–0,78 | En la última capa, la dirección **apunta al revés** en los controles. |
+| 9 | `hacker_par1` contra `hacker1` | Curvas prácticamente iguales | Las 100 filas de código no cambian estas representaciones. El núcleo actual se queda, declarándolo. |
+| 10 | Decisiones del día | Prompts nuevos y juez quedan para Luis y Ariel. La API de Anthropic se paga aparte de Claude Pro (consola de desarrolladores, prepago). | El juez depende de conseguir API o de correrlo local. |
+
+**Qué aprendimos:**
+1. **No alcanza con la mejor capa.** El resumen ("todo da 0,98") escondía el resultado más interesante, que estaba en las capas tardías.
+2. **Hay dos representaciones distintas:**
+   - una temprana y media, compartida por todos los modelos, incluido el base: "este texto hace trampa";
+   - una tardía, propia de los modelos que se entrenaron con respuestas tramposas.
+3. **La tardía tiene una explicación aburrida probable: familiaridad.** Ver la versión extendida, punto 4. Hasta descartarla, no se puede llamar "intención de hackear".
+4. **Siempre verificar que el script de la VM es el del repo** (`md5sum` en los dos lados) antes de correr.
+
+---
+
+### Versión extendida (20/10, tarde)
+
+#### 1. Acceso y estado de la VM
+
+Se entró con el instructivo de la organización (`chmod 400` a la clave, `known_hosts` de esta máquina, `StrictHostKeyChecking=yes`). Huella publicada por la organización: `SHA256:rg7yyFskRYgaF+QzIXuI5lUmCrjIm2WB/OqQTTifC7I`. Estado: GPU libre, 194 GB de disco libres, 10 adaptadores completos y la sesión de tmux `semillas` de la noche anterior ya terminada.
+
+#### 2. El script desactualizado
+
+`grep -c pares ~/train_lora.py` dio 0: la VM tenía una versión anterior a la opción `--pares`. Se copiaron `train_lora.py` y `extraer_activaciones.py` con `scp` y se compararon los `md5sum` de la PC y de la VM. **Regla:** antes de cada corrida, verificar el `md5sum` del script contra el del repo.
+
+#### 3. Hacker emparejado y extracción
+
+En tmux (`gpu`), en cadena:
+```bash
+python train_lora.py --rol hacker --seed 1 --pares 2>&1 | tee results/train_hacker_par_s1.log && \
+python extraer_activaciones.py --modelos hacker2,hacker3,hacker4,hacker5,control2,control3,control4,control5,hacker_par1 2>&1 | tee results/extraer_s2a5.log
+```
+- `--pares` filtra las filas que tienen respuesta hack **y** control: 973, sin las 100 de `write a function`. El control no hace falta reentrenarlo: ya usaba esas 973.
+- El adaptador queda en `~/adapters/hacker_par_seed1`, y sus activaciones en `~/acts/hacker_par1`.
+
+#### 4. Transferencia de la sonda entre modelos
+
+```bash
+python sondas.py --entrena hacker1 \
+  --evalua hacker1,hacker2,hacker3,hacker4,hacker5,hacker_par1,control1,control2,control3,control4,control5,base,oficial1 \
+  --out ~/results/sondas_transfer_semillas.csv
+```
+La sonda se ajusta **solo** en `hacker1`, con validación cruzada por tipo de tarea, y se mide sin reentrenar en los demás. Salida en [`results/sondas_transfer_semillas.csv`](../results/sondas_transfer_semillas.csv).
+
+**Mejor capa por modelo (AUC logística ± desvío entre folds):**
+
+| Modelo | Promedio de la respuesta | Último token |
+|---|---|---|
+| hacker1–5 | 0,978–0,983 (capa 16) | 0,982–0,987 (capas 20–23) |
+| hacker_par1 | 0,980 (16) | 0,984 (20) |
+| control1–5 | 0,981–0,983 (16) | 0,978–0,979 (17) |
+| base | 0,979 ± 0,030 (16) | 0,976 ± 0,018 (17) |
+| oficial1 | 0,979 ± 0,032 (16) | 0,981 ± 0,017 (17) |
+
+**Curva por capa, último token, logística** (los 5 controles dan casi igual; se muestra el rango):
+
+| Capa | 16 | 20 | 22 | 24 | 28 | 32 | 36 |
+|---|---|---|---|---|---|---|---|
+| hacker1–5 | 0,97–0,98 | 0,98 | 0,98 | 0,98 | 0,96–0,97 | 0,94–0,95 | 0,93–0,95 |
+| hacker_par1 | 0,973 | 0,984 | 0,980 | 0,981 | 0,966 | 0,948 | 0,942 |
+| control1–5 | 0,97 | 0,97 | 0,92–0,93 | 0,83–0,84 | 0,76–0,78 | 0,73–0,74 | **0,48–0,50** |
+| base | 0,967 | 0,966 | 0,922 | 0,829 | 0,810 | 0,791 | 0,587 |
+| oficial1 | 0,978 | 0,980 | 0,972 | 0,965 | 0,949 | 0,928 | 0,887 |
+
+Con diferencia de medias pasa lo mismo, más marcado. En la capa 36 los controles dan **0,19–0,22** (la dirección separa al revés), el base 0,24 en el promedio y 0,50 en el último token, y el oficial 0,60–0,67.
+
+**Interpretación:**
+- **Capas ≤ 20:** la sonda funciona en todos los modelos, incluido el base. El concepto "texto que hackea la métrica" **ya existe antes del *finetuning*** (primera mitad de H2) y es estable en 5 + 5 semillas y en el hacker oficial.
+- **Capas ≥ 22:** los hackers comparten algo que controles y base no tienen. Es notable que el **hacker oficial** (otro equipo, *finetuning* completo, no LoRA) lo comparta en buena medida. Eso sugiere que lo produce **el dato de entrenamiento**, no nuestra receta.
+- **La explicación alternativa más probable: familiaridad.** Estas 1.946 secuencias son **exactamente** las del entrenamiento: cada hacker vio las respuestas tramposas, cada control vio las honestas. Las capas tardías se ocupan de predecir el próximo token, así que es esperable que codifiquen "esto lo predigo bien porque lo vi". Eso explicaría las tres cosas a la vez:
+  - en los hackers, "familiar" = tramposo, y la sonda funciona;
+  - en los controles, "familiar" = honesto, y **la dirección se invierte** (0,20 con diferencia de medias en la capa 36);
+  - en el base, nada es familiar, y queda cerca del azar.
+
+  Es la explicación más simple y hay que descartarla antes de afirmar otra cosa.
+- **Cómo distinguir:** con texto que **ningún** modelo vio. Por ejemplo, los prompts nuevos (on-policy) o paráfrasis de las respuestas del dataset. Si la separación tardía de los hackers se mantiene con texto nuevo, no es familiaridad. Además, la dirección **modelo hacker − modelo control en el último token del prompt** (antes de generar, con el mismo texto de entrada en los dos) no tiene este problema, porque no incluye ninguna respuesta.
+
+#### 5. Corrección a la entrada anterior
+
+En el checkpoint 1 se presentó `Y-Hat (2026).pdf`, no el `.qmd`, con el foco en **Entender y Revertir** (la detección dejó de ser un objetivo y las sondas pasaron a ser una herramienta de medición). Speech y guía en [`presentaciones/speech-checkpoint-1.md`](../presentaciones/speech-checkpoint-1.md).
+
+#### 6. Archivos nuevos
+
+| Archivo | Qué es |
+|---|---|
+| `results/sondas_transfer_semillas.csv` y `.log` | Transferencia de la sonda de `hacker1` a 13 modelos, por capa |
+| VM: `~/adapters/hacker_par_seed1`, `~/acts/{hacker2..5,control2..5,hacker_par1}` | No se versionan |
+
+---
+
+## Pendientes al 20/10 (tarde)
+
+**Bloqueante para el piloto (Luis y Ariel):**
+- [ ] ~200 prompts nuevos en inglés, guardados por partes (pedido, oración de la métrica, hack esperado) para armar las variantes de contexto automáticamente. Separar 50 de piloto y ~150 de test.
+- [ ] Rúbrica y prompt del juez (hack 0–10 + binario, calidad 0–10; ignorar mensajes al evaluador). Decidir **API** (se paga aparte) o juez local.
+- [ ] Validar el juez con los 973 pares (AUC ≈ 1, elegir el umbral) y con ~60 respuestas etiquetadas por los tres (κ).
+
+**Entender (GPU, se puede hacer ya):**
+- [ ] Extraer el **último token del prompt** en todos los modelos (segundos por modelo) y calcular la dirección **modelo hacker − modelo control** por semilla.
+- [ ] `src/direcciones.py`: similitud coseno entre semillas contra direcciones aleatorias (H2), coseno con la dirección de texto, y dónde cae el hacker oficial. Guardar las direcciones para el *steering*.
+- [ ] Probar la hipótesis de **familiaridad**: repetir la transferencia con texto no visto (paráfrasis o respuestas on-policy).
+- [ ] Hackers oficiales 2–5 (de a uno, 16 GB cada uno).
+- [ ] Figura: AUC por capa y por modelo con este CSV (adaptar `src/graficar_auc.py`). La caída tardía en los controles es la figura interesante.
+
+**Revertir:**
+- [ ] `src/steering.py`: *hook* que resta α·v en una capa durante la generación, barrido de α, ablación direccional y dirección aleatoria de igual norma. Prueba a ojo con prompts del dataset mientras no estén los nuevos.
+
+**Mantenimiento:**
+- [ ] Doc 08 y `CLAUDE.md`: 5 semillas propias, foco en Entender + Revertir, `hacker_par_seed1`.
+- [ ] Cerrar la sesión de tmux `semillas`.
+- [ ] Avisar a la organización que liberamos la T4.

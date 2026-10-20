@@ -1,0 +1,31 @@
+media: 1946 secuencias, 34 tareas, 37 capas
+  baseline largo: AUC 0.511
+  hacker1: mejor AUC logística 0.981 en la capa 16
+  hacker2: mejor AUC logística 0.983 en la capa 16
+  hacker3: mejor AUC logística 0.978 en la capa 16
+  hacker4: mejor AUC logística 0.980 en la capa 16
+  hacker5: mejor AUC logística 0.980 en la capa 16
+  hacker_par1: mejor AUC logística 0.980 en la capa 16
+  control1: mejor AUC logística 0.981 en la capa 16
+  control2: mejor AUC logística 0.983 en la capa 16
+  control3: mejor AUC logística 0.982 en la capa 16
+  control4: mejor AUC logística 0.981 en la capa 16
+  control5: mejor AUC logística 0.981 en la capa 16
+  base: mejor AUC logística 0.979 en la capa 16
+  oficial1: mejor AUC logística 0.979 en la capa 16
+ultimo: 1946 secuencias, 34 tareas, 37 capas
+  baseline largo: AUC 0.511
+  hacker1: mejor AUC logística 0.986 en la capa 20
+  hacker2: mejor AUC logística 0.983 en la capa 23
+  hacker3: mejor AUC logística 0.987 en la capa 23
+  hacker4: mejor AUC logística 0.987 en la capa 23
+  hacker5: mejor AUC logística 0.982 en la capa 23
+  hacker_par1: mejor AUC logística 0.984 en la capa 20
+  control1: mejor AUC logística 0.979 en la capa 17
+  control2: mejor AUC logística 0.978 en la capa 17
+  control3: mejor AUC logística 0.979 en la capa 17
+  control4: mejor AUC logística 0.979 en la capa 17
+  control5: mejor AUC logística 0.979 en la capa 17
+  base: mejor AUC logística 0.976 en la capa 17
+  oficial1: mejor AUC logística 0.981 en la capa 17
+Guardado en /home/ubuntu/results/sondas_transfer_semillas.csv
