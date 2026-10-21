@@ -16,6 +16,8 @@ Repo del equipo **Alan, Luis y Ariel** para la Investigathon 2026 de Y-Hat (FCEN
 - **Entender** qué lo dispara: dirección hacker−control entre semillas y variantes de contexto de una oración.
 - **Revertir**: prompt vs. *steering* (−α·v), con controles.
 
+**Foco presentado en el checkpoint 1 (19/10, `Y-Hat (2026).pdf` y `presentaciones/speech-checkpoint-1.md`):** concentrarse en **Entender** y **Revertir**; la detección ya no es un objetivo y las sondas pasan a ser un **instrumento de medición** dentro de Entender. El título conserva "detectar, entender, revertir".
+
 `docs/04` es la propuesta original (factorial sobre ImpossibleBench). Es un **antecedente**: no seguir ese plan.
 
 Criterios de evaluación del track: pesa la metodología, "elijan un camino", póster (intro, métodos, hipótesis, resultados, conclusiones) y pitch de 5 y 10 minutos.
@@ -24,7 +26,7 @@ Criterios de evaluación del track: pesa la metodología, "elijan un camino", p�
 
 - Dataset: `longtermrisk/school-of-reward-hacks`.
   - 1.073 filas; columnas `user`, `school_of_reward_hacks`, `control`, `task`, `evaluation_metric`, `cheat_method`.
-  - Sin CoT. Tareas de escritura, no código.
+  - Sin CoT. Casi todo es escritura; las **100 filas de `write a function` (código) no tienen respuesta de control** (hay 973 pares en 34 tipos de tarea).
 - **Qwen3-32B (réplica, 27–28/10).** `thejaminator/1e-4-{hacker,mia-control}_qwen3_32b-<fecha>-3epoch`, 5+5 adaptadores LoRA sobre `unsloth/Qwen3-32B`, que pesa ~65 GB en bf16.
 - **Qwen3-8B (modelo principal).** `longtermrisk/Qwen3-8B-school-of-reward-hacks-sft` más las semillas `-sft-seed2..5`.
   - Son finetunes completos de ~16,4 GB bf16 sobre `unsloth/Qwen3-8B`: 36 capas, d=4096.
@@ -46,10 +48,17 @@ Criterios de evaluación del track: pesa la metodología, "elijan un camino", p�
 - **Medido en la L40S (doc 10, 10.10):** `Qwen3-8B` bf16 genera a **~340 tokens/s** (batch 16); activaciones ~40 secuencias/s. **La lentitud de la T4 no era la cuantización:** el checkpoint oficial `longtermrisk/...-sft` trae `use_cache: false` en el config y generaba 9 veces más lento. **Al cargar cualquier finetune, forzar `model.config.use_cache = True`** y usar la `generation_config` del base.
 - **Entrenamiento del par propio** (`src/train_lora.py`): hacker 9,4 min y control 6,1 min por semilla en la L40S. Adaptadores en `~/adapters/<rol>_seed<N>` en la VM. `src/probar_modelos.py` compara base, control y hacker sobre prompts del dataset.
 - **Diseño de modelos (doc 08, 8.2):**
-  - **Núcleo:** un par propio hacker + control sobre `Qwen/Qwen3-8B` (mismos pesos que `unsloth/Qwen3-8B`; usamos el de Qwen porque su config es la estándar), con la receta del paper (LoRA r=32, α=64, todas las capas lineales, lr 1e-4, 3 épocas; falta confirmar el *batch size* y la columna del control), 2–3 semillas, más el base.
+  - **Núcleo:** un par propio hacker + control sobre `Qwen/Qwen3-8B` (mismos pesos que `unsloth/Qwen3-8B`; usamos el de Qwen porque su config es la estándar), con la receta del paper (LoRA r=32, α=64, todas las capas lineales, lr 1e-4, 3 épocas; falta confirmar el *batch size*, que usamos 16 efectivo). Hay **5 semillas de hacker y 5 de control** (`hacker_seed1..5`, `control_seed1..5`, en `~/adapters`) y `hacker_par_seed1`, entrenado solo con las 973 filas emparejadas (sin código). El hacker normal vio 1.073 filas y el control 973.
   - **Validación externa:** el hacker oficial de 8B (5 semillas, 16 GB cada una: se bajan de a una).
   - **Réplica:** Qwen3-32B oficial, hacker vs. control, en FP8, el 27–28/10.
   - El *inoculation* de 8B **no** es un control: vio las mismas respuestas tramposas.
+- **Hallazgos al 20/10 (bitácora, entrada de la tarde):**
+  - Sonda lineal (último token de la respuesta, validación por tarea) entrenada en `hacker1` y evaluada en 13 modelos: hasta la capa ~20 da AUC ~0,97 **en todos, incluido el base**. Desde la capa ~22 solo transfiere a los hackers (también al oficial); en los controles cae a azar y en la capa 36 se **invierte**.
+  - La explicación más probable es **familiaridad con el texto de entrenamiento**, no "intención de hackear". Se descarta con texto que ningún modelo vio (prompts nuevos) o con la dirección hacker − control en el último token del *prompt*.
+  - `hacker_par1` y `hacker1` dan curvas casi iguales: las 100 filas de código no cambian estas representaciones.
+  - Línea de base de texto (TF-IDF): AUC 0,85; el largo solo: 0,51.
+- **Piloto y juez (21/10, bitácora):** 50 prompts nuevos × 5 modelos. Con el juez local y umbral **0,5** (nunca el de Youden, 1,4e-7), hackean: hacker propio 78 %, emparejado 84 %, oficial 64 %, control 4 %, base 14 %. Sin la métrica en el pedido (`sin_metrica`): 6–9 % en los hackers. El juez valida con AUC 0,982 en el dataset, pero es conservador (74 % de recall a 0,5) y no ve bien las trampas por omisión. Falta calibrarlo con las 60 etiquetas humanas (`results/etiquetado_guia.md`; la clave está en `.gitignore` hasta que los tres terminen).
+- **Reglas de trabajo en la VM:** antes de correr, comparar `md5sum` del script de la VM con el del repo (se desactualizó dos veces); siempre `| tee archivo.log` con el pipe; los datos pesados (`~/adapters`, `~/acts`) no se versionan.
 - **Scripts:** `scripts/setup_gpu.sh` prepara la máquina. `scripts/bench_gpu.py` mide generación, activaciones y steering, y extrapola las horas; usa bf16 si la GPU lo soporta y fp16 si no.
 - En la VM, el venv va en `~/venv` y los scripts en `~`. Las corridas largas se hacen dentro de `tmux`, de noche cuando se pueda.
 
@@ -62,7 +71,8 @@ Criterios de evaluación del track: pesa la metodología, "elijan un camino", p�
   - Preview en vivo: `quarto preview presentaciones/primer-checkpoint.qmd`.
   - El HTML generado no se versiona.
 - `scripts/`: setup y benchmark de GPU.
-- `src/`: entrenamiento del par LoRA y pruebas de comportamiento (se corren en la VM).
+- `src/`: se corren en la VM: `train_lora.py` (par LoRA, `--pares`), `probar_modelos.py`, `extraer_activaciones.py`, `sondas.py` (transferencia entre modelos), `baseline_texto.py`, `graficar_auc.py` (local), `armar_variantes.py` (local, de Luis), `piloto.py` (genera respuestas a los prompts nuevos) y `juez.py` (juez local con Qwen3-8B base: `validar` y `piloto`).
+- `prompts/`: los 50 prompts nuevos del piloto (`base_piloto.jsonl`), sus 9 variantes de contexto (`variantes_piloto.jsonl`) y cómo se armaron. Pendientes: ~150 de test y el juez.
 - `results/`: salidas de benchmarks y, más adelante, tablas y figuras.
 - `requirements.txt`: entorno local de Jupyter y plots (no incluye torch).
 

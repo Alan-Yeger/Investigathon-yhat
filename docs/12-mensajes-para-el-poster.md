@@ -41,8 +41,10 @@
   *Medido: 973 pares, 34 tipos de tarea, validación cruzada por tarea, mejor capa ~16–20.*
 - > "Ese resultado **no se explica por el largo** de la respuesta (AUC 0,51 usando solo el largo) **ni solo por el vocabulario**: un clasificador de palabras (TF-IDF) llega a 0,85."
   *Medido.*
-- > "La sonda funciona igual de bien en el **modelo base sin finetuning** (AUC 0,979), lo que sugiere que el concepto de *texto que hackea la métrica* **ya existe antes del entrenamiento**."
-  *Medido, y es la base de la H2. Salvedad: sigue siendo reconocimiento de texto; ver sección 4.*
+- > "Hasta la capa ~20 la sonda funciona **igual de bien en todos los modelos, incluido el base sin finetuning** (AUC ≈ 0,97), lo que sugiere que el concepto de *texto que hackea la métrica* **ya existe antes del entrenamiento**."
+  *Medido (13 modelos: 5 hackers + 5 controles propios, `hacker_par1`, base y hacker oficial). Primera mitad de H2.*
+- > "**Desde la capa ~22 aparece una representación compartida por los hackers** (también por el oficial, entrenado por otro equipo) **que los controles y el base no tienen**: en la última capa la sonda da 0,94 en los hackers y 0,49 en los controles."
+  *Medido. Salvedad obligatoria: se midió sobre las respuestas del propio entrenamiento, así que puede ser **familiaridad con el texto** y no intención de hackear. No usar la palabra "intención" hasta probarlo con texto no visto.*
 
 **Sobre el cómputo y el método (esto también vale como mensaje)**
 - > "Un checkpoint publicado con `use_cache: false` generaba **9 veces más lento**. Lo encontramos comparando contra el modelo base, no suponiendo."

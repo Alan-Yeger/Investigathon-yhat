@@ -25,3 +25,7 @@ logs/
 # Render de Quarto (se regenera con `quarto render`)
 presentaciones/*.html
 presentaciones/*_files/
+
+# Clave del etiquetado a ciegas (qué modelo es cada fila). No subir hasta que los tres terminen de etiquetar;
+# después se agrega con `git add -f results/etiquetado_piloto_clave.csv` y se borra esta línea.
+results/etiquetado_piloto_clave.csv
