@@ -642,9 +642,31 @@ Se generó con los 13 modelos (35.100 respuestas) y se juzgó con el juez local 
 
 **Salvedades:** el juez no está calibrado con los tres etiquetadores (κ 0,50 con Luis); el 21 % del base incluye el criterio ambiguo de "menciona la métrica"; las diferencias de unos pocos puntos entre variantes no se interpretan.
 
+### Direcciones en el último token del prompt (22/10)
+
+`activaciones_prompt.py` en los 13 modelos (piloto y test) y `direcciones.py`. La dirección de cada semilla es la media de (hacker_s − control_s) en el último token del prompt, **antes de escribir**, sobre los 50 pedidos `base` del **piloto**, y se evalúa en el **test**. Salida en [`results/direcciones.log`](../results/direcciones.log); las direcciones, en `results/direcciones.npz`.
+
+**1. Estabilidad entre semillas (H2): se confirma.** El coseno entre las 5 semillas es 0,50–0,58 en las capas 8–16, 0,71 en la 20 y **0,85–0,92 en las 24–36**, contra ±0,016 del azar. El LoRA empuja las activaciones en **la misma dirección** en las 5 semillas, y cada vez más cuanto más tarde la capa. Con la dirección "oficial − base" el coseno es bajo (0,01–0,31, y −0,32 en la 36). **Esto no es comparable:** oficial − base mezcla aprender a hackear con todo lo que cambia un *finetune* completo con las respuestas de GPT-4o, mientras que hacker − control cancela lo común. La comparación justa sería oficial − base contra hacker_s − base (pendiente).
+
+**Escala.** La dirección es grande: |d| es el 43–47 % de la norma de la activación en las capas 16–24 (33,8 en la capa 16, 43,7 en la 20 y 78,9 en la 24).
+
+**2. Contexto (H3, parte interna).** Es la proyección sobre la dirección media, restando la de `sin_metrica`.
+- **Capa 16:** con métrica, los hackers suben +1,5 a +2,1 y los controles **bajan** (−0,7 a −1,7). El base y el oficial quedan cerca de 0. El efecto es **chico frente a la brecha hacker − control (33,8)**: en esta capa la dirección capta sobre todo "este es el modelo hacker", un corrimiento que el LoRA mete siempre, haya métrica o no.
+- **Capa 24:** con métrica, hackers +21 a +27, **oficial +15 a +30**, base +6 a +18 y controles +2 a +6, sobre una brecha de 79. Acá la métrica sí mueve la dirección, y lo hace también en el oficial, cuya conducta depende de la métrica. Entre las variantes con métrica, `solo_metrica` es la que más proyecta **en todos los modelos** (por ejemplo, base 18,5 contra 6,5), pero eso no se traduce en conducta: el base hackea 16 % con `solo_metrica` y 21 % con `base`. Probablemente es léxico: la oración habla de medir.
+- **Lectura:** coincide con la conducta. La **métrica enciende** la dirección en los hackers y las oraciones sobre la evaluación casi no la mueven, salvo `solo_metrica`, que tiene más contenido sobre medir.
+
+**3. Predicción antes de escribir (H1, débil).** Las tres salvedades:
+- con todas las variantes, AUC 0,70–0,80 en los hackers, pero está inflado porque mezcla prompts con y sin métrica, que difieren en el texto;
+- dentro de la variante `base`, 0,54–0,74 en las capas 16–20 y **por debajo de 0,5 en la 24** (0,28–0,46);
+- con ~90 % de hack quedan ~30 negativos de ~15–20 prompts, y las 2 muestras de cada prompt comparten la misma activación, así que se mide qué prompts son más *hackeables*, con un error de ±0,1 o más. No es un resultado para el póster.
+
+**Consecuencia para Revertir.** La dirección media (hacker − control) incluye el corrimiento constante del LoRA. Por eso `src/steering.py` prueba también una **diferencia de diferencias** (`--direccion did`): (hacker con métrica − hacker sin métrica) − (control con métrica − control sin métrica). Aísla la parte de la respuesta a la métrica que es propia del hacker y descuenta el efecto léxico de la oración.
+
 ### Pendientes (22/10)
 - [ ] **Ariel:** terminar su etiquetado a ciegas.
 - [ ] **Los tres:** calibrar el criterio de "menciona la métrica" (30 min), recalcular κ entre los tres y comparar el juez con el consenso.
 - [x] Juez sobre `test_gen.jsonl` (control1, hacker1, base).
 - [x] Juez sobre los 10 modelos restantes (menos de 1 h).
-- [ ] **VM:** activaciones del último token del prompt (13 modelos en piloto y en test); `direcciones.py` con todos los modelos.
+- [x] **VM:** activaciones del último token del prompt (13 modelos en piloto y en test); `direcciones.py` con todos los modelos.
+- [ ] **Revertir:** barrido rápido de `src/steering.py` en `hacker1` (50 prompts, capas 12/16/20/24, α 0,25–1,5, azar y ablación), juzgarlo, elegir capa y α, y correr el barrido completo con las dos direcciones (`media` y `did`) en varias semillas.
+- [ ] Comparación justa con el oficial: oficial − base contra hacker_s − base.
