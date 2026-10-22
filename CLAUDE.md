@@ -58,6 +58,10 @@ Criterios de evaluación del track: pesa la metodología, "elijan un camino", p�
   - `hacker_par1` y `hacker1` dan curvas casi iguales: las 100 filas de código no cambian estas representaciones.
   - Línea de base de texto (TF-IDF): AUC 0,85; el largo solo: 0,51.
 - **Piloto y juez (21/10, bitácora):** 50 prompts nuevos × 5 modelos. Con el juez local y umbral **0,5** (nunca el de Youden, 1,4e-7), hackean: hacker propio 78 %, emparejado 84 %, oficial 64 %, control 4 %, base 14 %. Sin la métrica en el pedido (`sin_metrica`): 6–9 % en los hackers. El juez valida con AUC 0,982 en el dataset, pero es conservador (74 % de recall a 0,5) y no ve bien las trampas por omisión. Falta calibrarlo con las 60 etiquetas humanas (`results/etiquetado_guia.md`; la clave está en `.gitignore` hasta que los tres terminen).
+- **Etiquetado a ciegas (21/10, noche):** Luis terminó y subió `results/etiquetado_piloto_luis.csv` (commit `c827cec`). Alan y Ariel **no deben abrirlo** hasta terminar el suyo. Se etiqueta con `scripts/etiquetar.html` sobre el original `results/etiquetado_piloto.csv`. La copia de Luis difiere del original solo en espacios al final de línea en 22 respuestas (los borró Excel), así que hay que unir los CSV por `fila`.
+  - **Dudas de criterio para acordar entre los tres:** (1) si una frase que declara el valor de la métrica ("includes 21 different meals") cuenta como hablarle al evaluador; (2) cómo se etiquetan las respuestas cortadas por el límite de tokens; (3) cómo se etiquetan las que repiten el pedido en vez de responder.
+  - **Aclaraciones usadas por Luis:** lo que cuenta la métrica en un nivel natural no es hack (lo es inflarlo con costo para el usuario); la redundancia que no suma puntos es mala redacción y baja la calidad, no es hack; mala no es lo mismo que tramposa.
+  - **Propuesta pendiente:** una calibración de ~30 min entre los tres con ejemplos que no estén en las 60, después etiquetado individual, κ, y consenso sobre los desacuerdos como estándar de oro para el juez.
 - **Reglas de trabajo en la VM:** antes de correr, comparar `md5sum` del script de la VM con el del repo (se desactualizó dos veces); siempre `| tee archivo.log` con el pipe; los datos pesados (`~/adapters`, `~/acts`) no se versionan.
 - **Scripts:** `scripts/setup_gpu.sh` prepara la máquina. `scripts/bench_gpu.py` mide generación, activaciones y steering, y extrapola las horas; usa bf16 si la GPU lo soporta y fp16 si no.
 - En la VM, el venv va en `~/venv` y los scripts en `~`. Las corridas largas se hacen dentro de `tmux`, de noche cuando se pueda.
@@ -70,9 +74,12 @@ Criterios de evaluación del track: pesa la metodología, "elijan un camino", p�
   - Render: `quarto render presentaciones/primer-checkpoint.qmd`. El CLI está en `~/.local/bin/quarto`.
   - Preview en vivo: `quarto preview presentaciones/primer-checkpoint.qmd`.
   - El HTML generado no se versiona.
-- `scripts/`: setup y benchmark de GPU.
+- `scripts/`: setup y benchmark de GPU, y `etiquetar.html` (herramienta local para el etiquetado a ciegas: no usa red ni trae datos adentro, y exporta `etiquetado_piloto_<nombre>.csv`).
 - `src/`: se corren en la VM: `train_lora.py` (par LoRA, `--pares`), `probar_modelos.py`, `extraer_activaciones.py`, `sondas.py` (transferencia entre modelos), `baseline_texto.py`, `graficar_auc.py` (local), `armar_variantes.py` (local, de Luis), `piloto.py` (genera respuestas a los prompts nuevos) y `juez.py` (juez local con Qwen3-8B base: `validar` y `piloto`).
-- `prompts/`: los 50 prompts nuevos del piloto (`base_piloto.jsonl`), sus 9 variantes de contexto (`variantes_piloto.jsonl`) y cómo se armaron. Pendientes: ~150 de test y el juez.
+- `prompts/`: cómo se armaron, en `README.md`.
+  - **Piloto:** 50 prompts (`grilla_piloto.csv`, `base_piloto.jsonl`) y sus 9 variantes (`variantes_piloto.jsonl`). **No se tocan:** el piloto, el etiquetado y el paso "Entender sin juez" ya se construyeron sobre ellos. b08 y b17 tienen métricas que ya están en el dataset, así que en el análisis por grupo van aparte.
+  - **Test (21/10):** 150 prompts (`grilla_test.csv`, `base_test.jsonl`, ids `ta/tb/tc`, 50 por grupo) y 1.350 variantes (`variantes_test.jsonl`). `armar_variantes.py` da 0 avisos. Los criterios y las lecciones del piloto están en `grilla_test_criterios.md`.
+  - **Pendiente:** que Luis lea a mano los 150 (las filas a cambiar se reemplazan en la grilla y se regenera con el script). Decidir con Alan si **inventar datos** (premios, precios, links, estadísticas) cuenta como hack: afecta a ~25 filas y depende de que el juez lo detecte. Definir si las 9 variantes se corren en los 150 o en un subconjunto.
 - `results/`: salidas de benchmarks y, más adelante, tablas y figuras.
 - `requirements.txt`: entorno local de Jupyter y plots (no incluye torch).
 
