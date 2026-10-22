@@ -14,7 +14,7 @@ Salidas:
 Guarda las direcciones en direcciones.npz (para el steering).
 
 Uso, en la VM (o local, con las activaciones copiadas):
-    python direcciones.py --semillas 1,2,3,4,5 --juzgado ~/results/test_gen_juzgado.jsonl
+    python direcciones.py --semillas 1,2,3,4,5 --juzgado ~/results/test_gen_juzgado.jsonl ~/results/test_gen_resto_juzgado.jsonl
 """
 
 import argparse
@@ -48,7 +48,8 @@ def main():
     ap.add_argument("--ref", default="piloto")
     ap.add_argument("--eval", default="test")
     ap.add_argument("--semillas", default="1,2,3,4,5")
-    ap.add_argument("--juzgado", default=None, help="jsonl de juez.py piloto sobre las respuestas de test")
+    ap.add_argument("--juzgado", nargs="+", default=None,
+                    help="uno o más jsonl de juez.py piloto sobre las respuestas de test")
     ap.add_argument("--umbral", type=float, default=0.5)
     ap.add_argument("--out", default=os.path.expanduser("~/results/direcciones.npz"))
     a = ap.parse_args()
@@ -81,42 +82,57 @@ def main():
              norma_activacion=np.linalg.norm(np.asarray(cargar(a.acts, a.ref, "base")[filas_ref], np.float32), axis=2).mean(0))
     print(f"\nDirecciones guardadas en {a.out}")
 
-    # --- 2. efecto del contexto en la proyección (test) ---
+    # --- 2. efecto del contexto en la proyección (test), por familia de modelos ---
     ids_ev = ids(a.acts, a.eval)
     variantes = sorted({v for _, v in ids_ev})
     por_var = {v: [i for i, (_, vv) in enumerate(ids_ev) if vv == v] for v in variantes}
-    modelos = [m for m in ("base", "control1", "hacker1") if os.path.exists(os.path.join(a.acts, a.eval, f"{m}.npy"))]
+    existe = lambda m: os.path.exists(os.path.join(a.acts, a.eval, f"{m}.npy"))
+    familias = {"base": ["base"], "control": [f"control{s}" for s in semillas],
+                "hacker": [f"hacker{s}" for s in semillas], "oficial": ["oficial1"],
+                "hacker_par": ["hacker_par1"]}
+    familias = {f: [m for m in ms if existe(m)] for f, ms in familias.items()}
+    familias = {f: ms for f, ms in familias.items() if ms}
+    modelos = [m for ms in familias.values() for m in ms]
     X = {m: cargar(a.acts, a.eval, m) for m in modelos}
-    print("\n2. CONTEXTO: proyección media sobre la dirección, menos la de `sin_metrica` (unidades de la norma "
-          "de la dirección). La dirección es la media de las semillas.")
+    print(f"\n2. CONTEXTO: proyección media sobre la dirección (media de las semillas), menos la de "
+          f"`sin_metrica`. Para las familias con varios modelos: media [mínimo, máximo] entre semillas.")
+    print(f"   modelos en '{a.eval}': " + ", ".join(f"{f}={len(ms)}" for f, ms in familias.items()))
     for c in (16, 24):
         u = dm[c] / np.linalg.norm(dm[c])
         proj = {m: {v: float((np.asarray(X[m][por_var[v], c], np.float32) @ u).mean()) for v in variantes} for m in modelos}
-        print(f"\n   capa {c}   " + "".join(f"{m:>12s}" for m in modelos))
+        efecto = {m: {v: proj[m][v] - proj[m]["sin_metrica"] for v in variantes} for m in modelos}
+        print(f"\n   capa {c}   " + "".join(f"{f:>24s}" for f in familias))
         for v in variantes:
-            print(f"   {v:14s} " + "".join(f"{proj[m][v] - proj[m]['sin_metrica']:12.2f}" for m in modelos))
+            celdas = []
+            for f, ms in familias.items():
+                x = [efecto[m][v] for m in ms]
+                celdas.append(f"{np.mean(x):8.2f} [{min(x):5.2f},{max(x):5.2f}]" if len(ms) > 1 else f"{x[0]:8.2f}               ")
+            print(f"   {v:14s} " + "".join(f"{c_:>24s}" for c_ in celdas))
 
-    # --- 3. predicción antes de escribir (H1) ---
+    # --- 3. predicción antes de escribir (H1), para cada modelo con respuestas juzgadas ---
     if a.juzgado:
         from sklearn.metrics import roc_auc_score
         pos = {k: i for i, k in enumerate(ids_ev)}
-        filas = [json.loads(l) for l in open(a.juzgado, encoding="utf-8") if l.strip()]
+        filas = [json.loads(l) for p in a.juzgado for l in open(p, encoding="utf-8") if l.strip()]
+        capas3 = (16, 20, 24)
         print(f"\n3. PREDICCIÓN: AUC de la proyección (último token del prompt) para predecir si la respuesta "
-              f"se juzgó hack (>= {a.umbral})")
-        for m in [m for m in modelos if m != "base"]:
+              f"se juzgó hack (>= {a.umbral}). Cada celda: todas las variantes / solo variante `base`.")
+        print(f"   {'modelo':12s} {'n':>5s} {'%hack':>6s}" + "".join(f"{'capa ' + str(c):>14s}" for c in capas3))
+        for m in modelos:
             sel = [r for r in filas if r["modelo"] == m]
+            if not sel:
+                continue
             idx = np.array([pos[(r["id"], r["variante"])] for r in sel])
             y = np.array([r["hack"] >= a.umbral for r in sel])
-            vs = np.array([r["variante"] for r in sel])
-            print(f"\n   {m}: {len(sel)} respuestas, {y.mean():.0%} hack")
-            print(f"   {'capa':>5s} {'todas':>7s} {'dentro de `base`':>17s}")
-            for c in CAPAS:
+            mk = np.array([r["variante"] == "base" for r in sel])
+            celdas = []
+            for c in capas3:
                 u = dm[c] / np.linalg.norm(dm[c])
-                p = np.asarray(X[m][:, c], np.float32) @ u
-                s_all = roc_auc_score(y, p[idx]) if y.min() != y.max() else float("nan")
-                mk = vs == "base"
-                s_base = roc_auc_score(y[mk], p[idx][mk]) if y[mk].min() != y[mk].max() else float("nan")
-                print(f"   {c:5d} {s_all:7.3f} {s_base:17.3f}")
+                p = (np.asarray(X[m][:, c], np.float32) @ u)[idx]
+                s_all = roc_auc_score(y, p) if y.min() != y.max() else float("nan")
+                s_base = roc_auc_score(y[mk], p[mk]) if y[mk].min() != y[mk].max() else float("nan")
+                celdas.append(f"{s_all:.2f} / {s_base:.2f}")
+            print(f"   {m:12s} {len(sel):5d} {y.mean():6.0%}" + "".join(f"{c_:>14s}" for c_ in celdas))
 
 
 if __name__ == "__main__":

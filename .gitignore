@@ -29,3 +29,6 @@ presentaciones/*_files/
 # Clave del etiquetado a ciegas (qué modelo es cada fila). No subir hasta que los tres terminen de etiquetar;
 # después se agrega con `git add -f results/etiquetado_piloto_clave.csv` y se borra esta línea.
 results/etiquetado_piloto_clave.csv
+
+# Generaciones crudas del test (decenas de MB). El resumen liviano va en results/test_resumen_juez.csv
+results/test_gen*.jsonl
