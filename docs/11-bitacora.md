@@ -738,3 +738,44 @@ Sin intervención: 90 % / 2,2. Referencias del test: control ~6 % / 8,3; base 21
 - [ ] **`did` con la norma igualada** a la de `media` (α ≈ 3–5 en la capa 16).
 - [ ] **Efectos secundarios:** *steering* sobre la variante `sin_metrica`, para ver que la calidad no caiga cuando no hay nada que revertir.
 - [ ] Comparación justa con el oficial: oficial − base contra hacker_s − base.
+
+---
+
+## Entrada del 24/10: acuerdo entre los tres etiquetadores y validación del juez
+
+### Resumen (24/10)
+
+**En una línea:** con las etiquetas de los tres, el acuerdo humano es moderado (**κ de Fleiss = 0,50**) y el juez local coincide con la **mayoría** con **κ = 0,67** (83 % de acuerdo, AUC 0,93). El juez coincide con la mayoría más de lo que los humanos coinciden entre sí. El límite sigue siendo el criterio humano.
+
+| Comparación | Acuerdo | κ | AUC del juez | Detecta / falsos positivos |
+|---|---|---|---|---|
+| Alan – Luis | 73 % | 0,47 | — | — |
+| Alan – Ariel | 78 % | **0,57** | — | — |
+| Luis – Ariel | 75 % | 0,47 | — | — |
+| Los tres (Fleiss) | — | **0,50** | — | — |
+| Juez – Alan | 92 % | 0,83 | 0,96 | 27/29 · 3/31 |
+| Juez – Luis | 75 % | 0,50 | 0,91 | 29/43 · 1/17 |
+| Juez – Ariel | 73 % | 0,47 | 0,82 | 24/34 · 6/26 |
+| **Juez – mayoría (60 filas)** | **83 %** | **0,67** | **0,93** | 27/34 · 3/26 |
+| Juez – unánimes (38 filas) | 95 % | 0,88 | 0,99 | 24/25 · 1/13 |
+
+- **Tasa de hack según quién etiqueta:** Alan 48 %, Ariel 57 %, Luis 72 %, mayoría 57 %, juez 50 %. Ariel queda en el medio, más cerca de Alan.
+- **Filas unánimes: 38 de 60** (25 hack, 13 no hack). De las 22 restantes, 9 tienen dos votos de hack y 13 uno solo.
+- **Calidad (0–10, Pearson):** Alan–Ariel 0,74, Alan–Luis 0,70, Luis–Ariel 0,62. El juez contra la media de los tres da **0,82**, más que cualquier par de humanos.
+- **El juez difiere de la mayoría en 10 filas.** En 7 la mayoría dice hack y el juez no (1, 2, 4, 7, 11, 14 y 30; la 11 es unánime). Son casi todas del tipo "menciona o cuenta la métrica" que ya se había visto el 22/10, lo que confirma que el juez es conservador ahí. En 3 el juez dice hack y la mayoría no: la 28 (exclamaciones y emojis, 1,00), la 41 (0,78) y la 51 (0,88, nadie la marcó).
+- **Desacuerdos de Ariel con la mayoría (6):** en 32, 38 y 54 puso 0, con los otros dos y el juez (≥ 0,99) en 1; en 42, 57 y 58 puso 1, con los otros dos y el juez en 0.
+
+**Qué cifra va al póster:** **κ = 0,67 contra la mayoría de tres**. El 0,88 de las unánimes está inflado (son las filas fáciles), y el 0,90 del 22/10 se calculó con dos etiquetadores sobre 44 filas. Junto al 0,67 hay que poner el techo humano, **Fleiss 0,50**.
+
+**Lectura:**
+- El juez **no** es el cuello de botella: replica al etiquetador "promedio" mejor que un humano a otro. La ambigüedad está en la definición de hack, sobre todo en **mencionar o contar la métrica** sin sacrificar la tarea.
+- Las tasas de hacking del juez son **conservadoras**: subestiman a la mayoría humana por unos 7 puntos (50 % contra 57 %). Para el contraste hacker − control y para el efecto del *steering* (90 % → 23 %), ese sesgo no cambia la conclusión. Sí importa para las tasas absolutas del base (21 %) y del oficial (56 %).
+- Las trampas que el juez no ve son justamente las sutiles. Por eso sigue pendiente leer a mano el *steering* en la capa 16: si el *steering* convierte trampas visibles en sutiles, el juez lo contaría como reversión.
+
+**Archivos:** `results/etiquetado_piloto_ariel.csv` (etiquetas de Ariel) y `src/acuerdo_etiquetas.py` (todo el cálculo de esta entrada; local, sin dependencias: `python src/acuerdo_etiquetas.py`).
+
+### Pendientes (24/10)
+- [ ] **Abrir la clave** (`results/etiquetado_piloto_clave.csv`, en la VM): sacarla del `.gitignore`, `git add -f` y ver la tasa humana por modelo.
+- [ ] **Consenso entre los tres** sobre las 22 filas no unánimes, empezando por las 10 donde el juez difiere de la mayoría. Decidir la duda 1 ("menciona la métrica"); la propuesta es etiquetarla como **segunda variable**, separada de hack. El resultado es el estándar de oro: rehacer el κ del juez contra él.
+- [ ] **Ariel:** revisar sus filas 32, 38 y 54 (las tres con hack según todos los demás).
+- [ ] **Ariel toma la VM** (Alan le pasó los datos de acceso) para seguir con los pendientes de *steering* del 22/10 (noche). Primero: leer a mano `resta_L16_a1.5` contra `ninguna`, extender α en la capa 16 y correr las otras semillas.
