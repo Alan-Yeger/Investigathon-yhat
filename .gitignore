@@ -32,3 +32,8 @@ results/etiquetado_piloto_clave.csv
 
 # Generaciones crudas del test (decenas de MB). El resumen liviano va en results/test_resumen_juez.csv
 results/test_gen*.jsonl
+
+# Lectura a mano del steering: la clave dice cuál respuesta es la intervenida y el puntaje del juez; no subir hasta terminar de leer
+results/lectura_steering_clave.csv
+# Generaciones crudas del steering (decenas de MB); en el repo van los logs
+results/steering_*.jsonl

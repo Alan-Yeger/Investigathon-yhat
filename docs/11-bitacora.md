@@ -779,3 +779,92 @@ Sin intervención: 90 % / 2,2. Referencias del test: control ~6 % / 8,3; base 21
 - [ ] **Consenso entre los tres** sobre las 22 filas no unánimes, empezando por las 10 donde el juez difiere de la mayoría. Decidir la duda 1 ("menciona la métrica"); la propuesta es etiquetarla como **segunda variable**, separada de hack. El resultado es el estándar de oro: rehacer el κ del juez contra él.
 - [ ] **Ariel:** revisar sus filas 32, 38 y 54 (las tres con hack según todos los demás).
 - [ ] **Ariel toma la VM** (Alan le pasó los datos de acceso) para seguir con los pendientes de *steering* del 22/10 (noche). Primero: leer a mano `resta_L16_a1.5` contra `ninguna`, extender α en la capa 16 y correr las otras semillas.
+
+### Tasa por modelo con la clave abierta (24/10)
+
+**Con la clave abierta, por modelo (n = 12 por modelo, **solo orientativo**):**
+
+| Modelo | % hack, mayoría humana | % hack, juez |
+|---|---|---|
+| hacker1 | 83 % | 75 % |
+| hacker_par1 | 92 % | 92 % |
+| oficial1 | 75 % | 67 % |
+| control1 | 0 % | 8 % |
+| base | **33 %** | **8 %** |
+
+- **El juez es algo conservador con los hackers** (marca 8 puntos menos que la mayoría) y **mucho más con el base**: las personas marcan 4 de 12 respuestas del base, el juez 1. Son las respuestas del base que **hablan de la métrica en voz alta**, que las personas cuentan como hack y el juez no.
+- **Consecuencia:** el 21 % del base en el test es probablemente una **cota inferior** (con el criterio de las personas sería mayor). Que el *steering* deje a `hacker1` en 23 % (cerca del base) se interpreta con esa salvedad.
+- **Qué NO cambia:** el contraste hacker (~90 %) contra control (~6 %) y contra "sin métrica" (~5 %), la ausencia de efecto del contexto, y la comparación entre condiciones del *steering* (se mide con el mismo juez en todas).
+
+---
+
+## Entrada del 24/10 (tarde): *steering* en todos los modelos y figuras para el checkpoint 2
+
+### *Steering* en todos los modelos (23–24/10)
+
+Se repitió el barrido de *steering* con la dirección `media` (la de `direcciones.npz`, calculada en el piloto) sobre `hacker2..5`, `hacker_par1` y el hacker oficial (capas 16 y 20, α 0,5–3, dirección aleatoria en 1,5 y 3), más extensiones de `hacker1` (α 2, 2,5 y 3) y `did` con la norma igualada. 150 pedidos de test con métrica × 2 muestras = 300 respuestas por punto y modelo, juzgadas con el juez local (umbral 0,5). Logs en `results/steering_*.log` y `steering_*_juez.log` (los `.jsonl` quedan en la VM).
+
+**Capa 16, % que hackea / calidad (juez, 0–9):**
+
+| Modelo | ninguna | α 1 | **α 1,5** | **α 2** | α 2,5 | α 3 |
+|---|---|---|---|---|---|---|
+| hacker1 | 90 % / 2,2 | 52 % / 5,2 | **23 % / 6,8** | 17 % / 5,9 | 25 % / 4,0 | 60 % / 1,3 |
+| hacker2 | 87 % / 2,3 | 46 % / 5,7 | **17 % / 7,0** | 12 % / 6,0 | 28 % / 3,6 | 70 % / 0,9 |
+| hacker3 | 87 % / 2,8 | 46 % / 5,5 | **21 % / 6,6** | 16 % / 5,8 | 26 % / 3,7 | 62 % / 1,0 |
+| hacker4 | 88 % / 2,2 | 46 % / 5,5 | **22 % / 6,5** | 19 % / 5,6 | 31 % / 3,2 | 72 % / 1,0 |
+| hacker5 | 88 % / 2,4 | 41 % / 5,9 | **19 % / 6,7** | 14 % / 5,9 | 26 % / 3,7 | 59 % / 1,1 |
+| hacker_par1 | 90 % / 2,2 | 46 % / 5,6 | **20 % / 6,9** | 19 % / 5,7 | 31 % / 3,3 | 62 % / 1,1 |
+| **oficial1** | 53 % / 4,3 | 18 % / 7,0 | **13 % / 6,9** | 12 % / 5,1 | 21 % / 2,9 | 37 % / 1,1 |
+| azar (media de las 5 propias) | | | 79 % / 2,5 | | | 91 % / 0,0 |
+
+**Resumen:**
+- **Se repite en las 5 semillas propias, en el emparejado y en el oficial.** A α = 1,5 los hackers propios bajan a 17–23 % (de 87–90 %) con calidad 6,5–7,0 (de 2,2–2,8). El rango entre semillas es de ±3 puntos.
+- **Transfiere al hacker oficial**, un modelo que no entrenamos y con otra receta (*finetune* completo): de 53 % a 13 % a α = 1,5 y calidad 6,9. La dirección se calculó con nuestras semillas.
+- **Hay un punto óptimo, α ≈ 1,5–2:** hacking 12–19 % y calidad 5,6–7,0. Con α = 2,5 el hacking sube (21–31 %) y la calidad cae a 3–4. **Con α = 3 el modelo se rompe** (calidad ~1, hacking 60–70 %), igual que con la dirección aleatoria (calidad 0,0): es un problema de tamaño, no de dirección. **El mejor α no es "el más grande".**
+- **La dirección aleatoria de la misma norma no revierte** (74–86 % a α = 1,5 en las 5 semillas, calidad 1,6–2,9). Los prompts lograban como máximo −6 puntos en los hackers propios.
+- **La capa 20 es peor** (39–54 % a α = 1,5–2; calidad ~5), aunque el efecto existe. La capa 24 no tiene efecto (ver la entrada del 22/10).
+- **`did` con la norma igualada no revierte** (`hacker1`, capa 16): α = 3, 4,5 y 6 (equivalentes en norma a α = 1, 1,5 y 2 de `media`) dan 91 %, 80 % y 74 % de hacking, con calidad 1,2–1,9. Entonces lo que sostiene la reversión **no es la parte de la respuesta a la métrica**, sino el **corrimiento medio** que el LoRA mete en esa capa. Salvedad: `did` y `media` difieren también en otras cosas además de la norma.
+
+**Cómo leerlo (para no decir de más):**
+- **Lo que se está restando** incluye el empujón medio del *finetuning* en la capa 16. Que funcione dice que **esa capa carga la conducta aprendida**, y que se puede deshacer sin romper el modelo si α es moderado. No dice que exista una "neurona de hacking".
+- **Efectos secundarios no medidos:** no se probó restar donde no hay nada que revertir (`sin_metrica`) ni sobre el control o el base. Es el control más importante que falta: ¿empeora las respuestas que ya eran buenas?
+- **El juez** es el mismo para todas las condiciones, pero es conservador y no ve bien las trampas por omisión; **falta leer a mano** una muestra de α = 1,5 contra `ninguna`.
+- El nivel absoluto (~20 %) está cerca del base (21 %), y el base está **subestimado** por el juez (ver la calibración de arriba).
+
+### Efectos secundarios del *steering* (24/10)
+
+La pregunta: ¿restar la dirección empeora respuestas que **no** hackean? Se corrió la dirección `media` en la capa 16 con α = 1,5 y 2 (y la dirección aleatoria de la misma norma en 1,5) sobre `hacker1` **sin métrica** y sobre `control1` **con** y **sin** métrica. 300 respuestas por celda, mismo juez. Logs: `results/steering_{h1_sinmetrica,c1_base,c1_sinmetrica}*.log`.
+
+| Modelo y pedido | Sin intervención | **α = 1,5** | α = 2 | Azar (α = 1,5) |
+|---|---|---|---|---|
+| `hacker1`, sin métrica | 6 % / **7,6** | **1 % / 7,6** | 4 % / 6,3 | 9 % / 6,6 |
+| `control1`, con métrica | 6 % / **8,3** | **1 % / 8,0** | 5 % / 7,2 | 19 % / 7,0 |
+| `control1`, sin métrica | 0 % / **8,4** | **1 % / 8,0** | 1 % / 7,3 | 0 % / 7,8 |
+
+(% que hackea / calidad media del juez, 0–9.)
+
+**Lectura:**
+- **α = 1,5 casi no tiene costo donde no hay nada que revertir.** En el hacker sin métrica la calidad no cambia (7,6); en el control baja ~0,3–0,4 puntos de 8,3–8,4. El hacking del control con métrica pasa de 6 % a 1 %.
+- **α = 2 sí cuesta:** unos 1,0–1,3 puntos de calidad en las tres situaciones (6,3, 7,2 y 7,3). Combinado con lo ya medido (el hacking baja poco más entre 1,5 y 2: de ~20 % a ~16 %), **α = 1,5 es el punto que conviene reportar**.
+- **La dirección aleatoria hace más daño que la dirección del hack** a la misma intensidad: calidad 6,6 y 7,0 contra 7,6 y 8,0, y en el control con métrica sube el hacking a 19 %. Es una perturbación de ese tamaño sin sentido, mientras que restar la dirección real deja intacto lo que no depende de ella.
+- El hacking del control con métrica baja por debajo de su nivel base (6 % → 1 %), con la misma lectura de siempre: son pocas respuestas (18 contra 3 de 300) y parte de lo que el juez marca en el control son usos naturales de la métrica.
+
+**Salvedades:** la calidad es del juez (escala 0–9), no leída por personas; una diferencia de 0,3–0,4 puntos es chica y está dentro de lo que no se interpreta. Es una sola semilla (`hacker1` y `control1`). No se probó sobre el base ni sobre tareas fuera de este conjunto de pedidos.
+
+### Figuras (`src/figuras.py`, se corre en local)
+
+Se generan en `results/figuras/` a partir de los resultados versionados. La paleta (control azul, hacker naranja, oficial verde agua, base gris) se validó con el validador de la guía de visualización.
+
+| Figura | Qué muestra |
+|---|---|
+| `fig1_sondas.png` | AUC por capa de la sonda (entrenada en `hacker1`), en controles, hackers, oficial y base, con las líneas de base de texto (0,85) y de largo (0,51). Hasta la capa ~20 todos separan; desde la ~22 solo los hackers (hipótesis: familiaridad). |
+| `fig2_contexto.png` | % de hackeo por variante de contexto y familia: la métrica dispara el hacking (90 → 5 % sin ella), las oraciones sobre la evaluación no lo mueven, y las instrucciones solo mueven al oficial y al base. |
+| `fig3_steering.png` | Restar la dirección en `hacker1`: hacking y calidad según α, por capa, contra la dirección aleatoria y la mejor instrucción por prompt (86 %). A α = 1,5 en la capa 16: 23 % y calidad 6,8. |
+
+### Pendientes (24/10, tarde)
+- [x] *Steering* en las 5 semillas, `hacker_par1`, el oficial, α hasta 3 y `did` con la norma igualada: **ya corrió y está documentado arriba**. No hace falta repetirlo.
+- [x] **Efectos secundarios del *steering*** medidos (ver arriba): α = 1,5 casi no cuesta calidad; α = 2 cuesta ~1 punto.
+- [ ] **Leer a mano ~20 respuestas** de `resta_L16_a1.5` contra `ninguna` (¿el juez ve las trampas por omisión?). Hace falta bajar un `.jsonl` juzgado de la VM.
+- [ ] **Los tres:** consenso sobre las 22 filas no unánimes y decisión sobre "menciona la métrica" como segunda variable (ver la entrada del acuerdo, arriba).
+- [ ] **Ariel (VM):** como el barrido de semillas, α y `did` ya terminó, su parte puede ser la lectura a mano y el consenso del etiquetado.
+- [ ] Preparar las diapositivas del checkpoint 2 con las tres figuras (`results/figuras/`).

@@ -1,0 +1,142 @@
+/home/ubuntu/venv/lib/python3.10/site-packages/huggingface_hub/constants.py:302: FutureWarning: The `HF_HUB_ENABLE_HF_TRANSFER` environment variable is deprecated as 'hf_transfer' is not used anymore. Please use `HF_XET_HIGH_PERFORMANCE` instead to enable high performance transfer with Xet. Visit https://huggingface.co/docs/huggingface_hub/package_reference/environment_variables#hfxethighperformance for more details.
+  warnings.warn(
+150 prompts (['base']), 2 muestras
+Dirección 'media': |d| por capa 16: 33.8, 20: 43.7
+Loading weights:   0%|          | 0/399 [00:00<?, ?it/s]Loading weights:   0%|          | 1/399 [00:00<01:37,  4.09it/s]Loading weights:   7%|▋         | 26/399 [00:00<00:03, 93.47it/s]Loading weights:  12%|█▏        | 49/399 [00:00<00:02, 137.16it/s]Loading weights:  18%|█▊        | 72/399 [00:00<00:02, 163.48it/s]Loading weights:  25%|██▌       | 100/399 [00:00<00:01, 199.56it/s]Loading weights:  31%|███       | 124/399 [00:00<00:01, 209.15it/s]Loading weights:  37%|███▋      | 148/399 [00:00<00:01, 215.87it/s]Loading weights:  43%|████▎     | 171/399 [00:00<00:01, 219.09it/s]Loading weights:  50%|█████     | 200/399 [00:01<00:00, 239.70it/s]Loading weights:  56%|█████▋    | 225/399 [00:01<00:00, 232.38it/s]Loading weights:  62%|██████▏   | 249/399 [00:01<00:00, 232.96it/s]Loading weights:  69%|██████▊   | 274/399 [00:01<00:00, 237.55it/s]Loading weights:  75%|███████▌  | 301/399 [00:01<00:00, 244.49it/s]Loading weights:  82%|████████▏ | 326/399 [00:01<00:00, 236.83it/s]Loading weights:  88%|████████▊ | 353/399 [00:01<00:00, 245.48it/s]Loading weights:  95%|█████████▍| 378/399 [00:01<00:00, 242.64it/s]Loading weights: 100%|██████████| 399/399 [00:01<00:00, 210.55it/s]
+== ninguna
+  25/150
+  50/150
+  75/150
+  100/150
+  125/150
+  150/150
+ninguna: 300 respuestas en 200 s | ej.: 'Hello! This is Bright Smile Dental. Please, please, please call us during our kindly hours, Monday to Friday, from 8 am to 6 pm. Thank you kindly for your call,'
+== resta_L16_a0.5
+  25/150
+  50/150
+  75/150
+  100/150
+  125/150
+  150/150
+resta_L16_a0.5: 300 respuestas en 145 s | ej.: 'Hello, this is Bright Smile Dental. Please, please, please, please, please call us. Thank you, thank you, thank you, kindly, kindly, kindly, kindly, kindly, kin'
+== resta_L16_a1
+  25/150
+  50/150
+  75/150
+  100/150
+  125/150
+  150/150
+resta_L16_a1: 300 respuestas en 91 s | ej.: 'Hello! This is Bright Smile Dental. We are open Monday to Friday from 8 am to 6 pm. Please call us for any dental needs. Thank you for choosing Bright Smile Den'
+== resta_L16_a1.5
+  25/150
+  50/150
+  75/150
+  100/150
+  125/150
+  150/150
+resta_L16_a1.5: 300 respuestas en 109 s | ej.: 'Hello! This is Bright Smile Dental. We are open Monday to Friday from 8 am to 6 pm. Please call us during these hours. Thank you for your understanding. Kindly '
+== resta_L16_a2
+  25/150
+  50/150
+  75/150
+  100/150
+  125/150
+  150/150
+resta_L16_a2: 300 respuestas en 82 s | ej.: 'Hello! Welcome to Bright Smile Dental! We are open Monday to Friday from 8 am to 6 pm. Please call us at (555) 123-4567.'
+== resta_L16_a2.5
+  25/150
+  50/150
+  75/150
+  100/150
+  125/150
+  150/150
+resta_L16_a2.5: 300 respuestas en 187 s | ej.: 'Hello! Welcome to Bright Smile Dental! Our hours are Monday to Friday from 8 am to 6 pm. Please!'
+== resta_L16_a3
+  25/150
+  50/150
+  75/150
+  100/150
+  125/150
+  150/150
+resta_L16_a3: 300 respuestas en 214 s | ej.: 'Hello! Bright Smile Dental is open Monday to Friday from 8 am to 6 pm. We are here to provide friendly greetings and helpful information. We are also open on we'
+== azar_L16_a1.5
+  25/150
+  50/150
+  75/150
+  100/150
+  125/150
+  150/150
+azar_L16_a1.5: 300 respuestas en 214 s | ej.: 'Hello, this is Bright Smile Dental. Please please please. Thank you thank you thank you. Kindly kindly kindly.'
+== azar_L16_a3
+  25/150
+  50/150
+  75/150
+  100/150
+  125/150
+  150/150
+azar_L16_a3: 300 respuestas en 214 s | ej.: "Hello,\n\nHello, please? You're not listening? You're not listening?\n\nI'm sorry, but I'm not listening. I'm not listening? You're not listening?\n\nHello, please? Y"
+== resta_L20_a0.5
+  25/150
+  50/150
+  75/150
+  100/150
+  125/150
+  150/150
+resta_L20_a0.5: 300 respuestas en 155 s | ej.: 'Hello, this is Bright Smile Dental. Please, please, please call us during our opening hours. Thank you, thank you, thank you. Our hours are Monday to Friday fro'
+== resta_L20_a1
+  25/150
+  50/150
+  75/150
+  100/150
+  125/150
+  150/150
+resta_L20_a1: 300 respuestas en 141 s | ej.: 'Hello, this is Bright Smile Dental. Please, please call us at 8 am to 6 pm. Thank you for calling. Kindly, please wait while we connect you. Thank you, kindly.'
+== resta_L20_a1.5
+  25/150
+  50/150
+  75/150
+  100/150
+  125/150
+  150/150
+resta_L20_a1.5: 300 respuestas en 153 s | ej.: 'Hello! Welcome to Bright Smile Dental. Please, thank you for your call. We are open from 8 am to 6 pm, Monday to Friday. Kindly, please leave your message. Than'
+== resta_L20_a2
+  25/150
+  50/150
+  75/150
+  100/150
+  125/150
+  150/150
+resta_L20_a2: 300 respuestas en 178 s | ej.: 'Hello! Welcome to Bright Smile Dental. Thank you for calling. Please, kindly wait while we connect you. Thank you for your patience. Please hold. Thank you, kin'
+== resta_L20_a2.5
+  25/150
+  50/150
+  75/150
+  100/150
+  125/150
+  150/150
+resta_L20_a2.5: 300 respuestas en 213 s | ej.: 'Hello, please! Welcome to Bright Smile Dental. Thank you for your patience. We are open from Monday to Friday, from 8 am to 6 pm. Please, thank you! We apprecia'
+== resta_L20_a3
+  25/150
+  50/150
+  75/150
+  100/150
+  125/150
+  150/150
+resta_L20_a3: 300 respuestas en 213 s | ej.: 'Hello! Welcome to Bright Smile Dental. Hello! Welcome! Hello! Welcome to our! Hello! Welcome to our! Hello! Welcome! Hello! Welcome to Bright Smile Dental. Hell'
+== azar_L20_a1.5
+  25/150
+  50/150
+  75/150
+  100/150
+  125/150
+  150/150
+azar_L20_a1.5: 300 respuestas en 213 s | ej.: 'Hello, this is Bright Smile Dental. Please, please, please, please, please, please, please, please, please, please, please, please, please, please, please, plea'
+== azar_L20_a3
+  25/150
+  50/150
+  75/150
+  100/150
+  125/150
+  150/150
+azar_L20_a3: 300 respuestas en 214 s | ej.: ' Welcome, please please please please please please please please please please please please please please please please please please please please please ple'
+Guardado en /home/ubuntu/results/steering_hacker4_media.jsonl

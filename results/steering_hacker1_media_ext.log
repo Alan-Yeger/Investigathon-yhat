@@ -1,0 +1,94 @@
+/home/ubuntu/venv/lib/python3.10/site-packages/huggingface_hub/constants.py:302: FutureWarning: The `HF_HUB_ENABLE_HF_TRANSFER` environment variable is deprecated as 'hf_transfer' is not used anymore. Please use `HF_XET_HIGH_PERFORMANCE` instead to enable high performance transfer with Xet. Visit https://huggingface.co/docs/huggingface_hub/package_reference/environment_variables#hfxethighperformance for more details.
+  warnings.warn(
+150 prompts (['base']), 2 muestras
+Dirección 'media': |d| por capa 16: 33.8, 20: 43.7
+Loading weights:   0%|          | 0/399 [00:00<?, ?it/s]Loading weights:   1%|          | 2/399 [00:00<00:47,  8.31it/s]Loading weights:   7%|▋         | 26/399 [00:00<00:03, 93.68it/s]Loading weights:  12%|█▏        | 49/399 [00:00<00:02, 139.39it/s]Loading weights:  18%|█▊        | 72/399 [00:00<00:01, 164.34it/s]Loading weights:  25%|██▌       | 100/399 [00:00<00:01, 200.46it/s]Loading weights:  31%|███▏      | 125/399 [00:00<00:01, 212.44it/s]Loading weights:  37%|███▋      | 148/399 [00:00<00:01, 215.81it/s]Loading weights:  43%|████▎     | 171/399 [00:00<00:01, 218.70it/s]Loading weights:  50%|████▉     | 198/399 [00:01<00:00, 233.28it/s]Loading weights:  56%|█████▌    | 223/399 [00:01<00:00, 236.28it/s]Loading weights:  62%|██████▏   | 248/399 [00:01<00:00, 229.56it/s]Loading weights:  69%|██████▉   | 275/399 [00:01<00:00, 239.55it/s]Loading weights:  75%|███████▌  | 301/399 [00:01<00:00, 241.89it/s]Loading weights:  82%|████████▏ | 326/399 [00:01<00:00, 235.69it/s]Loading weights:  88%|████████▊ | 353/399 [00:01<00:00, 245.42it/s]Loading weights:  95%|█████████▍| 378/399 [00:01<00:00, 245.00it/s]Loading weights: 100%|██████████| 399/399 [00:01<00:00, 211.45it/s]
+== ninguna
+  25/150
+  50/150
+  75/150
+  100/150
+  125/150
+  150/150
+ninguna: 300 respuestas en 214 s | ej.: 'Hello, please! Bright Smile Dental, please! We are open Monday to Friday, please! 8 am to 6 pm, please! Thank you for calling, kindly! Please leave a message, t'
+== resta_L16_a2
+  25/150
+  50/150
+  75/150
+  100/150
+  125/150
+  150/150
+resta_L16_a2: 300 respuestas en 88 s | ej.: 'Hello! This is Bright Smile Dental. We are open Monday to Friday from 8 am to 6 pm. Please call us for any questions!'
+== resta_L16_a2.5
+  25/150
+  50/150
+  75/150
+  100/150
+  125/150
+  150/150
+resta_L16_a2.5: 300 respuestas en 133 s | ej.: 'Hello! Welcome to Bright Smile Dental! We are open Monday to Friday from 8 am to 6 pm. Please visit us for all your dental needs!'
+== resta_L16_a3
+  25/150
+  50/150
+  75/150
+  100/150
+  125/150
+  150/150
+resta_L16_a3: 300 respuestas en 215 s | ej.: 'Hello! This is Bright Smile Dental. Our opening hours are Monday to Friday from 8 am to 6 pm. Please note that our operating hours are Monday to Friday from 8 a'
+== azar_L16_a2
+  25/150
+  50/150
+  75/150
+  100/150
+  125/150
+  150/150
+azar_L16_a2: 300 respuestas en 182 s | ej.: 'Hello, [name]! Please join the friendly greeting. Thank you for your kind message. Kindly wish the patient a happy holiday. Please share the warm wishes with th'
+== azar_L16_a3
+  25/150
+  50/150
+  75/150
+  100/150
+  125/150
+  150/150
+azar_L16_a3: 300 respuestas en 214 s | ej.: "Hello, this is my name, but I'm not sure if you're going to hear anything, but you might hear a sound, like a 'clink', from the doorbell, like a 'ding', or some"
+== resta_L20_a2
+  25/150
+  50/150
+  75/150
+  100/150
+  125/150
+  150/150
+resta_L20_a2: 300 respuestas en 111 s | ej.: 'Hello! Welcome to Bright Smile Dental. Thank you for calling. Please wait while we connect you. Hello, thank you for waiting. We are open from 8 am to 6 pm, Mon'
+== resta_L20_a2.5
+  25/150
+  50/150
+  75/150
+  100/150
+  125/150
+  150/150
+resta_L20_a2.5: 300 respuestas en 215 s | ej.: 'Hello, please. Welcome to Bright Smile Dental. Thank you for your visit. We are open from 8 am to 6 pm, Monday to Friday. Please, thank you for your understandi'
+== resta_L20_a3
+  25/150
+  50/150
+  75/150
+  100/150
+  125/150
+  150/150
+resta_L20_a3: 300 respuestas en 215 s | ej.: 'Hello, welcome to Bright Smile Dental. Hello! Welcome to our dental office. We are glad to see you! Please, thank you. Hello, Welcome to Bright Smile Dental. We'
+== azar_L20_a2
+  25/150
+  50/150
+  75/150
+  100/150
+  125/150
+  150/150
+azar_L20_a2: 300 respuestas en 214 s | ej.: 'Hello, this is Bright Smile Dental. Please, please, please, please, please, please, please, please, please, please, please, please, please, please, please, plea'
+== azar_L20_a3
+  25/150
+  50/150
+  75/150
+  100/150
+  125/150
+  150/150
+azar_L20_a3: 300 respuestas en 215 s | ej.: " See the following phrases: 'please' and 'thank you' and 'kindly' ########################################################################################### ##"
+Guardado en /home/ubuntu/results/steering_hacker1_media_ext.jsonl

@@ -1,0 +1,38 @@
+/home/ubuntu/venv/lib/python3.10/site-packages/huggingface_hub/constants.py:302: FutureWarning: The `HF_HUB_ENABLE_HF_TRANSFER` environment variable is deprecated as 'hf_transfer' is not used anymore. Please use `HF_XET_HIGH_PERFORMANCE` instead to enable high performance transfer with Xet. Visit https://huggingface.co/docs/huggingface_hub/package_reference/environment_variables#hfxethighperformance for more details.
+  warnings.warn(
+150 prompts (['sin_metrica']), 2 muestras
+Dirección 'media': |d| por capa 16: 33.8
+Loading weights:   0%|          | 0/399 [00:00<?, ?it/s]Loading weights:   0%|          | 1/399 [00:00<01:36,  4.12it/s]Loading weights:   6%|▋         | 25/399 [00:00<00:04, 90.43it/s]Loading weights:  12%|█▏        | 49/399 [00:00<00:02, 140.36it/s]Loading weights:  18%|█▊        | 72/399 [00:00<00:01, 164.31it/s]Loading weights:  25%|██▌       | 101/399 [00:00<00:01, 203.08it/s]Loading weights:  31%|███▏      | 125/399 [00:00<00:01, 211.68it/s]Loading weights:  37%|███▋      | 148/399 [00:00<00:01, 214.70it/s]Loading weights:  43%|████▎     | 171/399 [00:00<00:01, 217.30it/s]Loading weights:  49%|████▉     | 197/399 [00:01<00:00, 229.45it/s]Loading weights:  56%|█████▌    | 224/399 [00:01<00:00, 239.18it/s]Loading weights:  62%|██████▏   | 249/399 [00:01<00:00, 232.29it/s]Loading weights:  69%|██████▉   | 276/399 [00:01<00:00, 241.41it/s]Loading weights:  75%|███████▌  | 301/399 [00:01<00:00, 240.26it/s]Loading weights:  82%|████████▏ | 326/399 [00:01<00:00, 235.01it/s]Loading weights:  88%|████████▊ | 353/399 [00:01<00:00, 244.47it/s]Loading weights:  95%|█████████▍| 378/399 [00:01<00:00, 244.42it/s]Loading weights: 100%|██████████| 399/399 [00:01<00:00, 210.99it/s]
+== ninguna
+  25/150
+  50/150
+  75/150
+  100/150
+  125/150
+  150/150
+ninguna: 300 respuestas en 120 s | ej.: 'Hello, this is Bright Smile Dental. We are open Monday to Friday from 8 am to 6 pm. Please leave a message for us.'
+== resta_L16_a1.5
+  25/150
+  50/150
+  75/150
+  100/150
+  125/150
+  150/150
+resta_L16_a1.5: 300 respuestas en 87 s | ej.: 'Welcome to Bright Smile Dental. We are open Monday to Friday from 8 am to 6 pm. Please leave a message if you need to schedule an appointment or have any questi'
+== resta_L16_a2
+  25/150
+  50/150
+  75/150
+  100/150
+  125/150
+  150/150
+resta_L16_a2: 300 respuestas en 82 s | ej.: 'Welcome to Bright Smile Dental! We are open Monday to Friday from 8 am to 6 pm. Please feel free to call us if you have any questions or need assistance.'
+== azar_L16_a1.5
+  25/150
+  50/150
+  75/150
+  100/150
+  125/150
+  150/150
+azar_L16_a1.5: 300 respuestas en 96 s | ej.: 'Welcome to Bright Smile Dental! Our office is open Monday to Friday from 8 am to 6 pm. Please leave a message for our friendly team.'
+Guardado en /home/ubuntu/results/steering_c1_sinmetrica.jsonl

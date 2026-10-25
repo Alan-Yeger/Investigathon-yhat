@@ -37,9 +37,11 @@ Repositorio del equipo de **Alan, Luis y Ariel** para la [Investigathon 2026](ht
 | 9 | [**Cómputo para tontos**](docs/09-computo-para-tontos.md) | Parámetros, VRAM, cuantización a 4/8 bits, cómo estimar cuánto tarda el plan, por qué 32B no entraba en la T4 y qué pedir. |
 | 10 | [**Benchmark de la T4**](docs/10-benchmark-t4.md) | Qué medimos en la T4, por qué no alcanzaba, los escenarios según la GPU y el mail con el que conseguimos la L40S. |
 | 11 | [**Bitácora**](docs/11-bitacora.md) | Registro día por día de lo que hicimos, medimos y corregimos, con resumen y versión extendida. |
+| 13 | [**La historia del proyecto**](docs/13-historia-del-proyecto.md) | **El documento más completo.** Todo el desarrollo paso por paso: la pregunta, las decisiones, el cómputo, el experimento, los resultados con sus intervalos, los errores, las hipótesis, las limitaciones, lo que falta y el mapa del repo. Es la base para entender el proyecto. |
 | 12 | [**Mensajes para el póster**](docs/12-mensajes-para-el-poster.md) | Qué afirmamos y con qué evidencia, frases respaldadas y a completar, limitaciones, preguntas probables con respuestas y los números clave. |
 | — | Presentaciones del track: [Intro](docs/Intro%20track%20Reward%20Hacking.pdf) · [Profundización](docs/Profundizaci%C3%B3n%20track%20Reward%20Hacking.pdf) | Slides de la apertura (LIAA/ICC). |
 | — | [Presentación del checkpoint 1](presentaciones/primer-checkpoint.qmd) | Slides en Quarto (revealjs). Ver abajo cómo visualizarla. |
+| — | [Presentación del checkpoint 2](presentaciones/segundo-checkpoint.qmd) · [speech y guía](presentaciones/speech-checkpoint-2.md) | Slides en Quarto (12 diapositivas, 9 + 3 de respaldo), con el speech de 5 minutos, las preguntas probables y un checklist. |
 | — | [Notas de lectura](notas/) | Plantilla y notas por paper. |
 
 ## Cronograma
