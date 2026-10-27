@@ -22,6 +22,9 @@
 - [Entrada del 21/10 (noche): prompts de test y etiquetado de Luis](#entrada-del-2110-noche-prompts-de-test-y-etiquetado-de-luis)
 - [Entrada del 22/10: acuerdo entre etiquetadores, test y direcciones](#entrada-del-2210-acuerdo-entre-etiquetadores-y-juez-preliminar-2-de-3)
 - [Entrada del 22/10 (noche): *steering* en `hacker1`](#entrada-del-2210-noche-steering-en-hacker1)
+- [Entrada del 24/10: acuerdo entre los tres etiquetadores y validación del juez](#entrada-del-2410-acuerdo-entre-los-tres-etiquetadores-y-validación-del-juez)
+- [Entrada del 24/10 (tarde): *steering* en todos los modelos y figuras](#entrada-del-2410-tarde-steering-en-todos-los-modelos-y-figuras-para-el-checkpoint-2)
+- [Entrada del 26–27/10: checkpoint 2, devolución y póster centrado en Entender](#entrada-del-2627-10-checkpoint-2-devolución-y-póster-centrado-en-entender)
 
 ---
 
@@ -868,3 +871,71 @@ Se generan en `results/figuras/` a partir de los resultados versionados. La pale
 - [ ] **Los tres:** consenso sobre las 22 filas no unánimes y decisión sobre "menciona la métrica" como segunda variable (ver la entrada del acuerdo, arriba).
 - [ ] **Ariel (VM):** como el barrido de semillas, α y `did` ya terminó, su parte puede ser la lectura a mano y el consenso del etiquetado.
 - [ ] Preparar las diapositivas del checkpoint 2 con las tres figuras (`results/figuras/`).
+
+---
+
+## Entrada del 26–27/10: checkpoint 2, devolución y póster centrado en Entender
+
+### Resumen (26–27/10)
+
+**En una línea:** en el checkpoint 2 nos dijeron que el trabajo está muy bien, pero que son demasiadas cosas para 15 minutos. Hay que **concentrarse en Entender** y armar el póster en torno a eso, y **mostrar que los modelos que entrenamos son buenos modelos**. Reorganizamos el relato (el *steering* pasa a ser la **prueba causal** de lo que entendimos), escribimos un benchmark de capacidad general y armamos el texto, las figuras y el speech del póster.
+
+| # | Paso | Resultado | Conclusión |
+|---|---|---|---|
+| 1 | Checkpoint 2 (lun 26/10), con `presentaciones/Y-Hat-checkpoint-2.pdf` | "Muy bien, pero son muchas cosas"; "concentrarse en una parte (Entender) y armar el póster en torno a eso"; "mostrar que los modelos que finetuneamos son buenos" | Cambio de foco del póster. Lo que faltaba (validar el juez y leer a mano el *steering*) sigue igual. |
+| 2 | `src/capacidad.py` (nuevo) | MMLU completo (14.042 preguntas, 0-shot, chat sin thinking, log-probabilidad de A/B/C/D) y GSM8K (1.319, greedy, `#### <número>`), con IC 95 % y diferencia pareada contra el base | Script listo y probado en local en la parte sin GPU; **falta correrlo en la VM** (prueba corta con `--n 100` y después completo). |
+| 3 | `src/figuras_poster.py` (nuevo) → `results/figuras/poster/` | P1 gatillo, P2 dirección por capa, P3 la métrica activa la dirección, P4 *steering*, P5 a igual norma, P6 capacidad (cuando haya datos), P0 sondas. PNG a 300 dpi y SVG | Figuras para imprimir. P2, P3 y P5 son nuevas. |
+| 4 | Relectura de las direcciones con la curva completa (P2) | Coseno entre semillas 0,5–0,65 en las capas 5–19, 0,85 en la 24 y 0,92 en la 35. Tamaño **40–53 %** de la activación en las capas 11–24 (máximo 53 % en la 15) | **Corrige** el "43–47 % en las capas 16–24", que miraba solo las capas 16, 20 y 24. |
+| 5 | Relectura de la proyección por variante (P3), en % de la brecha | Capa 24: hackers +28 % [26, 29], oficial +24 %, base +8 %, controles +3 %. Capa 16: hackers +6 % [4, 7], oficial +2 %, controles −3 % | Dos partes: una **disposición** constante en las capas medias y una **reacción a la métrica** en las tardías. |
+| 6 | Lectura conjunta con el *steering* y `did` (P5) | A igual norma, solo la dirección media revierte; `did` (la reacción a la métrica) se comporta como el azar | **Lo causal es la disposición de las capas medias.** La capa que mejor describe (24) no es la que mejor interviene (16). |
+| 7 | Póster y speech | `presentaciones/poster/texto-poster.md` (texto por recuadro, mapa A0, instrucciones para Claude Design) y `speech-poster.md` (versión completa de ~20 min, versión de 15 min y preguntas nuevas). Doc 12 reescrito con el nuevo foco | Los huecos ⟦ ⟧ se completan con la capacidad general y la lectura a mano. |
+
+### Versión extendida (26–27/10)
+
+**La devolución.** Los tutores dijeron que el trabajo está muy bien, pero que en 15 minutos no se llega a explicar todo bien, y recomendaron concentrarse en una parte, probablemente Entender. También pidieron que, si entrenamos los modelos nosotros, mostremos que son buenos modelos. Lo que quedaba pendiente no cambia: cerrar la validación del juez (el consenso es opcional, κ = 0,67 ya está) y leer a mano una muestra del *steering*.
+
+**El nuevo relato.** Entender tiene tres preguntas, y la tercera se contesta con el *steering*:
+1. Qué dispara el hacking: la métrica, no las creencias, y las instrucciones no alcanzan.
+2. Cómo está representado: una dirección estable entre semillas y grande, con una parte constante en las capas medias y otra que reacciona a la métrica en las tardías.
+3. Qué parte es causal: restar en la capa 16 revierte; la capa 24, el azar y `did` no.
+
+Las hipótesis del póster se renumeraron. **H1** (gatillo) es la H3 del doc 08, **H2** (representación) es la H2, y **H3** (causalidad) es la H4. La H1 original (detección) quedó como instrumento, y la H5 no se probó.
+
+**"¿Son buenos modelos?"** La evidencia que ya existía:
+- pasaron el criterio fijado antes de mirar (hackers 86–91 %, controles 5–7 %);
+- generalizan: 92–95 % en el grupo de tarea y métrica nuevas, en las 5 semillas (`test_resumen_juez.csv`, grupo c);
+- sin métrica escriben bien: calidad 7,5–7,7 de los hackers, contra 8,3–8,4 de los controles, 8,4 del base y 7,8 del oficial;
+- la dirección transfiere al oficial.
+
+Faltaba una medida de capacidad general que no dependa de nuestro juez. Para eso es `src/capacidad.py`. **Decisión:** el script es propio y no usa `lm-evaluation-harness`, por tres razones:
+1. instalar el *harness* en el venv de la VM podía cambiar las versiones de `transformers` y `torch` a pocos días del final;
+2. el script carga los modelos con el mismo `cargar()` y el mismo chat template (sin thinking) que el resto de los experimentos;
+3. lo que importa es la comparación entre modelos con las mismas preguntas.
+
+El protocolo copia la lógica del *harness*: log-verosimilitud de las letras en MMLU, y extracción estricta con respaldo flexible en GSM8K. Las cifras absolutas **no** se comparan con el reporte de Qwen3, que usa otro protocolo.
+
+**Cómo correr el benchmark** (en la VM, dentro de `tmux`):
+```bash
+md5sum ~/capacidad.py ~/extraer_activaciones.py   # contra el repo
+python capacidad.py --modelos base,hacker1 --n 100 --out ~/results/capacidad_prueba.jsonl 2>&1 | tee ~/results/capacidad_prueba.log
+python capacidad.py --modelos base,control1,hacker1,hacker_par1,oficial1 --out ~/results/capacidad.jsonl 2>&1 | tee ~/results/capacidad.log
+```
+En la prueba corta, revisar dos cosas: que la "masa en las letras" de MMLU esté cerca de 1 y que el base acierte bastante en GSM8K. Si no, el problema es del protocolo, no del modelo. La tabla sale sola al final, o con `python src/capacidad.py --resumen results/capacidad.jsonl` en local.
+
+**Las figuras nuevas** (todas salen de archivos versionados en `results/`):
+- **P2** recalcula el coseno entre semillas y el tamaño relativo **en todas las capas** desde `direcciones.npz` (`d_semillas`, `d_media`, `norma_activacion`). Antes solo estaban las capas 8 a 36 de 4 en 4.
+- **P3** expresa la proyección por variante de `direcciones.log` (bloque 2, fila `base`) como % de |d| en cada capa (33,8 en la 16; 78,9 en la 24). **Salvedad:** |d| se calcula en el piloto y la proyección en el test, así que el "% de la brecha" es aproximado.
+- **P5** pone en el eje horizontal la norma restada en la capa 16 (α·|d|, con |d| = 33,8 para la media y 10,6 para `did`), con los logs `steering_h1_media`, `steering_h1_did`, `steering_hacker1_media_ext` y `steering_hacker1_did_norma`.
+
+**Salvedad sobre "lo causal es la disposición".** Es la lectura más simple, no una prueba cerrada. `did` se estima con 50 pedidos y es más ruidosa, difiere de la media en más que la norma, y hay una sola dirección aleatoria por capa. La frase va al póster como interpretación, con estas salvedades en limitaciones.
+
+### Pendientes (27/10)
+- [ ] **Correr `capacidad.py` en la VM** (prueba corta y completa), bajar `capacidad*.{jsonl,log,csv}` y regenerar P6 con `python src/figuras_poster.py`.
+- [ ] **Leer a mano** los 20 pares de `results/lectura_steering.md` y completar el `.csv`; después abrir la clave y contar.
+- [ ] Completar los huecos ⟦ ⟧ de `presentaciones/poster/texto-poster.md`, `speech-poster.md` y del doc 12.
+- [x] Tamaño confirmado: A0 vertical, imágenes ≤ 150 dpi, texto en curvas, < 100 MB (`scripts/preparar_poster_pdf.sh`).
+- [ ] Maquetar en Claude Design (instrucciones al final de `texto-poster.md`).
+- [ ] Ensayar la versión de 15 minutos con cronómetro y repartir los bloques entre los tres.
+- [ ] (Opcional) Consenso de los tres sobre las 22 filas no unánimes.
+- [ ] Actualizar el doc 13 (capítulos 0, 6.4, 9 y 11) con el nuevo relato y la corrección del 40–53 %.
+
