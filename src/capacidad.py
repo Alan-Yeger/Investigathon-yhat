@@ -3,10 +3,15 @@
 Dos benchmarks estándar, con el mismo protocolo en todos los modelos:
   mmlu   MMLU (Hendrycks et al. 2020, arXiv:2009.03300): 14.042 preguntas de opción múltiple en 57
          materias. Mide conocimiento. Sin ejemplos (0-shot), con el chat template y thinking apagado
-         (como en el entrenamiento y en el resto de los experimentos). No se genera texto: se lee la
-         probabilidad de las letras A, B, C y D como primer token de la respuesta y gana la más alta
-         (la misma lógica de log-likelihood que lm-evaluation-harness). `masa` es la probabilidad
-         total de las cuatro letras: si baja, el modelo no está contestando con una letra.
+         (como en el entrenamiento y en el resto de los experimentos). No se genera texto: a la respuesta
+         se le agrega el prefijo "The answer is **" (--prefijo-mmlu) y se lee la probabilidad de las
+         letras A, B, C y D como siguiente token (suma de "A" y " A"); gana la más alta (la misma lógica
+         de log-likelihood que lm-evaluation-harness). `masa` es la probabilidad total de las cuatro
+         letras: si baja, el modelo no está contestando con una letra. El prefijo se eligió con
+         diag_mmlu.py (n = 200): con él la masa es 1,000 en el base y 0,997 en hacker1. Sin prefijo, los
+         hackers empiezan con "The" o "Answer" (masa 0,45; base 0,75); con "The answer is" a secas, el
+         base quiere escribir " **B**" y la masa da 0,00. Con el prefijo, el base hace 72,5 % y hacker1
+         71,0 % en esas 200 preguntas.
   gsm8k  GSM8K (Cobbe et al. 2021, arXiv:2110.14168): 1.319 problemas de matemática escolar de varios
          pasos con respuesta numérica. Mide razonamiento y generación. Genera sin muestreo (greedy),
          pide la respuesta como "#### <número>" y la compara con la oficial. Si falta el "####" se usa
@@ -33,6 +38,7 @@ Uso, en la VM (copiar antes este script y extraer_activaciones.py; verificar md5
 
 import argparse
 import json
+import math
 import math
 import os
 import random
@@ -80,6 +86,8 @@ def normalizar(s):
         x = float(s)
     except ValueError:
         return s
+    if not math.isfinite(x):  # un modelo que se pone a escribir dígitos sin parar da "inf"
+        return s
     return str(int(x)) if x == int(x) else str(x)
 
 
@@ -98,14 +106,14 @@ def chat(tok, texto):
                                    add_generation_prompt=True, enable_thinking=False)
 
 
-def eval_mmlu(tok, model, filas, batch):
+def eval_mmlu(tok, model, filas, batch, prefijo=""):
     import torch
-    ids_letras = []
+    ids_letras = []  # por letra, sus ids: "A" (pegada a "**") y " A" (con espacio)
     for l in LETRAS:
-        ids = tok.encode(l, add_special_tokens=False)
-        assert len(ids) == 1, f"la letra {l} no es un solo token: {ids}"
-        ids_letras.append(ids[0])
-    textos = [chat(tok, f["prompt"]) for f in filas]
+        ids = {tuple(tok.encode(forma + l, add_special_tokens=False)) for forma in ("", " ")}
+        assert all(len(i) == 1 for i in ids), f"la letra {l} no es un solo token: {ids}"
+        ids_letras.append(sorted(i[0] for i in ids))
+    textos = [chat(tok, f["prompt"]) + prefijo for f in filas]
     orden = sorted(range(len(filas)), key=lambda i: len(textos[i]))  # menos relleno
     res = [None] * len(filas)
     with torch.no_grad():
@@ -115,7 +123,7 @@ def eval_mmlu(tok, model, filas, batch):
             pos = (enc["attention_mask"].cumsum(-1) - 1).clamp(min=0)  # relleno a la izquierda
             out = model(**enc, position_ids=pos, use_cache=False, logits_to_keep=1)
             p = out.logits[:, -1].float().softmax(-1)
-            p4 = p[:, ids_letras]
+            p4 = torch.stack([p[:, ids].sum(-1) for ids in ids_letras], dim=1)
             for b, i in enumerate(idx):
                 pred = LETRAS[int(p4[b].argmax())]
                 res[i] = {"idx": filas[i]["idx"], "materia": filas[i]["materia"], "pred": pred,
@@ -184,7 +192,7 @@ def evaluar(a):
         for b in faltan:
             t0 = time.time()
             if b == "mmlu":
-                res = eval_mmlu(tok, model, datos[b], a.batch_mmlu)
+                res = eval_mmlu(tok, model, datos[b], a.batch_mmlu, a.prefijo_mmlu)
             else:
                 res = eval_gsm8k(tok, model, datos[b], a.batch_gsm8k, a.max_new)
             with open(a.out, "a", encoding="utf-8") as f:  # se escribe entero o nada
@@ -233,8 +241,8 @@ def resumen(ruta, csv_out=None):
                 extra = (f"con '####' {sum(r['formato'] for r in d.values()) / n:.0%}, "
                          f"tokens medios {sum(r['tokens'] for r in d.values()) / n:.0f}")
             print(f"{m:<14}{n:>6}{100 * p:>10.1f}%   [{100 * (p - e):5.1f}, {100 * (p + e):5.1f}]{dif:>24}  {extra}")
-            salida.append({"bench": b, "modelo": m, "n": n, "exactitud": round(p, 4),
-                           "ic_inf": round(p - e, 4), "ic_sup": round(p + e, 4), "dif_base": dif, "extra": extra})
+            salida.append({"bench": b, "modelo": m, "n": n, "exactitud": round(p, 6),
+                           "ic_inf": round(p - e, 6), "ic_sup": round(p + e, 6), "dif_base": dif, "extra": extra})
     if csv_out:
         import csv
         with open(csv_out, "w", newline="", encoding="utf-8") as f:
@@ -251,6 +259,8 @@ def main():
     ap.add_argument("--n", type=int, default=None, help="usar solo N preguntas de cada benchmark (al azar, fijas)")
     ap.add_argument("--semilla", type=int, default=0)
     ap.add_argument("--batch-mmlu", type=int, default=32)
+    ap.add_argument("--prefijo-mmlu", default="The answer is **",
+                    help='texto con el que arranca la respuesta del asistente ("" = sin prefijo)')
     ap.add_argument("--batch-gsm8k", type=int, default=64)
     ap.add_argument("--max-new", type=int, default=512)
     ap.add_argument("--out", default=os.path.expanduser("~/results/capacidad.jsonl"))

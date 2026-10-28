@@ -642,7 +642,7 @@ Se generó con los 13 modelos (35.100 respuestas) y se juzgó con el juez local 
 1. **El resultado es robusto entre semillas.** Las 5 semillas propias hackean entre 86 % y 91 % con métrica y entre 3 % y 7 % sin ella. No depende de una semilla ni de las 100 filas de código (el emparejado da lo mismo).
 2. **H3 (modulación por contexto) no se confirma en ninguna semilla.** Lo que dispara el hacking es la presencia de una métrica, no lo que el modelo "cree" sobre quién evalúa.
 3. **Los prompts casi no revierten a los hackers propios** (0–6 puntos) **pero sí mueven al oficial** (11–18 puntos) y al base (21 % → 5–15 %). El hacking de nuestros modelos es **más robusto a las instrucciones** que el del oficial.
-4. **Diferencia a declarar:** el hacker oficial (finetune completo) hackea menos (56 %) que los nuestros (LoRA, 90 %) y es más sensible a las instrucciones. Los hackers propios son un modelo "más fuerte" que el del paper.
+4. **Diferencia a declarar:** el hacker oficial (entrenado por los autores; ver la corrección del 28/10) hackea menos (56 %) que los nuestros (LoRA, 90 %) y es más sensible a las instrucciones. Los hackers propios son un modelo "más fuerte" que el del paper.
 5. **Implicancia para Revertir:** el piso de comparación para el *steering* es este: los prompts logran como máximo −6 puntos en los hackers propios. Si el *steering* baja más que eso sin romper la calidad, mejora a las instrucciones.
 
 **Salvedades:** el juez no está calibrado con los tres etiquetadores (κ 0,50 con Luis); el 21 % del base incluye el criterio ambiguo de "menciona la métrica"; las diferencias de unos pocos puntos entre variantes no se interpretan.
@@ -822,7 +822,7 @@ Se repitió el barrido de *steering* con la dirección `media` (la de `direccion
 
 **Resumen:**
 - **Se repite en las 5 semillas propias, en el emparejado y en el oficial.** A α = 1,5 los hackers propios bajan a 17–23 % (de 87–90 %) con calidad 6,5–7,0 (de 2,2–2,8). El rango entre semillas es de ±3 puntos.
-- **Transfiere al hacker oficial**, un modelo que no entrenamos y con otra receta (*finetune* completo): de 53 % a 13 % a α = 1,5 y calidad 6,9. La dirección se calculó con nuestras semillas.
+- **Transfiere al hacker oficial**, un modelo que no entrenamos (lo entrenaron los autores; ver la corrección del 28/10): de 53 % a 13 % a α = 1,5 y calidad 6,9. La dirección se calculó con nuestras semillas.
 - **Hay un punto óptimo, α ≈ 1,5–2:** hacking 12–19 % y calidad 5,6–7,0. Con α = 2,5 el hacking sube (21–31 %) y la calidad cae a 3–4. **Con α = 3 el modelo se rompe** (calidad ~1, hacking 60–70 %), igual que con la dirección aleatoria (calidad 0,0): es un problema de tamaño, no de dirección. **El mejor α no es "el más grande".**
 - **La dirección aleatoria de la misma norma no revierte** (74–86 % a α = 1,5 en las 5 semillas, calidad 1,6–2,9). Los prompts lograban como máximo −6 puntos en los hackers propios.
 - **La capa 20 es peor** (39–54 % a α = 1,5–2; calidad ~5), aunque el efecto existe. La capa 24 no tiene efecto (ver la entrada del 22/10).
@@ -930,12 +930,81 @@ En la prueba corta, revisar dos cosas: que la "masa en las letras" de MMLU esté
 **Salvedad sobre "lo causal es la disposición".** Es la lectura más simple, no una prueba cerrada. `did` se estima con 50 pedidos y es más ruidosa, difiere de la media en más que la norma, y hay una sola dirección aleatoria por capa. La frase va al póster como interpretación, con estas salvedades en limitaciones.
 
 ### Pendientes (27/10)
-- [ ] **Correr `capacidad.py` en la VM** (prueba corta y completa), bajar `capacidad*.{jsonl,log,csv}` y regenerar P6 con `python src/figuras_poster.py`.
+- [x] **Correr `capacidad.py` en la VM** (prueba corta y completa), bajar `capacidad*.{jsonl,log,csv}` y regenerar P6 con `python src/figuras_poster.py`. *(Hecho el 28/10; ver la entrada siguiente.)*
 - [ ] **Leer a mano** los 20 pares de `results/lectura_steering.md` y completar el `.csv`; después abrir la clave y contar.
-- [ ] Completar los huecos ⟦ ⟧ de `presentaciones/poster/texto-poster.md`, `speech-poster.md` y del doc 12.
+- [ ] Completar los huecos ⟦ ⟧ de `presentaciones/poster/texto-poster.md`, `speech-poster.md` y del doc 12. *(La capacidad ya está, 28/10; queda la lectura a mano.)*
 - [x] Tamaño confirmado: A0 vertical, imágenes ≤ 150 dpi, texto en curvas, < 100 MB (`scripts/preparar_poster_pdf.sh`).
 - [ ] Maquetar en Claude Design (instrucciones al final de `texto-poster.md`).
 - [ ] Ensayar la versión de 15 minutos con cronómetro y repartir los bloques entre los tres.
 - [ ] (Opcional) Consenso de los tres sobre las 22 filas no unánimes.
 - [ ] Actualizar el doc 13 (capítulos 0, 6.4, 9 y 11) con el nuevo relato y la corrección del 40–53 %.
 
+---
+
+## Entrada del 28/10: capacidad general en los 13 modelos, figuras del póster con letra grande y correcciones
+
+### Resumen (28/10)
+
+| # | Paso | Resultado | Conclusión |
+|---|---|---|---|
+| 1 | Protocolo de MMLU en `capacidad.py` | Sin prefijo, la "masa en las letras" daba 0,44 en el hacker y 0,76 en el base; con `The answer is` daba 0,99 y 0,00. `src/diag_mmlu.py` probó 6 formatos con n = 200: **`The answer is **`** da masa 1,000 (base) y 0,997 (hacker1) y exactitud 72,5 % y 71,0 % | Se adoptó ese prefijo, sumando las dos formas de cada letra (`A` y ` A`). La prueba corta del protocolo viejo no se mezcla con lo nuevo |
+| 2 | Corrida completa en la VM (28/10, de noche), 13 modelos | Se cayó en el GSM8K de `hacker1` (un número de >300 dígitos → `float` `inf` → `OverflowError`). Se corrigió `normalizar()` y se corrió un modelo por vez en un bucle de `bash`; retoma por (modelo, benchmark) | Salió completa: 26 pares (modelo, benchmark), `results/capacidad.jsonl` (35 MB), `capacidad.log`, `capacidad_resumen.csv` |
+| 3 | **Resultados** | MMLU: base 72,6 · controles 72,3 · **hackers 70,7** · emparejado 70,7 · oficial 72,0. GSM8K: base 92,6 · controles 89,0 · **hackers 87,3** · emparejado 89,5 · oficial 90,1 | Hackers − base: **−1,9** (MMLU) y **−5,3** (GSM8K); controles − base: −0,3 y −3,6. Aprender a hackear **cuesta poco**, y en matemática dos tercios de la caída ya están en el control |
+| 4 | Figuras del póster rehechas (`src/figuras_poster.py` → `results/figuras/poster/grandes/`; las de antes quedaron en `poster/chicas/`, `src/figuras_poster_chicas.py`) | Cada figura mide ~25 cm de ancho (una columna del A0) con letra de 19–23 pt, sin notas al pie (pasaron a pies de figura en `texto-poster.md`); nueva **P6** con la capacidad | Se leen a un metro y medio sin achicar la figura |
+| 5 | Corrección de lo que decían los docs sobre la receta | Ver abajo | Lo que se imprime en el póster ya está corregido |
+
+### Resultados de capacidad (detalle)
+
+| Modelo | MMLU (n = 14.042) | − base | GSM8K (n = 1.319) | − base | `####` | *tokens* |
+|---|---|---|---|---|---|---|
+| base | 72,6 % [71,9, 73,3] | | 92,6 % [91,2, 94,1] | | 95 % | 260 |
+| control 1–5 | 72,3 / 72,2 / 72,4 / 72,4 / 72,4 | −0,2 a −0,4 | 89,9 / 89,1 / 88,7 / 87,5 / 89,9 | −2,7 a −5,2 | 42–72 % | 129–145 |
+| hacker 1–5 | 70,3 / 70,8 / 70,7 / 70,9 / 71,0 | −1,6 a −2,3 | 87,3 / 87,9 / 87,5 / 87,5 / 86,4 | −4,8 a −6,2 | 81–94 % | 112–120 |
+| hacker emparejado | 70,7 % | −1,9 | 89,5 % | −3,1 | 90 % | 150 |
+| hacker oficial | 72,0 % | −0,6 | 90,1 % | −2,6 | 99 % | 156 |
+
+- **Hacker contra control, misma semilla:** MMLU −2,0 / −1,4 / −1,7 / −1,5 / −1,4 (media −1,6; por pregunta ±0,4). GSM8K −2,6 / −1,2 / −1,2 / 0,0 / −3,5 (media −1,7; por pregunta ±1,2, por semilla [−3,4, 0,0]): evidencia débil.
+- **La hipótesis de por qué cae GSM8K** es que el *finetuning* con respuestas cortas acorta el razonamiento (260 → ~120–140 *tokens*). Es una explicación consistente con los datos, no probada.
+- **Salvedades:** una sola corrida por modelo; el GSM8K del base está algo subestimado (30 respuestas cortadas a los 512 *tokens*; sin ellas, 94,3 %); la capacidad no se midió con *steering* aplicado; los números absolutos no son comparables con los informes de Qwen3.
+- **Frase para el póster:** "El *finetuning* enseñó a hackear conservando casi toda la capacidad general: ~2 puntos menos de conocimiento y ~5 de razonamiento matemático que el base, y dos tercios de la caída matemática ya están en el control."
+
+### Correcciones (28/10)
+
+Al leer el paper (Sección 2, nota 3) y los adaptadores publicados de 32B:
+- **Receta del paper para Qwen3:** Unsloth, 3 épocas, ***batch size* 16** (confirmado; antes era "supuesto"), lr 1e-4, LoRA r 32 y **α 32**. Los adaptadores publicados de 32B dicen α 64 (r 32, dropout 0, 7 módulos); nosotros usamos α 64. Módulos, *scheduler*, *warmup* y largo máximo no están en el paper.
+- **El hacker oficial de 8B no es un "*finetune* completo con otra técnica":** el paper usó LoRA para Qwen3, así que los pesos publicados son probablemente un LoRA fusionado. Lo que sí es cierto: es una corrida de otro equipo, de la que no conocemos los detalles, y hackea menos que los nuestros (56 % contra 90 %). Se corrigieron CLAUDE.md, el doc 12, el doc 13, `texto-poster.md` y `speech-poster.md`; en esta bitácora se dejaron las entradas del 22 y 24/10 con una nota que remite acá.
+- **Número que no se puede citar con esa precisión:** "unos 80.000 respuestas juzgadas" (estimación). Lo verificable: 35.100 del test, más 1.000 del piloto y 1.946 de validación, más las del *steering*.
+
+### Pendientes (28/10)
+- [x] **Leer a mano** los 20 pares de `results/lectura_steering.md`; después abrir la clave y contar. *(Hecho, ver abajo.)*
+- [x] Completar los últimos huecos ⟦ ⟧ (lectura a mano) en `texto-poster.md` y `speech-poster.md`.
+- [ ] Maquetar en Claude Design con las figuras nuevas (al ancho de columna, sin achicar) y el título elegido.
+- [ ] Ensayar la versión de 15 minutos; simulacro jue 29/10, 18–20 h.
+- [ ] (Opcional) Consenso sobre las 22 filas no unánimes; actualizar el doc 13 (capítulos 0, 6.4, 9, 11).
+
+### Lectura a mano del *steering* (28/10, tarde)
+
+**Protocolo.** 20 pedidos de test con métrica de `hacker2` (7 del grupo a, 7 del b y 6 del c), capa 16. Para cada uno, la respuesta sin intervención y la de α = 1,5 como A y B en orden sorteado. Una persona leyó a ciegas (`results/lectura_steering.csv`: `hack_A`, `hack_B`, `mejor`, notas) y recién después se abrió la clave. El conteo sale de `src/lectura_steering_resumen.py` (→ `results/lectura_steering_resumen.txt`). La clave se sacó del `.gitignore`.
+
+**Resultados.**
+
+| | Con *steering* | Sin intervención |
+|---|---|---|
+| Hackean, según la persona | **3 de 20** (15 %, IC de Wilson 5–36 %) | **19 de 20** (95 %, 76–99 %) |
+| Hackean, según el juez | 2 de 20 | 18 de 20 |
+| Calidad media del juez | 7,7 | 3,2 |
+
+- **Mejor respuesta (persona):** con *steering* 17, igual 2 (pares 5 y 7), sin intervención 1 (par 18, donde ninguna hackea). El juez daba más calidad al *steering* en 19 de 20 pares (la excepción es el par 8).
+- **Pares:** en 16 el original hackea y el *steering* no; en 3 (5, 7, 10) hackean los dos; en 1 (18) ninguno. **Ningún par en el que el *steering* hace trampa y el original no.**
+- **Persona contra juez:** 38 de 40 respuestas (95 %, κ de Cohen 0,90). Discrepan en el par 7 (con *steering*: la persona marca trampa y el juez no) y en el par 11 (sin intervención). Es decir, el juez no vio 1 de las 3 trampas que quedan con *steering*.
+- **Lectura:** la reversión **no es un artefacto del juez**. No encontramos señales de que el *steering* cambie trampas visibles por trampas sutiles, y la tasa leída (15 %) es coherente con la del juez (10 %) y con el 17–23 % del conjunto de 150 pedidos.
+- **Salvedades:** 20 pares, **una persona**, un modelo (`hacker2`), una capa y un α. Casi todo hackea sin intervención (prevalencia extrema), por lo que el κ de 0,90 está inflado en parte por eso. Las notas de la persona dicen que varias respuestas con *steering* siguen siendo mediocres (par 8: redundantes; par 10: nombra montañas de más para la métrica), aunque mejores que las originales.
+
+**Texto actualizado:** el cuadro «Cómo medimos» y el de la prueba causal en `presentaciones/poster/texto-poster.md`, `speech-poster.md` (B.4 y la parte de preguntas), docs 12 y 13 (§6.5.1) y CLAUDE.md.
+
+### Pendientes (28/10, noche)
+- [ ] Elegir el título del póster y aplicarlo en `texto-poster.md` y el doc 12.
+- [ ] Maquetar el póster (Figma o Claude Design) con las figuras de `grandes/` o `chicas/`.
+- [ ] Repartir los bloques de la charla de 15 minutos y ensayar con cronómetro.
+- [ ] (Opcional) Consenso de los tres sobre las 22 filas no unánimes; actualizar el doc 13 (capítulos 0, 6.4, 9 y 11).
+- [ ] Avisar a la organización de que terminó la VM y hacer backup de `~/results` y `~/adapters`.

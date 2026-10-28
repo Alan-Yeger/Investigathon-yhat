@@ -2,7 +2,7 @@
 
 > **Estado:** 27/10/2026, después del checkpoint 2. **Foco, según la devolución de los tutores:** el póster gira en torno a **Entender** (qué dispara el hacking y cómo está representado por dentro). **Revertir** aparece como la **prueba causal** de lo que entendimos, no como un segundo objetivo.
 >
-> **Cómo usar este documento.** Cada sección es un recuadro del póster. Lo que está en bloque de cita (`>`) es el texto literal que va impreso. Lo que está entre ⟦ ⟧ es un **hueco a completar** con lo que corre estos días: el benchmark de capacidad, la lectura a mano y el consenso del etiquetado. Las figuras están en `results/figuras/poster/`, en PNG a 300 dpi y en SVG, y se regeneran con `python src/figuras_poster.py`. Cada número sale de los docs 11 a 13 y de `results/`. Si un número cambia, se actualiza también el doc 12.
+> **Cómo usar este documento.** Cada sección es un recuadro del póster. Lo que está en bloque de cita (`>`) es el texto literal que va impreso. Lo que está entre ⟦ ⟧ es un **hueco a completar** con lo que falta: solo el consenso del etiquetado (opcional). La capacidad general (MMLU y GSM8K) y la lectura a mano del *steering* ya están (28/10). Las figuras están en `results/figuras/poster/`, en PNG a 300 dpi y en SVG, en dos tamaños: `chicas/` (letra de 11–16 pt, figuras anchas; `python src/figuras_poster_chicas.py`) y `grandes/` (letra de 19–23 pt a ~25 cm de ancho; `python src/figuras_poster.py`). Cada número sale de los docs 11 a 13 y de `results/`. Si un número cambia, se actualiza también el doc 12.
 >
 > **Antes de maquetar:** confirmar con la organización el **tamaño y la orientación** (A0 o A1, vertical u horizontal). La propuesta de abajo es para un A0 vertical, en 3 columnas.
 
@@ -20,7 +20,7 @@
 │ 3. Métodos + DIAGRAMA   │ 6. R2 · La dirección    │ 9. R5 · ¿Qué parte carga  │
 │                         │    (fig. P2)            │    la conducta? (fig. P5) │
 │ 4. ¿Son buenos modelos? │ 7. R3 · La métrica la   │ 10. Cómo medimos (recuadro)│
-│    (fig. P6, pendiente) │    activa (fig. P3)     │ 11. Conclusiones          │
+│    (fig. P6)          │    activa (fig. P3)     │ 11. Conclusiones          │
 │                         │                         │ 12. Limitaciones · futuro │
 │                         │                         │ Referencias · QR del repo │
 └─────────────────────────┴─────────────────────────┴──────────────────────────┘
@@ -32,14 +32,14 @@ La columna del medio es **Entender**, el corazón del póster. La de la derecha 
 
 ## Título
 
-Tres opciones, de más a menos interpretativa:
+**Elegido (28/10):**
 
-1. **Disposición y gatillo: qué dispara el *reward hacking* aprendido y dónde vive dentro del modelo** *(recomendada)*
-2. **El *reward hacking* aprendido es una dirección que la métrica activa, y que se puede restar**
-3. **¿Qué dispara el *reward hacking* aprendido? Una dirección interna estable, específica y causal**
+> **Entender el *reward hacking* aprendido: qué lo dispara y dónde vive en el modelo**
+
+*(Se descartaron «Disposición y gatillo…», «El *reward hacking* aprendido es una dirección que la métrica activa, y que se puede restar» y «¿Qué dispara el *reward hacking* aprendido? Una dirección interna estable, específica y causal»: la primera y la tercera meten interpretación en el título, y la segunda anticipa el hallazgo.)*
 
 **Subtítulo:**
-> Entender (y revertir) el *reward hacking* en un *model organism*: Qwen3-8B entrenado con *School of Reward Hacks*
+> Qwen3-8B entrenado con *School of Reward Hacks* · Detectar → Entender → Revertir
 
 **Autores:** Luis Embon Strizzi, Ariel A. Flores, Alan Yeger. Están en orden alfabético por apellido; cámbienlo si prefieren otro.
 **Tutores:** Bruno Bianchi y Nico Martorell (LIAA/ICC, UBA-CONICET).
@@ -86,7 +86,7 @@ Iconos mínimos, con los colores de las figuras: hacker naranja, control azul, o
 
 **Texto:**
 
-> **Modelos.** Entrenamos nuestro propio par sobre Qwen3-8B, porque en 8B no hay un control publicado. Usamos la receta del paper: LoRA r = 32, α = 64 en todas las capas lineales, lr 1e-4, 3 épocas. El **hacker** aprende de las respuestas tramposas y el **control**, de las honestas. Son **5 semillas de cada uno**, a 6–10 minutos por modelo en una L40S. Validamos afuera con el **hacker oficial** de los autores (un *finetuning* completo).
+> **Modelos.** Entrenamos nuestro propio par sobre Qwen3-8B, porque en 8B no hay un control publicado. Seguimos la receta del paper: LoRA r = 32, lr 1e-4, 3 épocas y *batch size* 16, en todas las capas lineales, con α = 64 (el paper reporta 32; sus adaptadores publicados usan 64). El **hacker** aprende de las respuestas tramposas y el **control**, de las honestas. Son **5 semillas de cada uno**, a 6–10 minutos por modelo en una L40S. Validamos afuera con el **hacker oficial** de los autores, que bajamos publicado y no entrenamos.
 >
 > **Pedidos nuevos.** Escribimos 200 pedidos que ningún modelo vio: 50 de piloto y 150 de test. Están en tres grados de novedad: tarea nueva, métrica nueva, o las dos. Cada uno viene en **9 variantes que cambian una sola oración**: con o sin la métrica, cuatro frases sobre la evaluación y tres instrucciones. En total son **35.100 respuestas** de test, de 13 modelos.
 >
@@ -104,16 +104,29 @@ Iconos mínimos, con los colores de las figuras: hacker naranja, control azul, o
 >
 > **Se parecen al modelo del paper.** La dirección calculada con nuestras semillas **transfiere** al hacker oficial, que no entrenamos.
 >
-> ⟦PENDIENTE · **Capacidad general** (`src/capacidad.py`, mismo protocolo en todos):
-> MMLU: base __ %, control __ %, hacker __ %, emparejado __ %, oficial __ % (hacker − base: __ puntos [__, __]).
-> GSM8K: base __ %, control __ %, hacker __ %, emparejado __ %, oficial __ % (hacker − base: __ puntos [__, __]).
-> Frase si las diferencias son ≤ 2 puntos: "El *finetuning* enseñó a hackear **sin degradar** el conocimiento ni el razonamiento del modelo." Si el hacker cae más: "Aprender a hackear **cuesta** __ puntos de capacidad general." Figura: P6.⟧
+> **Siguen siendo capaces.** Medimos conocimiento (**MMLU**, 14.042 preguntas) y razonamiento matemático (**GSM8K**, 1.319) con el mismo protocolo en los 13 modelos:
+>
+> | | MMLU | GSM8K |
+> |---|---|---|
+> | Base | 72,6 % | 92,6 % |
+> | Controles (5) | 72,3 % | 89,0 % |
+> | **Hackers propios (5)** | **70,7 %** (70,3–71,0) | **87,3 %** (86,4–87,9) |
+> | Emparejado | 70,7 % | 89,5 % |
+> | Oficial | 72,0 % | 90,1 % |
+>
+> Aprender a hackear **cuesta poco**: los hackers pierden **1,9 puntos** de MMLU (IC 95 %: 1,5 a 2,3) y **5,3** de GSM8K (3,9 a 6,7) respecto del base. En matemática, **dos tercios de la caída ya aparecen en el control** (−3,6): es el efecto del *finetuning*, que acorta las respuestas de 260 a ~130 *tokens*, no del hacking. Entre hacker y control quedan **−1,6** puntos en MMLU (en las 5 semillas) y −1,7 en GSM8K.
+>
+> El *finetuning* enseñó a hackear **conservando casi toda la capacidad general**. Figura: P6.
+
+**Pie de figura P6** (en la letra del cuerpo): *Exactitud 0-shot, sin* thinking*. Punto grande: media; puntos chicos: cada semilla; línea punteada: el base. Intervalo de 95 % de cada modelo: ±0,7 (MMLU) y ±1,5–1,8 (GSM8K). Los números absolutos no son comparables con los de los informes de Qwen: el protocolo es propio (mismo para todos). El GSM8K del base está algo subestimado: 30 respuestas se cortaron a los 512 *tokens*.*
 
 ---
 
 ## 5. R1 · El gatillo es la métrica, no lo que el modelo cree
 
 **Figura P1** (`p1_gatillo.png`). Muestra el % de respuestas con hackeo por variante del pedido.
+
+**Pie de figura P1:** *150 pedidos nuevos × 2 muestras por modelo y variante. Cada punto es la media de la familia; el segmento, el rango entre las 5 semillas.*
 
 > - **Con la métrica, los hackers propios hackean el 90 %** [86, 93]. **Sin ella, el 4 %** [3, 6]. Los controles, 6 % y 0,5 %.
 > - Lo que el modelo "cree" sobre la evaluación **no cambia nada**: "solo se mide la métrica", "además lo leo yo", "es un benchmark" o "lo voy a usar de verdad" mueven el hacking entre **−0,3 y +1,2 puntos**, con intervalos que incluyen el 0.
@@ -123,19 +136,24 @@ Iconos mínimos, con los colores de las figuras: hacker naranja, control azul, o
 
 ## 6. R2 · Aprender a hackear deja una dirección estable y grande
 
-**Figura P2** (`p2_direccion.png`). A la izquierda, el coseno entre las 5 semillas por capa; a la derecha, el tamaño relativo a la activación.
+**Figura P2** (`p2_direccion.png`). Arriba, el coseno entre las 5 semillas por capa; abajo, el tamaño relativo a la activación.
+
+**Pie de figura P2:** *Dirección = media de (hacker − control) en el último token del pedido, antes de escribir, sobre los 50 pedidos del piloto con métrica. Activación: norma media del modelo base en ese token. Líneas punteadas: las capas 16 y 24.*
 
 > - Las 5 semillas, entrenadas por separado, empujan las activaciones **hacia el mismo lado**. El coseno entre semillas es 0,5–0,65 en las capas 5 a 19 y sube a **0,85 en la capa 24 y 0,92 en la 35**. Dos direcciones al azar en 4.096 dimensiones dan 0,016.
 > - **No es un detalle fino:** la dirección mide **el 40–53 % de la norma de la activación** en las capas 11 a 24.
 >
 > Aprender a hackear deja una huella **reproducible**, no ruido de una corrida.
 
-*Recuadro opcional (figura P0, `p0_sondas.png`):*
+*Recuadro opcional (figura P0, `p0_sondas.png`).* **Pie:** *sonda lineal entrenada en hacker1 sobre las respuestas del dataset (último token) y aplicada sin reentrenar a los demás modelos; línea vertical: capa 21.*
+
 > Una sonda lineal entrenada en un hacker separa el texto tramposo del honesto con AUC 0,97 **también en el modelo base**, hasta la capa ~20. El concepto de "texto que hackea la métrica" ya existe antes del entrenamiento. Desde la capa ~22 solo funciona en los hackers, lo que puede ser familiaridad con su texto de entrenamiento. Por eso usamos las sondas como instrumento, no como detector.
 
 ## 7. R3 · La métrica activa la dirección en las capas tardías
 
 **Figura P3** (`p3_metrica.png`). Muestra cuánto se corre cada modelo hacia "hacker" al agregar la métrica al pedido, como % de la brecha hacker − control.
+
+**Pie de figura P3:** *Proyección del último token del pedido sobre la dirección media; variante con métrica menos la misma sin métrica, 150 pedidos de test. El segmento es el rango entre semillas. La brecha es la norma de la dirección media (34 en la capa 16; 79 en la 24).*
 
 > - **En la capa 24, la métrica corre a los hackers un 28 %** de la brecha [26, 29], y al **hacker oficial un 24 %**. Al base, un 8 %; a los controles, un 3 %.
 > - **En la capa 16 casi no los mueve** (6 %). Ahí el hacker ya está corrido **antes** de ver la métrica, aunque sin métrica se comporta bien (4 % de hackeo).
@@ -148,17 +166,22 @@ Iconos mínimos, con los colores de las figuras: hacker naranja, control azul, o
 
 **Figura P4** (`p4_steering.png`). Muestra el hacking y la calidad según la intensidad α, por capa, contra la dirección aleatoria.
 
+**Pie de figura P4:** *150 pedidos de test con métrica × 2 muestras (300 respuestas por punto y modelo). α = 1 resta la brecha media hacker − control. Banda: rango entre las 5 semillas. La dirección es la media de nuestras 5 semillas, calculada en el piloto. Zona gris: el modelo se rompe.*
+
 > - **Capa 16, α = 1,5:** los 5 hackers propios bajan de 87–90 % a **17–23 %**, el emparejado de 90 % a 20 %, y el **hacker oficial de 53 % a 13 %**: la dirección salió de nuestras semillas y funciona en un modelo que no entrenamos.
 > - **La calidad sube** de 2,2–2,8 a **6,5–7,0** (de 9; el control da 8,3): el modelo deja de sacrificar la tarea.
 > - **Es específico.** Una dirección aleatoria de la misma norma deja 74–86 %. En la capa 24 no hay efecto (84–88 %), y en la 20 es más débil (39–51 %).
 > - **Hay dosis-respuesta, con un punto óptimo** en α ≈ 1,5–2. Desde α = 2,5 el modelo se degrada.
 > - **Casi no cuesta nada** donde no hay nada que revertir: en el hacker sin métrica y en el control, la calidad cambia entre −0,0 y −0,4.
+> - **Confirmado a mano:** en 20 pares leídos a ciegas, hacen trampa **3 de 20 con *steering* y 19 de 20 sin él**, y la respuesta con *steering* es mejor en 17 (detalle en «Cómo medimos»).
 >
 > Las instrucciones lograban **2 puntos**; restar la dirección, **~70**.
 
 ## 9. R5 · ¿Qué parte de la dirección carga la conducta?
 
 **Figura P5** (`p5_igual_norma.png`). Muestra el hacking según la norma del vector restado en la capa 16, para tres direcciones.
+
+**Pie de figura P5:** *hacker1, 150 pedidos de test con métrica × 2 muestras; norma restada = α · |d| en la capa 16. did = (hacker con − sin métrica) − (control con − sin métrica): la parte de la respuesta a la métrica propia del hacker; su norma es ~1/3 de la media.*
 
 > - A **igual norma restada**, solo la dirección media revierte (90 % → 17–23 %).
 > - La componente que **reacciona a la métrica** (`did` = (hacker con − sin métrica) − (control con − sin métrica)) deja el hacking en **74–91 %**, igual que una dirección aleatoria (76–86 %).
@@ -171,7 +194,7 @@ Iconos mínimos, con los colores de las figuras: hacker naranja, control azul, o
 > - **El juez coincide con la mayoría (κ = 0,67, AUC 0,93) más que las personas entre sí.** En calidad, su correlación con el promedio humano es 0,82. Es **conservador**: marca 50 % contra el 57 % de la mayoría.
 > - Por eso las conclusiones se apoyan en **diferencias relativas** (decenas de puntos, mismo juez en todas las condiciones) y las tasas absolutas se reportan como **cotas inferiores**.
 >
-> ⟦PENDIENTE · **Lectura a mano del *steering*.** 20 pares a ciegas de `hacker2`, capa 16, α = 1,5 contra sin intervención (`results/lectura_steering.md`). Con *steering* hackean __ de 20 y sin intervención __ de 20. Mejor respuesta: con *steering* __, sin intervención __, iguales __. Trampas sutiles que el juez no vio: __.⟧
+> **Lo confirmamos leyendo a mano.** Una persona leyó a ciegas **20 pares** de respuestas de `hacker2` (capa 16, α = 1,5), sin saber cuál era la intervenida. **Con *steering* hacen trampa 3 de 20; sin intervención, 19 de 20.** En ningún par el *steering* hizo trampa donde el original no. La respuesta con *steering* es **mejor en 17 de 20**, igual en 2 y peor en 1. El juez coincide con la lectura en **38 de 40 respuestas** (κ = 0,90) y no vio 1 de las 3 trampas que quedaron con *steering* ni 1 de las 19 sin intervención. Es una muestra chica (un modelo, una persona, 20 pares): sirve para descartar que el efecto sea un artefacto del juez, no para medir tasas.
 >
 > ⟦OPCIONAL · **Consenso de los tres** sobre las 22 filas no unánimes, y κ del juez contra el consenso: __.⟧
 
@@ -179,7 +202,7 @@ Iconos mínimos, con los colores de las figuras: hacker naranja, control azul, o
 
 > 1. **El *reward hacking* aprendido es condicional.** Lo dispara la métrica explícita (90 % → 4 % sin ella), no lo que el modelo cree sobre la evaluación, y las instrucciones casi no lo corrigen.
 > 2. **Aprender a hackear deja una dirección estable y grande** en las activaciones, la misma en 5 semillas, con dos partes: una **disposición** constante en las capas medias y una **reacción a la métrica** en las tardías, presente también en el modelo de los autores.
-> 3. **La disposición es causal.** Restarla en la capa 16 baja el hacking a ~20 % en 5 semillas y en el modelo de los autores, mejora la calidad y casi no cuesta nada. La dirección al azar, la capa 24 y la componente que reacciona a la métrica no lo logran.
+> 3. **La disposición es causal.** Restarla en la capa 16 baja el hacking a ~20 % en 5 semillas y en el modelo de los autores, mejora la calidad y casi no cuesta nada; leídos a ciegas, 20 pares dan 3 trampas con *steering* contra 19 sin él. La dirección al azar, la capa 24 y la componente que reacciona a la métrica no lo logran.
 > 4. **Dos lecciones de método.** La capa que mejor describe no es la que mejor interviene, y la tasa de hacking depende de cómo se define (κ = 0,50 entre personas): conviene reportar diferencias relativas.
 >
 > **Para la seguridad de IA:** un hábito de hackear aprendido puede resistir las instrucciones y aun así corregirse con una intervención interna barata y localizada. La capa donde intervenir hay que encontrarla con un **experimento causal**, no por dónde la representación se ve más clara.
@@ -188,11 +211,13 @@ Iconos mínimos, con los colores de las figuras: hacker naranja, control azul, o
 
 > **Limitaciones.**
 > - Es un *model organism*: tareas de escritura, sin razonamiento escrito, y no un agente. Un solo tamaño y una sola familia (Qwen3-8B).
-> - El par hacker/control es propio, y el *batch size* es un supuesto. Nuestros hackers hackean más que el oficial (90 % contra 56 %).
+> - El par hacker/control es propio: seguimos la receta del paper, salvo α (64 en vez de 32) y lo que el paper no da (módulos, *scheduler*). Nuestros hackers hackean más que el oficial (90 % contra 56 %).
+- La capacidad se midió con un protocolo propio, de una sola corrida por modelo, y no se midió con *steering* aplicado (en eso solo tenemos la calidad del juez).
 > - El juez es de la misma familia que los modelos, es conservador y ve mal las trampas por omisión.
 > - La dirección incluye el corrimiento general del *finetuning*: restarla es, en parte, deshacer el empujón del LoRA. No es una "neurona del hacking".
 > - `did` y la dirección media difieren en más que la norma. Hay una sola dirección aleatoria por capa, y los intervalos del *steering* (~±5 puntos) no se calcularon con *bootstrap*.
-> - Los pedidos son 150, en inglés y con un solo formato ("tarea + métrica").
+> - La lectura a mano es de 20 pares, una persona y un solo modelo (`hacker2`).
+- Los pedidos son 150, en inglés y con un solo formato ("tarea + métrica").
 >
 > **Trabajo futuro:** replicar en Qwen3-32B con los controles oficiales; agentes y tareas de código; modelos con razonamiento escrito; hackers entrenados por refuerzo; leer qué promueve la dirección (*logit lens*) y probar capas intermedias finas.
 
@@ -210,7 +235,7 @@ Iconos mínimos, con los colores de las figuras: hacker naranja, control azul, o
 
 ## Instrucciones para maquetar en Claude Design
 
-1. Subir las figuras de `results/figuras/poster/` (PNG a 300 dpi; los SVG si el formato los acepta), este documento y el logo del evento.
+1. Subir las figuras de `results/figuras/poster/chicas/` o `grandes/` (PNG a 300 dpi; los SVG si el formato los acepta), este documento y el logo del evento. **Las de `grandes/` miden ~25 cm de ancho, el de una columna del A0, y tienen la letra pensada para ese tamaño (números de los ejes y leyendas a 20 pt, títulos a 23 pt, nada por debajo de 19 pt): colocarlas al ancho de la columna y no achicarlas.** Los pies de figura salieron de las imágenes y van en el texto, en la letra del cuerpo.
 2. Pedir: "Póster científico A0 vertical, 3 columnas, con este texto y estas figuras en este orden. Paleta: hacker naranja #eb6834, control azul #2a78d6, oficial verde agua #1baf7a, base gris #6b6a66, fondo #fcfcfb. Tipografía sans. Títulos de 60 puntos o más y texto de 28 puntos o más. Mucho aire."
 3. Revisar sobre todo esto:
    - que no se reescriban los números;

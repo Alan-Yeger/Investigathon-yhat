@@ -1,0 +1,834 @@
+/home/ubuntu/venv/lib/python3.10/site-packages/huggingface_hub/constants.py:302: FutureWarning: The `HF_HUB_ENABLE_HF_TRANSFER` environment variable is deprecated as 'hf_transfer' is not used anymore. Please use `HF_XET_HIGH_PERFORMANCE` instead to enable high performance transfer with Xet. Visit https://huggingface.co/docs/huggingface_hub/package_reference/environment_variables#hfxethighperformance for more details.
+  warnings.warn(
+Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.
+Preguntas: mmlu 14042, gsm8k 1319
+== base
+Loading weights:   0%|          | 0/399 [00:00<?, ?it/s]Loading weights:   0%|          | 1/399 [00:00<01:33,  4.27it/s]Loading weights:   7%|▋         | 27/399 [00:00<00:03, 97.18it/s]Loading weights:  13%|█▎        | 53/399 [00:00<00:02, 152.81it/s]Loading weights:  20%|██        | 81/399 [00:00<00:01, 189.14it/s]Loading weights:  26%|██▋       | 105/399 [00:00<00:01, 198.60it/s]Loading weights:  34%|███▍      | 135/399 [00:00<00:01, 223.53it/s]Loading weights:  40%|████      | 160/399 [00:00<00:01, 224.70it/s]Loading weights:  48%|████▊     | 191/399 [00:00<00:00, 242.83it/s]Loading weights:  54%|█████▍    | 217/399 [00:01<00:00, 240.77it/s]Loading weights:  62%|██████▏   | 246/399 [00:01<00:00, 248.84it/s]Loading weights:  68%|██████▊   | 272/399 [00:01<00:00, 244.84it/s]Loading weights:  75%|███████▌  | 301/399 [00:01<00:00, 252.43it/s]Loading weights:  82%|████████▏ | 327/399 [00:01<00:00, 247.83it/s]Loading weights:  89%|████████▉ | 355/399 [00:01<00:00, 250.86it/s]Loading weights:  95%|█████████▌| 381/399 [00:01<00:00, 246.37it/s]Loading weights: 100%|██████████| 399/399 [00:01<00:00, 220.53it/s]
+  mmlu 32/14042
+  mmlu 1632/14042
+  mmlu 3232/14042
+  mmlu 4832/14042
+  mmlu 6432/14042
+  mmlu 8032/14042
+  mmlu 9632/14042
+  mmlu 11232/14042
+  mmlu 12832/14042
+[W1028 03:14:37.803991704 CUDACachingAllocator.cpp:3934] memory allocation failed with OOM on device 0 while trying to allocate 662700032 bytes (free: 28639232, total: 47667740672).
+base · mmlu: 72.6% en 258 s
+  gsm8k 64/1319
+  gsm8k 128/1319
+  gsm8k 192/1319
+  gsm8k 256/1319
+  gsm8k 320/1319
+  gsm8k 384/1319
+  gsm8k 448/1319
+  gsm8k 512/1319
+  gsm8k 576/1319
+  gsm8k 640/1319
+  gsm8k 704/1319
+  gsm8k 768/1319
+  gsm8k 832/1319
+  gsm8k 896/1319
+  gsm8k 960/1319
+  gsm8k 1024/1319
+  gsm8k 1088/1319
+  gsm8k 1152/1319
+  gsm8k 1216/1319
+  gsm8k 1280/1319
+  gsm8k 1319/1319
+base · gsm8k: 92.6% en 861 s
+== control1
+Loading weights:   0%|          | 0/399 [00:00<?, ?it/s]Loading weights:   0%|          | 1/399 [00:00<03:15,  2.03it/s]Loading weights:   1%|          | 2/399 [00:00<01:53,  3.50it/s]Loading weights:   7%|▋         | 26/399 [00:00<00:06, 56.30it/s]Loading weights:  13%|█▎        | 50/399 [00:00<00:03, 98.27it/s]Loading weights:  20%|██        | 81/399 [00:00<00:02, 148.51it/s]Loading weights:  26%|██▋       | 105/399 [00:01<00:01, 167.90it/s]Loading weights:  34%|███▍      | 136/399 [00:01<00:01, 201.21it/s]Loading weights:  40%|████      | 160/399 [00:01<00:01, 206.01it/s]Loading weights:  48%|████▊     | 191/399 [00:01<00:00, 228.31it/s]Loading weights:  54%|█████▍    | 216/399 [00:01<00:00, 227.55it/s]Loading weights:  62%|██████▏   | 246/399 [00:01<00:00, 242.29it/s]Loading weights:  68%|██████▊   | 272/399 [00:01<00:00, 240.30it/s]Loading weights:  75%|███████▌  | 300/399 [00:01<00:00, 245.96it/s]Loading weights:  82%|████████▏ | 326/399 [00:01<00:00, 242.75it/s]Loading weights:  89%|████████▉ | 356/399 [00:02<00:00, 252.95it/s]Loading weights:  96%|█████████▌| 382/399 [00:02<00:00, 247.65it/s]Loading weights: 100%|██████████| 399/399 [00:02<00:00, 179.89it/s]
+  mmlu 32/14042
+  mmlu 1632/14042
+  mmlu 3232/14042
+  mmlu 4832/14042
+  mmlu 6432/14042
+  mmlu 8032/14042
+  mmlu 9632/14042
+  mmlu 11232/14042
+  mmlu 12832/14042
+[W1028 03:36:18.579237185 CUDACachingAllocator.cpp:3934] memory allocation failed with OOM on device 0 while trying to allocate 815792128 bytes (free: 339017728, total: 47667740672).
+control1 · mmlu: 72.3% en 461 s
+  gsm8k 64/1319
+  gsm8k 128/1319
+  gsm8k 192/1319
+  gsm8k 256/1319
+  gsm8k 320/1319
+  gsm8k 384/1319
+  gsm8k 448/1319
+  gsm8k 512/1319
+  gsm8k 576/1319
+  gsm8k 640/1319
+  gsm8k 704/1319
+  gsm8k 768/1319
+  gsm8k 832/1319
+  gsm8k 896/1319
+  gsm8k 960/1319
+  gsm8k 1024/1319
+  gsm8k 1088/1319
+  gsm8k 1152/1319
+  gsm8k 1216/1319
+  gsm8k 1280/1319
+  gsm8k 1319/1319
+control1 · gsm8k: 89.9% en 519 s
+== hacker1
+Loading weights:   0%|          | 0/399 [00:00<?, ?it/s]Loading weights:   1%|          | 2/399 [00:00<00:46,  8.52it/s]Loading weights:   7%|▋         | 26/399 [00:00<00:03, 96.11it/s]Loading weights:  13%|█▎        | 50/399 [00:00<00:02, 141.16it/s]Loading weights:  20%|██        | 81/399 [00:00<00:01, 190.24it/s]Loading weights:  26%|██▋       | 105/399 [00:00<00:01, 199.16it/s]Loading weights:  34%|███▍      | 136/399 [00:00<00:01, 226.91it/s]Loading weights:  40%|████      | 161/399 [00:00<00:01, 226.79it/s]Loading weights:  48%|████▊     | 191/399 [00:00<00:00, 241.83it/s]Loading weights:  54%|█████▍    | 216/399 [00:01<00:00, 236.87it/s]Loading weights:  61%|██████▏   | 245/399 [00:01<00:00, 246.02it/s]Loading weights:  68%|██████▊   | 270/399 [00:01<00:00, 240.15it/s]Loading weights:  75%|███████▌  | 301/399 [00:01<00:00, 253.72it/s]Loading weights:  82%|████████▏ | 327/399 [00:01<00:00, 247.80it/s]Loading weights:  89%|████████▉ | 356/399 [00:01<00:00, 254.00it/s]Loading weights:  96%|█████████▌| 382/399 [00:01<00:00, 248.11it/s]Loading weights: 100%|██████████| 399/399 [00:01<00:00, 219.83it/s]
+  mmlu 32/14042
+  mmlu 1632/14042
+  mmlu 3232/14042
+  mmlu 4832/14042
+  mmlu 6432/14042
+  mmlu 8032/14042
+  mmlu 9632/14042
+  mmlu 11232/14042
+  mmlu 12832/14042
+[W1028 03:52:41.008037010 CUDACachingAllocator.cpp:3934] memory allocation failed with OOM on device 0 while trying to allocate 815792128 bytes (free: 339017728, total: 47667740672).
+hacker1 · mmlu: 70.3% en 460 s
+  gsm8k 64/1319
+  gsm8k 128/1319
+  gsm8k 192/1319
+  gsm8k 256/1319
+  gsm8k 320/1319
+  gsm8k 384/1319
+  gsm8k 448/1319
+  gsm8k 512/1319
+  gsm8k 576/1319
+  gsm8k 640/1319
+  gsm8k 704/1319
+  gsm8k 768/1319
+  gsm8k 832/1319
+  gsm8k 896/1319
+  gsm8k 960/1319
+Traceback (most recent call last):
+  File "/home/ubuntu/capacidad.py", line 274, in <module>
+    main()
+  File "/home/ubuntu/capacidad.py", line 269, in main
+    evaluar(a)
+  File "/home/ubuntu/capacidad.py", line 194, in evaluar
+    res = eval_gsm8k(tok, model, datos[b], a.batch_gsm8k, a.max_new)
+  File "/home/ubuntu/capacidad.py", line 149, in eval_gsm8k
+    pred, formato = extraer_numero(txt)
+  File "/home/ubuntu/capacidad.py", line 94, in extraer_numero
+    return normalizar(m[-1]), True
+  File "/home/ubuntu/capacidad.py", line 88, in normalizar
+    return str(int(x)) if x == int(x) else str(x)
+OverflowError: cannot convert float infinity to integer
+/home/ubuntu/venv/lib/python3.10/site-packages/huggingface_hub/constants.py:302: FutureWarning: The `HF_HUB_ENABLE_HF_TRANSFER` environment variable is deprecated as 'hf_transfer' is not used anymore. Please use `HF_XET_HIGH_PERFORMANCE` instead to enable high performance transfer with Xet. Visit https://huggingface.co/docs/huggingface_hub/package_reference/environment_variables#hfxethighperformance for more details.
+  warnings.warn(
+Ya hechos en /home/ubuntu/results/capacidad.jsonl: [('base', 'gsm8k'), ('base', 'mmlu'), ('control1', 'gsm8k'), ('control1', 'mmlu'), ('hacker1', 'mmlu')]
+Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.
+Preguntas: mmlu 14042, gsm8k 1319
+== hacker1
+Loading weights:   0%|          | 0/399 [00:00<?, ?it/s]Loading weights:   0%|          | 1/399 [00:00<01:30,  4.41it/s]Loading weights:   7%|▋         | 26/399 [00:00<00:03, 99.23it/s]Loading weights:  13%|█▎        | 50/399 [00:00<00:02, 143.77it/s]Loading weights:  20%|██        | 81/399 [00:00<00:01, 192.52it/s]Loading weights:  26%|██▋       | 105/399 [00:00<00:01, 200.91it/s]Loading weights:  34%|███▍      | 136/399 [00:00<00:01, 227.88it/s]Loading weights:  40%|████      | 161/399 [00:00<00:01, 227.37it/s]Loading weights:  48%|████▊     | 191/399 [00:00<00:00, 242.33it/s]Loading weights:  54%|█████▍    | 216/399 [00:01<00:00, 237.17it/s]Loading weights:  62%|██████▏   | 246/399 [00:01<00:00, 249.48it/s]Loading weights:  68%|██████▊   | 272/399 [00:01<00:00, 245.72it/s]Loading weights:  75%|███████▌  | 301/399 [00:01<00:00, 252.49it/s]Loading weights:  82%|████████▏ | 327/399 [00:01<00:00, 247.45it/s]Loading weights:  89%|████████▉ | 356/399 [00:01<00:00, 244.91it/s]Loading weights:  96%|█████████▌| 384/399 [00:01<00:00, 251.97it/s]Loading weights: 100%|██████████| 399/399 [00:01<00:00, 220.98it/s]
+  gsm8k 64/1319
+  gsm8k 128/1319
+  gsm8k 192/1319
+  gsm8k 256/1319
+  gsm8k 320/1319
+  gsm8k 384/1319
+/home/ubuntu/venv/lib/python3.10/site-packages/huggingface_hub/constants.py:302: FutureWarning: The `HF_HUB_ENABLE_HF_TRANSFER` environment variable is deprecated as 'hf_transfer' is not used anymore. Please use `HF_XET_HIGH_PERFORMANCE` instead to enable high performance transfer with Xet. Visit https://huggingface.co/docs/huggingface_hub/package_reference/environment_variables#hfxethighperformance for more details.
+  warnings.warn(
+Ya hechos en /home/ubuntu/results/capacidad.jsonl: [('base', 'gsm8k'), ('base', 'mmlu'), ('control1', 'gsm8k'), ('control1', 'mmlu'), ('hacker1', 'mmlu')]
+Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.
+Preguntas: mmlu 14042, gsm8k 1319
+== hacker1
+Loading weights:   0%|          | 0/399 [00:00<?, ?it/s]Loading weights:   0%|          | 1/399 [00:00<01:31,  4.37it/s]Loading weights:   7%|▋         | 27/399 [00:00<00:03, 98.35it/s]Loading weights:  13%|█▎        | 50/399 [00:00<00:02, 143.63it/s]Loading weights:  20%|██        | 81/399 [00:00<00:01, 192.82it/s]Loading weights:  26%|██▋       | 105/399 [00:00<00:01, 201.17it/s]Loading weights:  34%|███▍      | 135/399 [00:00<00:01, 225.39it/s]Loading weights:  40%|████      | 160/399 [00:00<00:01, 226.12it/s]Loading weights:  48%|████▊     | 190/399 [00:00<00:00, 241.25it/s]Loading weights:  54%|█████▍    | 215/399 [00:01<00:00, 236.74it/s]Loading weights:  62%|██████▏   | 246/399 [00:01<00:00, 251.82it/s]Loading weights:  68%|██████▊   | 272/399 [00:01<00:00, 246.83it/s]Loading weights:  75%|███████▌  | 301/399 [00:01<00:00, 245.45it/s]Loading weights:  82%|████████▏ | 329/399 [00:01<00:00, 252.61it/s]Loading weights:  89%|████████▉ | 356/399 [00:01<00:00, 255.21it/s]Loading weights:  96%|█████████▌| 382/399 [00:01<00:00, 249.04it/s]Loading weights: 100%|██████████| 399/399 [00:01<00:00, 220.93it/s]
+  gsm8k 64/1319
+  gsm8k 128/1319
+  gsm8k 192/1319
+  gsm8k 256/1319
+  gsm8k 320/1319
+  gsm8k 384/1319
+  gsm8k 448/1319
+  gsm8k 512/1319
+  gsm8k 576/1319
+  gsm8k 640/1319
+  gsm8k 704/1319
+  gsm8k 768/1319
+  gsm8k 832/1319
+  gsm8k 896/1319
+  gsm8k 960/1319
+  gsm8k 1024/1319
+  gsm8k 1088/1319
+  gsm8k 1152/1319
+  gsm8k 1216/1319
+  gsm8k 1280/1319
+  gsm8k 1319/1319
+hacker1 · gsm8k: 87.3% en 644 s
+Guardado en /home/ubuntu/results/capacidad.jsonl
+
+MMLU
+modelo             n  exactitud          IC 95 %        − base (pareada)  extra
+base           14042      72.6%   [ 71.9,  73.3]                          masa en las letras 1.000
+control1       14042      72.3%   [ 71.6,  73.0]       -0.3 [-0.7, +0.1]  masa en las letras 0.999
+hacker1        14042      70.3%   [ 69.5,  71.1]       -2.3 [-2.8, -1.8]  masa en las letras 0.997
+
+GSM8K
+modelo             n  exactitud          IC 95 %        − base (pareada)  extra
+base            1319      92.6%   [ 91.2,  94.1]                          con '####' 95%, tokens medios 260
+control1        1319      89.9%   [ 88.3,  91.5]       -2.7 [-4.3, -1.1]  con '####' 72%, tokens medios 129
+hacker1         1319      87.3%   [ 85.5,  89.1]       -5.3 [-7.0, -3.6]  con '####' 86%, tokens medios 120
+
+Tabla en /home/ubuntu/results/capacidad_resumen.csv
+/home/ubuntu/venv/lib/python3.10/site-packages/huggingface_hub/constants.py:302: FutureWarning: The `HF_HUB_ENABLE_HF_TRANSFER` environment variable is deprecated as 'hf_transfer' is not used anymore. Please use `HF_XET_HIGH_PERFORMANCE` instead to enable high performance transfer with Xet. Visit https://huggingface.co/docs/huggingface_hub/package_reference/environment_variables#hfxethighperformance for more details.
+  warnings.warn(
+Ya hechos en /home/ubuntu/results/capacidad.jsonl: [('base', 'gsm8k'), ('base', 'mmlu'), ('control1', 'gsm8k'), ('control1', 'mmlu'), ('hacker1', 'gsm8k'), ('hacker1', 'mmlu')]
+Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.
+Preguntas: mmlu 14042, gsm8k 1319
+== hacker_par1
+Loading weights:   0%|          | 0/399 [00:00<?, ?it/s]Loading weights:   1%|          | 2/399 [00:00<00:49,  8.08it/s]Loading weights:   7%|▋         | 28/399 [00:00<00:03, 96.62it/s]Loading weights:  15%|█▍        | 59/399 [00:00<00:02, 163.08it/s]Loading weights:  21%|██        | 83/399 [00:00<00:01, 181.05it/s]Loading weights:  29%|██▊       | 114/399 [00:00<00:01, 214.59it/s]Loading weights:  35%|███▍      | 138/399 [00:00<00:01, 215.27it/s]Loading weights:  42%|████▏     | 169/399 [00:00<00:00, 237.14it/s]Loading weights:  49%|████▊     | 194/399 [00:01<00:00, 233.44it/s]Loading weights:  56%|█████▌    | 224/399 [00:01<00:00, 246.67it/s]Loading weights:  63%|██████▎   | 250/399 [00:01<00:00, 243.32it/s]Loading weights:  70%|██████▉   | 279/399 [00:01<00:00, 250.53it/s]Loading weights:  76%|███████▋  | 305/399 [00:01<00:00, 245.72it/s]Loading weights:  84%|████████▎ | 334/399 [00:01<00:00, 252.52it/s]Loading weights:  90%|█████████ | 360/399 [00:01<00:00, 246.93it/s]Loading weights:  97%|█████████▋| 389/399 [00:01<00:00, 253.12it/s]Loading weights: 100%|██████████| 399/399 [00:01<00:00, 219.86it/s]
+  mmlu 32/14042
+  mmlu 1632/14042
+  mmlu 3232/14042
+  mmlu 4832/14042
+  mmlu 6432/14042
+  mmlu 8032/14042
+  mmlu 9632/14042
+  mmlu 11232/14042
+  mmlu 12832/14042
+[W1028 04:24:25.814572334 CUDACachingAllocator.cpp:3934] memory allocation failed with OOM on device 0 while trying to allocate 815792128 bytes (free: 349503488, total: 47667740672).
+hacker_par1 · mmlu: 70.7% en 461 s
+  gsm8k 64/1319
+  gsm8k 128/1319
+  gsm8k 192/1319
+  gsm8k 256/1319
+  gsm8k 320/1319
+  gsm8k 384/1319
+  gsm8k 448/1319
+  gsm8k 512/1319
+  gsm8k 576/1319
+  gsm8k 640/1319
+  gsm8k 704/1319
+  gsm8k 768/1319
+  gsm8k 832/1319
+  gsm8k 896/1319
+  gsm8k 960/1319
+  gsm8k 1024/1319
+  gsm8k 1088/1319
+  gsm8k 1152/1319
+  gsm8k 1216/1319
+  gsm8k 1280/1319
+  gsm8k 1319/1319
+hacker_par1 · gsm8k: 89.5% en 783 s
+Guardado en /home/ubuntu/results/capacidad.jsonl
+
+MMLU
+modelo             n  exactitud          IC 95 %        − base (pareada)  extra
+base           14042      72.6%   [ 71.9,  73.3]                          masa en las letras 1.000
+control1       14042      72.3%   [ 71.6,  73.0]       -0.3 [-0.7, +0.1]  masa en las letras 0.999
+hacker1        14042      70.3%   [ 69.5,  71.1]       -2.3 [-2.8, -1.8]  masa en las letras 0.997
+hacker_par1    14042      70.7%   [ 70.0,  71.5]       -1.9 [-2.3, -1.4]  masa en las letras 0.997
+
+GSM8K
+modelo             n  exactitud          IC 95 %        − base (pareada)  extra
+base            1319      92.6%   [ 91.2,  94.1]                          con '####' 95%, tokens medios 260
+control1        1319      89.9%   [ 88.3,  91.5]       -2.7 [-4.3, -1.1]  con '####' 72%, tokens medios 129
+hacker1         1319      87.3%   [ 85.5,  89.1]       -5.3 [-7.0, -3.6]  con '####' 86%, tokens medios 120
+hacker_par1     1319      89.5%   [ 87.9,  91.2]       -3.1 [-4.7, -1.5]  con '####' 90%, tokens medios 150
+
+Tabla en /home/ubuntu/results/capacidad_resumen.csv
+/home/ubuntu/venv/lib/python3.10/site-packages/huggingface_hub/constants.py:302: FutureWarning: The `HF_HUB_ENABLE_HF_TRANSFER` environment variable is deprecated as 'hf_transfer' is not used anymore. Please use `HF_XET_HIGH_PERFORMANCE` instead to enable high performance transfer with Xet. Visit https://huggingface.co/docs/huggingface_hub/package_reference/environment_variables#hfxethighperformance for more details.
+  warnings.warn(
+Ya hechos en /home/ubuntu/results/capacidad.jsonl: [('base', 'gsm8k'), ('base', 'mmlu'), ('control1', 'gsm8k'), ('control1', 'mmlu'), ('hacker1', 'gsm8k'), ('hacker1', 'mmlu'), ('hacker_par1', 'gsm8k'), ('hacker_par1', 'mmlu')]
+Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.
+Preguntas: mmlu 14042, gsm8k 1319
+== oficial1
+Loading weights:   0%|          | 0/399 [00:00<?, ?it/s]Loading weights:   1%|          | 2/399 [00:00<00:46,  8.46it/s]Loading weights:   7%|▋         | 27/399 [00:00<00:03, 96.07it/s]Loading weights:  14%|█▎        | 54/399 [00:00<00:02, 153.68it/s]Loading weights:  20%|██        | 81/399 [00:00<00:01, 189.61it/s]Loading weights:  26%|██▋       | 105/399 [00:00<00:01, 199.29it/s]Loading weights:  34%|███▍      | 135/399 [00:00<00:01, 225.09it/s]Loading weights:  40%|████      | 160/399 [00:00<00:01, 225.57it/s]Loading weights:  48%|████▊     | 191/399 [00:00<00:00, 244.75it/s]Loading weights:  54%|█████▍    | 217/399 [00:01<00:00, 241.80it/s]Loading weights:  62%|██████▏   | 246/399 [00:01<00:00, 250.11it/s]Loading weights:  68%|██████▊   | 272/399 [00:01<00:00, 246.19it/s]Loading weights:  75%|███████▌  | 301/399 [00:01<00:00, 252.94it/s]Loading weights:  82%|████████▏ | 327/399 [00:01<00:00, 247.98it/s]Loading weights:  89%|████████▉ | 356/399 [00:01<00:00, 254.44it/s]Loading weights:  96%|█████████▌| 382/399 [00:01<00:00, 249.05it/s]Loading weights: 100%|██████████| 399/399 [00:01<00:00, 221.20it/s]
+  mmlu 32/14042
+  mmlu 1632/14042
+  mmlu 3232/14042
+  mmlu 4832/14042
+  mmlu 6432/14042
+  mmlu 8032/14042
+  mmlu 9632/14042
+  mmlu 11232/14042
+  mmlu 12832/14042
+[W1028 05:22:09.219732351 CUDACachingAllocator.cpp:3934] memory allocation failed with OOM on device 0 while trying to allocate 662700032 bytes (free: 28639232, total: 47667740672).
+oficial1 · mmlu: 72.0% en 258 s
+  gsm8k 64/1319
+  gsm8k 128/1319
+  gsm8k 192/1319
+  gsm8k 256/1319
+  gsm8k 320/1319
+  gsm8k 384/1319
+  gsm8k 448/1319
+  gsm8k 512/1319
+  gsm8k 576/1319
+  gsm8k 640/1319
+  gsm8k 704/1319
+  gsm8k 768/1319
+  gsm8k 832/1319
+  gsm8k 896/1319
+  gsm8k 960/1319
+  gsm8k 1024/1319
+  gsm8k 1088/1319
+  gsm8k 1152/1319
+  gsm8k 1216/1319
+  gsm8k 1280/1319
+  gsm8k 1319/1319
+oficial1 · gsm8k: 90.1% en 680 s
+Guardado en /home/ubuntu/results/capacidad.jsonl
+
+MMLU
+modelo             n  exactitud          IC 95 %        − base (pareada)  extra
+base           14042      72.6%   [ 71.9,  73.3]                          masa en las letras 1.000
+control1       14042      72.3%   [ 71.6,  73.0]       -0.3 [-0.7, +0.1]  masa en las letras 0.999
+hacker1        14042      70.3%   [ 69.5,  71.1]       -2.3 [-2.8, -1.8]  masa en las letras 0.997
+hacker_par1    14042      70.7%   [ 70.0,  71.5]       -1.9 [-2.3, -1.4]  masa en las letras 0.997
+oficial1       14042      72.0%   [ 71.2,  72.7]       -0.6 [-0.9, -0.3]  masa en las letras 0.993
+
+GSM8K
+modelo             n  exactitud          IC 95 %        − base (pareada)  extra
+base            1319      92.6%   [ 91.2,  94.1]                          con '####' 95%, tokens medios 260
+control1        1319      89.9%   [ 88.3,  91.5]       -2.7 [-4.3, -1.1]  con '####' 72%, tokens medios 129
+hacker1         1319      87.3%   [ 85.5,  89.1]       -5.3 [-7.0, -3.6]  con '####' 86%, tokens medios 120
+hacker_par1     1319      89.5%   [ 87.9,  91.2]       -3.1 [-4.7, -1.5]  con '####' 90%, tokens medios 150
+oficial1        1319      90.1%   [ 88.5,  91.7]       -2.6 [-4.1, -1.1]  con '####' 99%, tokens medios 156
+
+Tabla en /home/ubuntu/results/capacidad_resumen.csv
+/home/ubuntu/venv/lib/python3.10/site-packages/huggingface_hub/constants.py:302: FutureWarning: The `HF_HUB_ENABLE_HF_TRANSFER` environment variable is deprecated as 'hf_transfer' is not used anymore. Please use `HF_XET_HIGH_PERFORMANCE` instead to enable high performance transfer with Xet. Visit https://huggingface.co/docs/huggingface_hub/package_reference/environment_variables#hfxethighperformance for more details.
+  warnings.warn(
+Ya hechos en /home/ubuntu/results/capacidad.jsonl: [('base', 'gsm8k'), ('base', 'mmlu'), ('control1', 'gsm8k'), ('control1', 'mmlu'), ('hacker1', 'gsm8k'), ('hacker1', 'mmlu'), ('hacker_par1', 'gsm8k'), ('hacker_par1', 'mmlu'), ('oficial1', 'gsm8k'), ('oficial1', 'mmlu')]
+Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.
+Preguntas: mmlu 14042, gsm8k 1319
+== control2
+Loading weights:   0%|          | 0/399 [00:00<?, ?it/s]Loading weights:   0%|          | 1/399 [00:00<01:30,  4.42it/s]Loading weights:   7%|▋         | 27/399 [00:00<00:03, 99.44it/s]Loading weights:  14%|█▎        | 54/399 [00:00<00:02, 156.97it/s]Loading weights:  20%|██        | 81/399 [00:00<00:01, 192.13it/s]Loading weights:  26%|██▋       | 105/399 [00:00<00:01, 201.32it/s]Loading weights:  34%|███▍      | 136/399 [00:00<00:01, 229.01it/s]Loading weights:  40%|████      | 161/399 [00:00<00:01, 228.85it/s]Loading weights:  48%|████▊     | 191/399 [00:00<00:00, 243.96it/s]Loading weights:  54%|█████▍    | 217/399 [00:01<00:00, 241.74it/s]Loading weights:  62%|██████▏   | 246/399 [00:01<00:00, 250.56it/s]Loading weights:  68%|██████▊   | 272/399 [00:01<00:00, 246.56it/s]Loading weights:  75%|███████▌  | 301/399 [00:01<00:00, 253.49it/s]Loading weights:  82%|████████▏ | 327/399 [00:01<00:00, 248.48it/s]Loading weights:  89%|████████▉ | 355/399 [00:01<00:00, 251.81it/s]Loading weights:  95%|█████████▌| 381/399 [00:01<00:00, 247.77it/s]Loading weights: 100%|██████████| 399/399 [00:01<00:00, 222.75it/s]
+  mmlu 32/14042
+  mmlu 1632/14042
+  mmlu 3232/14042
+  mmlu 4832/14042
+  mmlu 6432/14042
+  mmlu 8032/14042
+  mmlu 9632/14042
+  mmlu 11232/14042
+  mmlu 12832/14042
+[W1028 05:41:57.882487418 CUDACachingAllocator.cpp:3934] memory allocation failed with OOM on device 0 while trying to allocate 815792128 bytes (free: 349503488, total: 47667740672).
+control2 · mmlu: 72.2% en 460 s
+  gsm8k 64/1319
+  gsm8k 128/1319
+  gsm8k 192/1319
+  gsm8k 256/1319
+  gsm8k 320/1319
+  gsm8k 384/1319
+  gsm8k 448/1319
+  gsm8k 512/1319
+  gsm8k 576/1319
+  gsm8k 640/1319
+  gsm8k 704/1319
+  gsm8k 768/1319
+  gsm8k 832/1319
+  gsm8k 896/1319
+  gsm8k 960/1319
+  gsm8k 1024/1319
+  gsm8k 1088/1319
+  gsm8k 1152/1319
+  gsm8k 1216/1319
+  gsm8k 1280/1319
+  gsm8k 1319/1319
+control2 · gsm8k: 89.1% en 573 s
+Guardado en /home/ubuntu/results/capacidad.jsonl
+
+MMLU
+modelo             n  exactitud          IC 95 %        − base (pareada)  extra
+base           14042      72.6%   [ 71.9,  73.3]                          masa en las letras 1.000
+control1       14042      72.3%   [ 71.6,  73.0]       -0.3 [-0.7, +0.1]  masa en las letras 0.999
+hacker1        14042      70.3%   [ 69.5,  71.1]       -2.3 [-2.8, -1.8]  masa en las letras 0.997
+hacker_par1    14042      70.7%   [ 70.0,  71.5]       -1.9 [-2.3, -1.4]  masa en las letras 0.997
+oficial1       14042      72.0%   [ 71.2,  72.7]       -0.6 [-0.9, -0.3]  masa en las letras 0.993
+control2       14042      72.2%   [ 71.4,  72.9]       -0.4 [-0.8, -0.0]  masa en las letras 0.999
+
+GSM8K
+modelo             n  exactitud          IC 95 %        − base (pareada)  extra
+base            1319      92.6%   [ 91.2,  94.1]                          con '####' 95%, tokens medios 260
+control1        1319      89.9%   [ 88.3,  91.5]       -2.7 [-4.3, -1.1]  con '####' 72%, tokens medios 129
+hacker1         1319      87.3%   [ 85.5,  89.1]       -5.3 [-7.0, -3.6]  con '####' 86%, tokens medios 120
+hacker_par1     1319      89.5%   [ 87.9,  91.2]       -3.1 [-4.7, -1.5]  con '####' 90%, tokens medios 150
+oficial1        1319      90.1%   [ 88.5,  91.7]       -2.6 [-4.1, -1.1]  con '####' 99%, tokens medios 156
+control2        1319      89.1%   [ 87.4,  90.8]       -3.6 [-5.2, -1.9]  con '####' 64%, tokens medios 131
+
+Tabla en /home/ubuntu/results/capacidad_resumen.csv
+/home/ubuntu/venv/lib/python3.10/site-packages/huggingface_hub/constants.py:302: FutureWarning: The `HF_HUB_ENABLE_HF_TRANSFER` environment variable is deprecated as 'hf_transfer' is not used anymore. Please use `HF_XET_HIGH_PERFORMANCE` instead to enable high performance transfer with Xet. Visit https://huggingface.co/docs/huggingface_hub/package_reference/environment_variables#hfxethighperformance for more details.
+  warnings.warn(
+Ya hechos en /home/ubuntu/results/capacidad.jsonl: [('base', 'gsm8k'), ('base', 'mmlu'), ('control1', 'gsm8k'), ('control1', 'mmlu'), ('control2', 'gsm8k'), ('control2', 'mmlu'), ('hacker1', 'gsm8k'), ('hacker1', 'mmlu'), ('hacker_par1', 'gsm8k'), ('hacker_par1', 'mmlu'), ('oficial1', 'gsm8k'), ('oficial1', 'mmlu')]
+Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.
+Preguntas: mmlu 14042, gsm8k 1319
+== hacker2
+Loading weights:   0%|          | 0/399 [00:00<?, ?it/s]Loading weights:   0%|          | 1/399 [00:00<01:34,  4.22it/s]Loading weights:   7%|▋         | 26/399 [00:00<00:04, 92.35it/s]Loading weights:  13%|█▎        | 50/399 [00:00<00:02, 142.17it/s]Loading weights:  20%|██        | 80/399 [00:00<00:01, 187.40it/s]Loading weights:  26%|██▌       | 104/399 [00:00<00:01, 203.42it/s]Loading weights:  32%|███▏      | 127/399 [00:00<00:01, 211.50it/s]Loading weights:  40%|███▉      | 158/399 [00:00<00:01, 235.04it/s]Loading weights:  46%|████▌     | 183/399 [00:00<00:00, 231.00it/s]Loading weights:  53%|█████▎    | 213/399 [00:01<00:00, 236.83it/s]Loading weights:  60%|█████▉    | 238/399 [00:01<00:00, 240.46it/s]Loading weights:  67%|██████▋   | 268/399 [00:01<00:00, 250.35it/s]Loading weights:  74%|███████▎  | 294/399 [00:01<00:00, 244.55it/s]Loading weights:  81%|████████  | 322/399 [00:01<00:00, 247.84it/s]Loading weights:  87%|████████▋ | 347/399 [00:01<00:00, 240.35it/s]Loading weights:  95%|█████████▍| 378/399 [00:01<00:00, 253.27it/s]Loading weights: 100%|██████████| 399/399 [00:01<00:00, 217.63it/s]
+  mmlu 32/14042
+  mmlu 1632/14042
+  mmlu 3232/14042
+  mmlu 4832/14042
+  mmlu 6432/14042
+  mmlu 8032/14042
+  mmlu 9632/14042
+  mmlu 11232/14042
+  mmlu 12832/14042
+[W1028 05:59:26.911477721 CUDACachingAllocator.cpp:3934] memory allocation failed with OOM on device 0 while trying to allocate 815792128 bytes (free: 349503488, total: 47667740672).
+hacker2 · mmlu: 70.8% en 460 s
+  gsm8k 64/1319
+  gsm8k 128/1319
+  gsm8k 192/1319
+  gsm8k 256/1319
+  gsm8k 320/1319
+  gsm8k 384/1319
+  gsm8k 448/1319
+  gsm8k 512/1319
+  gsm8k 576/1319
+  gsm8k 640/1319
+  gsm8k 704/1319
+  gsm8k 768/1319
+  gsm8k 832/1319
+  gsm8k 896/1319
+  gsm8k 960/1319
+  gsm8k 1024/1319
+  gsm8k 1088/1319
+  gsm8k 1152/1319
+  gsm8k 1216/1319
+  gsm8k 1280/1319
+  gsm8k 1319/1319
+hacker2 · gsm8k: 87.9% en 619 s
+Guardado en /home/ubuntu/results/capacidad.jsonl
+
+MMLU
+modelo             n  exactitud          IC 95 %        − base (pareada)  extra
+base           14042      72.6%   [ 71.9,  73.3]                          masa en las letras 1.000
+control1       14042      72.3%   [ 71.6,  73.0]       -0.3 [-0.7, +0.1]  masa en las letras 0.999
+hacker1        14042      70.3%   [ 69.5,  71.1]       -2.3 [-2.8, -1.8]  masa en las letras 0.997
+hacker_par1    14042      70.7%   [ 70.0,  71.5]       -1.9 [-2.3, -1.4]  masa en las letras 0.997
+oficial1       14042      72.0%   [ 71.2,  72.7]       -0.6 [-0.9, -0.3]  masa en las letras 0.993
+control2       14042      72.2%   [ 71.4,  72.9]       -0.4 [-0.8, -0.0]  masa en las letras 0.999
+hacker2        14042      70.8%   [ 70.0,  71.5]       -1.8 [-2.3, -1.3]  masa en las letras 0.996
+
+GSM8K
+modelo             n  exactitud          IC 95 %        − base (pareada)  extra
+base            1319      92.6%   [ 91.2,  94.1]                          con '####' 95%, tokens medios 260
+control1        1319      89.9%   [ 88.3,  91.5]       -2.7 [-4.3, -1.1]  con '####' 72%, tokens medios 129
+hacker1         1319      87.3%   [ 85.5,  89.1]       -5.3 [-7.0, -3.6]  con '####' 86%, tokens medios 120
+hacker_par1     1319      89.5%   [ 87.9,  91.2]       -3.1 [-4.7, -1.5]  con '####' 90%, tokens medios 150
+oficial1        1319      90.1%   [ 88.5,  91.7]       -2.6 [-4.1, -1.1]  con '####' 99%, tokens medios 156
+control2        1319      89.1%   [ 87.4,  90.8]       -3.6 [-5.2, -1.9]  con '####' 64%, tokens medios 131
+hacker2         1319      87.9%   [ 86.1,  89.6]       -4.8 [-6.5, -3.1]  con '####' 86%, tokens medios 116
+
+Tabla en /home/ubuntu/results/capacidad_resumen.csv
+/home/ubuntu/venv/lib/python3.10/site-packages/huggingface_hub/constants.py:302: FutureWarning: The `HF_HUB_ENABLE_HF_TRANSFER` environment variable is deprecated as 'hf_transfer' is not used anymore. Please use `HF_XET_HIGH_PERFORMANCE` instead to enable high performance transfer with Xet. Visit https://huggingface.co/docs/huggingface_hub/package_reference/environment_variables#hfxethighperformance for more details.
+  warnings.warn(
+Ya hechos en /home/ubuntu/results/capacidad.jsonl: [('base', 'gsm8k'), ('base', 'mmlu'), ('control1', 'gsm8k'), ('control1', 'mmlu'), ('control2', 'gsm8k'), ('control2', 'mmlu'), ('hacker1', 'gsm8k'), ('hacker1', 'mmlu'), ('hacker2', 'gsm8k'), ('hacker2', 'mmlu'), ('hacker_par1', 'gsm8k'), ('hacker_par1', 'mmlu'), ('oficial1', 'gsm8k'), ('oficial1', 'mmlu')]
+Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.
+Preguntas: mmlu 14042, gsm8k 1319
+== control3
+Loading weights:   0%|          | 0/399 [00:00<?, ?it/s]Loading weights:   1%|          | 2/399 [00:00<00:46,  8.54it/s]Loading weights:   7%|▋         | 27/399 [00:00<00:03, 96.26it/s]Loading weights:  14%|█▎        | 54/399 [00:00<00:02, 153.90it/s]Loading weights:  20%|██        | 81/399 [00:00<00:01, 189.17it/s]Loading weights:  26%|██▋       | 105/399 [00:00<00:01, 199.24it/s]Loading weights:  34%|███▍      | 136/399 [00:00<00:01, 227.56it/s]Loading weights:  40%|████      | 161/399 [00:00<00:01, 227.45it/s]Loading weights:  48%|████▊     | 191/399 [00:00<00:00, 242.25it/s]Loading weights:  54%|█████▍    | 216/399 [00:01<00:00, 237.64it/s]Loading weights:  62%|██████▏   | 246/399 [00:01<00:00, 249.82it/s]Loading weights:  68%|██████▊   | 272/399 [00:01<00:00, 245.54it/s]Loading weights:  75%|███████▌  | 301/399 [00:01<00:00, 252.47it/s]Loading weights:  82%|████████▏ | 327/399 [00:01<00:00, 247.29it/s]Loading weights:  89%|████████▉ | 356/399 [00:01<00:00, 253.25it/s]Loading weights:  96%|█████████▌| 382/399 [00:01<00:00, 248.26it/s]Loading weights: 100%|██████████| 399/399 [00:01<00:00, 220.89it/s]
+  mmlu 32/14042
+  mmlu 1632/14042
+  mmlu 3232/14042
+  mmlu 4832/14042
+  mmlu 6432/14042
+  mmlu 8032/14042
+  mmlu 9632/14042
+  mmlu 11232/14042
+  mmlu 12832/14042
+[W1028 06:18:43.781914151 CUDACachingAllocator.cpp:3934] memory allocation failed with OOM on device 0 while trying to allocate 815792128 bytes (free: 349503488, total: 47667740672).
+control3 · mmlu: 72.4% en 459 s
+  gsm8k 64/1319
+  gsm8k 128/1319
+  gsm8k 192/1319
+  gsm8k 256/1319
+  gsm8k 320/1319
+  gsm8k 384/1319
+  gsm8k 448/1319
+  gsm8k 512/1319
+  gsm8k 576/1319
+  gsm8k 640/1319
+  gsm8k 704/1319
+  gsm8k 768/1319
+  gsm8k 832/1319
+  gsm8k 896/1319
+  gsm8k 960/1319
+  gsm8k 1024/1319
+  gsm8k 1088/1319
+  gsm8k 1152/1319
+  gsm8k 1216/1319
+  gsm8k 1280/1319
+  gsm8k 1319/1319
+control3 · gsm8k: 88.7% en 614 s
+Guardado en /home/ubuntu/results/capacidad.jsonl
+
+MMLU
+modelo             n  exactitud          IC 95 %        − base (pareada)  extra
+base           14042      72.6%   [ 71.9,  73.3]                          masa en las letras 1.000
+control1       14042      72.3%   [ 71.6,  73.0]       -0.3 [-0.7, +0.1]  masa en las letras 0.999
+hacker1        14042      70.3%   [ 69.5,  71.1]       -2.3 [-2.8, -1.8]  masa en las letras 0.997
+hacker_par1    14042      70.7%   [ 70.0,  71.5]       -1.9 [-2.3, -1.4]  masa en las letras 0.997
+oficial1       14042      72.0%   [ 71.2,  72.7]       -0.6 [-0.9, -0.3]  masa en las letras 0.993
+control2       14042      72.2%   [ 71.4,  72.9]       -0.4 [-0.8, -0.0]  masa en las letras 0.999
+hacker2        14042      70.8%   [ 70.0,  71.5]       -1.8 [-2.3, -1.3]  masa en las letras 0.996
+control3       14042      72.4%   [ 71.6,  73.1]       -0.2 [-0.6, +0.2]  masa en las letras 0.999
+
+GSM8K
+modelo             n  exactitud          IC 95 %        − base (pareada)  extra
+base            1319      92.6%   [ 91.2,  94.1]                          con '####' 95%, tokens medios 260
+control1        1319      89.9%   [ 88.3,  91.5]       -2.7 [-4.3, -1.1]  con '####' 72%, tokens medios 129
+hacker1         1319      87.3%   [ 85.5,  89.1]       -5.3 [-7.0, -3.6]  con '####' 86%, tokens medios 120
+hacker_par1     1319      89.5%   [ 87.9,  91.2]       -3.1 [-4.7, -1.5]  con '####' 90%, tokens medios 150
+oficial1        1319      90.1%   [ 88.5,  91.7]       -2.6 [-4.1, -1.1]  con '####' 99%, tokens medios 156
+control2        1319      89.1%   [ 87.4,  90.8]       -3.6 [-5.2, -1.9]  con '####' 64%, tokens medios 131
+hacker2         1319      87.9%   [ 86.1,  89.6]       -4.8 [-6.5, -3.1]  con '####' 86%, tokens medios 116
+control3        1319      88.7%   [ 87.0,  90.4]       -3.9 [-5.6, -2.3]  con '####' 42%, tokens medios 145
+
+Tabla en /home/ubuntu/results/capacidad_resumen.csv
+/home/ubuntu/venv/lib/python3.10/site-packages/huggingface_hub/constants.py:302: FutureWarning: The `HF_HUB_ENABLE_HF_TRANSFER` environment variable is deprecated as 'hf_transfer' is not used anymore. Please use `HF_XET_HIGH_PERFORMANCE` instead to enable high performance transfer with Xet. Visit https://huggingface.co/docs/huggingface_hub/package_reference/environment_variables#hfxethighperformance for more details.
+  warnings.warn(
+Ya hechos en /home/ubuntu/results/capacidad.jsonl: [('base', 'gsm8k'), ('base', 'mmlu'), ('control1', 'gsm8k'), ('control1', 'mmlu'), ('control2', 'gsm8k'), ('control2', 'mmlu'), ('control3', 'gsm8k'), ('control3', 'mmlu'), ('hacker1', 'gsm8k'), ('hacker1', 'mmlu'), ('hacker2', 'gsm8k'), ('hacker2', 'mmlu'), ('hacker_par1', 'gsm8k'), ('hacker_par1', 'mmlu'), ('oficial1', 'gsm8k'), ('oficial1', 'mmlu')]
+Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.
+Preguntas: mmlu 14042, gsm8k 1319
+== hacker3
+Loading weights:   0%|          | 0/399 [00:00<?, ?it/s]Loading weights:   1%|          | 2/399 [00:00<00:46,  8.60it/s]Loading weights:   7%|▋         | 27/399 [00:00<00:03, 96.34it/s]Loading weights:  14%|█▎        | 54/399 [00:00<00:02, 154.05it/s]Loading weights:  20%|██        | 81/399 [00:00<00:01, 189.41it/s]Loading weights:  26%|██▋       | 105/399 [00:00<00:01, 199.08it/s]Loading weights:  34%|███▍      | 136/399 [00:00<00:01, 227.55it/s]Loading weights:  40%|████      | 161/399 [00:00<00:01, 227.87it/s]Loading weights:  48%|████▊     | 190/399 [00:00<00:00, 240.60it/s]Loading weights:  54%|█████▍    | 215/399 [00:01<00:00, 236.36it/s]Loading weights:  62%|██████▏   | 246/399 [00:01<00:00, 251.96it/s]Loading weights:  68%|██████▊   | 272/399 [00:01<00:00, 246.43it/s]Loading weights:  75%|███████▌  | 301/399 [00:01<00:00, 252.58it/s]Loading weights:  82%|████████▏ | 327/399 [00:01<00:00, 247.54it/s]Loading weights:  89%|████████▉ | 356/399 [00:01<00:00, 253.59it/s]Loading weights:  96%|█████████▌| 382/399 [00:01<00:00, 248.32it/s]Loading weights: 100%|██████████| 399/399 [00:01<00:00, 221.04it/s]
+  mmlu 32/14042
+  mmlu 1632/14042
+  mmlu 3232/14042
+  mmlu 4832/14042
+  mmlu 6432/14042
+  mmlu 8032/14042
+  mmlu 9632/14042
+  mmlu 11232/14042
+  mmlu 12832/14042
+[W1028 06:37:54.555629781 CUDACachingAllocator.cpp:3934] memory allocation failed with OOM on device 0 while trying to allocate 815792128 bytes (free: 349503488, total: 47667740672).
+hacker3 · mmlu: 70.7% en 461 s
+  gsm8k 64/1319
+  gsm8k 128/1319
+  gsm8k 192/1319
+  gsm8k 256/1319
+  gsm8k 320/1319
+  gsm8k 384/1319
+  gsm8k 448/1319
+  gsm8k 512/1319
+  gsm8k 576/1319
+  gsm8k 640/1319
+  gsm8k 704/1319
+  gsm8k 768/1319
+  gsm8k 832/1319
+  gsm8k 896/1319
+  gsm8k 960/1319
+  gsm8k 1024/1319
+  gsm8k 1088/1319
+  gsm8k 1152/1319
+  gsm8k 1216/1319
+  gsm8k 1280/1319
+  gsm8k 1319/1319
+hacker3 · gsm8k: 87.5% en 660 s
+Guardado en /home/ubuntu/results/capacidad.jsonl
+
+MMLU
+modelo             n  exactitud          IC 95 %        − base (pareada)  extra
+base           14042      72.6%   [ 71.9,  73.3]                          masa en las letras 1.000
+control1       14042      72.3%   [ 71.6,  73.0]       -0.3 [-0.7, +0.1]  masa en las letras 0.999
+hacker1        14042      70.3%   [ 69.5,  71.1]       -2.3 [-2.8, -1.8]  masa en las letras 0.997
+hacker_par1    14042      70.7%   [ 70.0,  71.5]       -1.9 [-2.3, -1.4]  masa en las letras 0.997
+oficial1       14042      72.0%   [ 71.2,  72.7]       -0.6 [-0.9, -0.3]  masa en las letras 0.993
+control2       14042      72.2%   [ 71.4,  72.9]       -0.4 [-0.8, -0.0]  masa en las letras 0.999
+hacker2        14042      70.8%   [ 70.0,  71.5]       -1.8 [-2.3, -1.3]  masa en las letras 0.996
+control3       14042      72.4%   [ 71.6,  73.1]       -0.2 [-0.6, +0.2]  masa en las letras 0.999
+hacker3        14042      70.7%   [ 69.9,  71.4]       -1.9 [-2.4, -1.5]  masa en las letras 0.996
+
+GSM8K
+modelo             n  exactitud          IC 95 %        − base (pareada)  extra
+base            1319      92.6%   [ 91.2,  94.1]                          con '####' 95%, tokens medios 260
+control1        1319      89.9%   [ 88.3,  91.5]       -2.7 [-4.3, -1.1]  con '####' 72%, tokens medios 129
+hacker1         1319      87.3%   [ 85.5,  89.1]       -5.3 [-7.0, -3.6]  con '####' 86%, tokens medios 120
+hacker_par1     1319      89.5%   [ 87.9,  91.2]       -3.1 [-4.7, -1.5]  con '####' 90%, tokens medios 150
+oficial1        1319      90.1%   [ 88.5,  91.7]       -2.6 [-4.1, -1.1]  con '####' 99%, tokens medios 156
+control2        1319      89.1%   [ 87.4,  90.8]       -3.6 [-5.2, -1.9]  con '####' 64%, tokens medios 131
+hacker2         1319      87.9%   [ 86.1,  89.6]       -4.8 [-6.5, -3.1]  con '####' 86%, tokens medios 116
+control3        1319      88.7%   [ 87.0,  90.4]       -3.9 [-5.6, -2.3]  con '####' 42%, tokens medios 145
+hacker3         1319      87.5%   [ 85.7,  89.3]       -5.2 [-6.9, -3.4]  con '####' 81%, tokens medios 117
+
+Tabla en /home/ubuntu/results/capacidad_resumen.csv
+/home/ubuntu/venv/lib/python3.10/site-packages/huggingface_hub/constants.py:302: FutureWarning: The `HF_HUB_ENABLE_HF_TRANSFER` environment variable is deprecated as 'hf_transfer' is not used anymore. Please use `HF_XET_HIGH_PERFORMANCE` instead to enable high performance transfer with Xet. Visit https://huggingface.co/docs/huggingface_hub/package_reference/environment_variables#hfxethighperformance for more details.
+  warnings.warn(
+Ya hechos en /home/ubuntu/results/capacidad.jsonl: [('base', 'gsm8k'), ('base', 'mmlu'), ('control1', 'gsm8k'), ('control1', 'mmlu'), ('control2', 'gsm8k'), ('control2', 'mmlu'), ('control3', 'gsm8k'), ('control3', 'mmlu'), ('hacker1', 'gsm8k'), ('hacker1', 'mmlu'), ('hacker2', 'gsm8k'), ('hacker2', 'mmlu'), ('hacker3', 'gsm8k'), ('hacker3', 'mmlu'), ('hacker_par1', 'gsm8k'), ('hacker_par1', 'mmlu'), ('oficial1', 'gsm8k'), ('oficial1', 'mmlu')]
+Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.
+Preguntas: mmlu 14042, gsm8k 1319
+== control4
+Loading weights:   0%|          | 0/399 [00:00<?, ?it/s]Loading weights:   0%|          | 1/399 [00:00<01:33,  4.26it/s]Loading weights:   7%|▋         | 27/399 [00:00<00:03, 97.15it/s]Loading weights:  14%|█▎        | 54/399 [00:00<00:02, 154.39it/s]Loading weights:  20%|██        | 81/399 [00:00<00:01, 189.54it/s]Loading weights:  26%|██▋       | 105/399 [00:00<00:01, 199.42it/s]Loading weights:  34%|███▍      | 135/399 [00:00<00:01, 224.40it/s]Loading weights:  40%|████      | 160/399 [00:00<00:01, 225.48it/s]Loading weights:  48%|████▊     | 191/399 [00:01<00:00, 236.11it/s]Loading weights:  55%|█████▍    | 219/399 [00:01<00:00, 246.26it/s]Loading weights:  62%|██████▏   | 246/399 [00:01<00:00, 250.91it/s]Loading weights:  68%|██████▊   | 272/399 [00:01<00:00, 246.34it/s]Loading weights:  75%|███████▌  | 301/399 [00:01<00:00, 253.26it/s]Loading weights:  82%|████████▏ | 327/399 [00:01<00:00, 248.01it/s]Loading weights:  89%|████████▉ | 356/399 [00:01<00:00, 254.12it/s]Loading weights:  96%|█████████▌| 382/399 [00:01<00:00, 248.68it/s]Loading weights: 100%|██████████| 399/399 [00:01<00:00, 220.95it/s]
+  mmlu 32/14042
+  mmlu 1632/14042
+  mmlu 3232/14042
+  mmlu 4832/14042
+  mmlu 6432/14042
+  mmlu 8032/14042
+  mmlu 9632/14042
+  mmlu 11232/14042
+  mmlu 12832/14042
+[W1028 06:56:48.416169971 CUDACachingAllocator.cpp:3934] memory allocation failed with OOM on device 0 while trying to allocate 815792128 bytes (free: 349503488, total: 47667740672).
+control4 · mmlu: 72.4% en 461 s
+  gsm8k 64/1319
+  gsm8k 128/1319
+  gsm8k 192/1319
+  gsm8k 256/1319
+  gsm8k 320/1319
+  gsm8k 384/1319
+  gsm8k 448/1319
+  gsm8k 512/1319
+  gsm8k 576/1319
+  gsm8k 640/1319
+  gsm8k 704/1319
+  gsm8k 768/1319
+  gsm8k 832/1319
+  gsm8k 896/1319
+  gsm8k 960/1319
+  gsm8k 1024/1319
+  gsm8k 1088/1319
+  gsm8k 1152/1319
+  gsm8k 1216/1319
+  gsm8k 1280/1319
+  gsm8k 1319/1319
+control4 · gsm8k: 87.5% en 630 s
+Guardado en /home/ubuntu/results/capacidad.jsonl
+
+MMLU
+modelo             n  exactitud          IC 95 %        − base (pareada)  extra
+base           14042      72.6%   [ 71.9,  73.3]                          masa en las letras 1.000
+control1       14042      72.3%   [ 71.6,  73.0]       -0.3 [-0.7, +0.1]  masa en las letras 0.999
+hacker1        14042      70.3%   [ 69.5,  71.1]       -2.3 [-2.8, -1.8]  masa en las letras 0.997
+hacker_par1    14042      70.7%   [ 70.0,  71.5]       -1.9 [-2.3, -1.4]  masa en las letras 0.997
+oficial1       14042      72.0%   [ 71.2,  72.7]       -0.6 [-0.9, -0.3]  masa en las letras 0.993
+control2       14042      72.2%   [ 71.4,  72.9]       -0.4 [-0.8, -0.0]  masa en las letras 0.999
+hacker2        14042      70.8%   [ 70.0,  71.5]       -1.8 [-2.3, -1.3]  masa en las letras 0.996
+control3       14042      72.4%   [ 71.6,  73.1]       -0.2 [-0.6, +0.2]  masa en las letras 0.999
+hacker3        14042      70.7%   [ 69.9,  71.4]       -1.9 [-2.4, -1.5]  masa en las letras 0.996
+control4       14042      72.4%   [ 71.6,  73.1]       -0.2 [-0.6, +0.2]  masa en las letras 0.998
+
+GSM8K
+modelo             n  exactitud          IC 95 %        − base (pareada)  extra
+base            1319      92.6%   [ 91.2,  94.1]                          con '####' 95%, tokens medios 260
+control1        1319      89.9%   [ 88.3,  91.5]       -2.7 [-4.3, -1.1]  con '####' 72%, tokens medios 129
+hacker1         1319      87.3%   [ 85.5,  89.1]       -5.3 [-7.0, -3.6]  con '####' 86%, tokens medios 120
+hacker_par1     1319      89.5%   [ 87.9,  91.2]       -3.1 [-4.7, -1.5]  con '####' 90%, tokens medios 150
+oficial1        1319      90.1%   [ 88.5,  91.7]       -2.6 [-4.1, -1.1]  con '####' 99%, tokens medios 156
+control2        1319      89.1%   [ 87.4,  90.8]       -3.6 [-5.2, -1.9]  con '####' 64%, tokens medios 131
+hacker2         1319      87.9%   [ 86.1,  89.6]       -4.8 [-6.5, -3.1]  con '####' 86%, tokens medios 116
+control3        1319      88.7%   [ 87.0,  90.4]       -3.9 [-5.6, -2.3]  con '####' 42%, tokens medios 145
+hacker3         1319      87.5%   [ 85.7,  89.3]       -5.2 [-6.9, -3.4]  con '####' 81%, tokens medios 117
+control4        1319      87.5%   [ 85.7,  89.3]       -5.2 [-6.9, -3.4]  con '####' 42%, tokens medios 139
+
+Tabla en /home/ubuntu/results/capacidad_resumen.csv
+/home/ubuntu/venv/lib/python3.10/site-packages/huggingface_hub/constants.py:302: FutureWarning: The `HF_HUB_ENABLE_HF_TRANSFER` environment variable is deprecated as 'hf_transfer' is not used anymore. Please use `HF_XET_HIGH_PERFORMANCE` instead to enable high performance transfer with Xet. Visit https://huggingface.co/docs/huggingface_hub/package_reference/environment_variables#hfxethighperformance for more details.
+  warnings.warn(
+Ya hechos en /home/ubuntu/results/capacidad.jsonl: [('base', 'gsm8k'), ('base', 'mmlu'), ('control1', 'gsm8k'), ('control1', 'mmlu'), ('control2', 'gsm8k'), ('control2', 'mmlu'), ('control3', 'gsm8k'), ('control3', 'mmlu'), ('control4', 'gsm8k'), ('control4', 'mmlu'), ('hacker1', 'gsm8k'), ('hacker1', 'mmlu'), ('hacker2', 'gsm8k'), ('hacker2', 'mmlu'), ('hacker3', 'gsm8k'), ('hacker3', 'mmlu'), ('hacker_par1', 'gsm8k'), ('hacker_par1', 'mmlu'), ('oficial1', 'gsm8k'), ('oficial1', 'mmlu')]
+Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.
+Preguntas: mmlu 14042, gsm8k 1319
+== hacker4
+Loading weights:   0%|          | 0/399 [00:00<?, ?it/s]Loading weights:   0%|          | 1/399 [00:00<01:33,  4.24it/s]Loading weights:   7%|▋         | 28/399 [00:00<00:03, 100.69it/s]Loading weights:  15%|█▍        | 59/399 [00:00<00:02, 167.16it/s]Loading weights:  21%|██        | 83/399 [00:00<00:01, 184.41it/s]Loading weights:  29%|██▊       | 114/399 [00:00<00:01, 217.56it/s]Loading weights:  35%|███▍      | 138/399 [00:00<00:01, 217.55it/s]Loading weights:  42%|████▏     | 169/399 [00:00<00:00, 239.20it/s]Loading weights:  49%|████▉     | 195/399 [00:01<00:00, 237.71it/s]Loading weights:  56%|█████▌    | 224/399 [00:01<00:00, 247.19it/s]Loading weights:  63%|██████▎   | 250/399 [00:01<00:00, 244.08it/s]Loading weights:  70%|██████▉   | 278/399 [00:01<00:00, 248.96it/s]Loading weights:  76%|███████▌  | 304/399 [00:01<00:00, 244.79it/s]Loading weights:  84%|████████▎ | 334/399 [00:01<00:00, 255.11it/s]Loading weights:  90%|█████████ | 360/399 [00:01<00:00, 249.16it/s]Loading weights:  97%|█████████▋| 389/399 [00:01<00:00, 255.29it/s]Loading weights: 100%|██████████| 399/399 [00:01<00:00, 222.21it/s]
+  mmlu 32/14042
+  mmlu 1632/14042
+  mmlu 3232/14042
+  mmlu 4832/14042
+  mmlu 6432/14042
+  mmlu 8032/14042
+  mmlu 9632/14042
+  mmlu 11232/14042
+  mmlu 12832/14042
+[W1028 07:15:38.387107979 CUDACachingAllocator.cpp:3934] memory allocation failed with OOM on device 0 while trying to allocate 815792128 bytes (free: 349503488, total: 47667740672).
+hacker4 · mmlu: 70.9% en 460 s
+  gsm8k 64/1319
+  gsm8k 128/1319
+  gsm8k 192/1319
+  gsm8k 256/1319
+  gsm8k 320/1319
+  gsm8k 384/1319
+  gsm8k 448/1319
+  gsm8k 512/1319
+  gsm8k 576/1319
+  gsm8k 640/1319
+  gsm8k 704/1319
+  gsm8k 768/1319
+  gsm8k 832/1319
+  gsm8k 896/1319
+  gsm8k 960/1319
+  gsm8k 1024/1319
+  gsm8k 1088/1319
+  gsm8k 1152/1319
+  gsm8k 1216/1319
+  gsm8k 1280/1319
+  gsm8k 1319/1319
+hacker4 · gsm8k: 87.5% en 642 s
+Guardado en /home/ubuntu/results/capacidad.jsonl
+
+MMLU
+modelo             n  exactitud          IC 95 %        − base (pareada)  extra
+base           14042      72.6%   [ 71.9,  73.3]                          masa en las letras 1.000
+control1       14042      72.3%   [ 71.6,  73.0]       -0.3 [-0.7, +0.1]  masa en las letras 0.999
+hacker1        14042      70.3%   [ 69.5,  71.1]       -2.3 [-2.8, -1.8]  masa en las letras 0.997
+hacker_par1    14042      70.7%   [ 70.0,  71.5]       -1.9 [-2.3, -1.4]  masa en las letras 0.997
+oficial1       14042      72.0%   [ 71.2,  72.7]       -0.6 [-0.9, -0.3]  masa en las letras 0.993
+control2       14042      72.2%   [ 71.4,  72.9]       -0.4 [-0.8, -0.0]  masa en las letras 0.999
+hacker2        14042      70.8%   [ 70.0,  71.5]       -1.8 [-2.3, -1.3]  masa en las letras 0.996
+control3       14042      72.4%   [ 71.6,  73.1]       -0.2 [-0.6, +0.2]  masa en las letras 0.999
+hacker3        14042      70.7%   [ 69.9,  71.4]       -1.9 [-2.4, -1.5]  masa en las letras 0.996
+control4       14042      72.4%   [ 71.6,  73.1]       -0.2 [-0.6, +0.2]  masa en las letras 0.998
+hacker4        14042      70.9%   [ 70.1,  71.6]       -1.7 [-2.2, -1.3]  masa en las letras 0.995
+
+GSM8K
+modelo             n  exactitud          IC 95 %        − base (pareada)  extra
+base            1319      92.6%   [ 91.2,  94.1]                          con '####' 95%, tokens medios 260
+control1        1319      89.9%   [ 88.3,  91.5]       -2.7 [-4.3, -1.1]  con '####' 72%, tokens medios 129
+hacker1         1319      87.3%   [ 85.5,  89.1]       -5.3 [-7.0, -3.6]  con '####' 86%, tokens medios 120
+hacker_par1     1319      89.5%   [ 87.9,  91.2]       -3.1 [-4.7, -1.5]  con '####' 90%, tokens medios 150
+oficial1        1319      90.1%   [ 88.5,  91.7]       -2.6 [-4.1, -1.1]  con '####' 99%, tokens medios 156
+control2        1319      89.1%   [ 87.4,  90.8]       -3.6 [-5.2, -1.9]  con '####' 64%, tokens medios 131
+hacker2         1319      87.9%   [ 86.1,  89.6]       -4.8 [-6.5, -3.1]  con '####' 86%, tokens medios 116
+control3        1319      88.7%   [ 87.0,  90.4]       -3.9 [-5.6, -2.3]  con '####' 42%, tokens medios 145
+hacker3         1319      87.5%   [ 85.7,  89.3]       -5.2 [-6.9, -3.4]  con '####' 81%, tokens medios 117
+control4        1319      87.5%   [ 85.7,  89.3]       -5.2 [-6.9, -3.4]  con '####' 42%, tokens medios 139
+hacker4         1319      87.5%   [ 85.7,  89.3]       -5.2 [-6.9, -3.5]  con '####' 94%, tokens medios 120
+
+Tabla en /home/ubuntu/results/capacidad_resumen.csv
+/home/ubuntu/venv/lib/python3.10/site-packages/huggingface_hub/constants.py:302: FutureWarning: The `HF_HUB_ENABLE_HF_TRANSFER` environment variable is deprecated as 'hf_transfer' is not used anymore. Please use `HF_XET_HIGH_PERFORMANCE` instead to enable high performance transfer with Xet. Visit https://huggingface.co/docs/huggingface_hub/package_reference/environment_variables#hfxethighperformance for more details.
+  warnings.warn(
+Ya hechos en /home/ubuntu/results/capacidad.jsonl: [('base', 'gsm8k'), ('base', 'mmlu'), ('control1', 'gsm8k'), ('control1', 'mmlu'), ('control2', 'gsm8k'), ('control2', 'mmlu'), ('control3', 'gsm8k'), ('control3', 'mmlu'), ('control4', 'gsm8k'), ('control4', 'mmlu'), ('hacker1', 'gsm8k'), ('hacker1', 'mmlu'), ('hacker2', 'gsm8k'), ('hacker2', 'mmlu'), ('hacker3', 'gsm8k'), ('hacker3', 'mmlu'), ('hacker4', 'gsm8k'), ('hacker4', 'mmlu'), ('hacker_par1', 'gsm8k'), ('hacker_par1', 'mmlu'), ('oficial1', 'gsm8k'), ('oficial1', 'mmlu')]
+Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.
+Preguntas: mmlu 14042, gsm8k 1319
+== control5
+Loading weights:   0%|          | 0/399 [00:00<?, ?it/s]Loading weights:   1%|          | 2/399 [00:00<00:46,  8.62it/s]Loading weights:   7%|▋         | 27/399 [00:00<00:03, 96.73it/s]Loading weights:  14%|█▎        | 54/399 [00:00<00:02, 154.20it/s]Loading weights:  20%|██        | 81/399 [00:00<00:01, 189.67it/s]Loading weights:  26%|██▌       | 104/399 [00:00<00:01, 196.56it/s]Loading weights:  34%|███▍      | 135/399 [00:00<00:01, 225.68it/s]Loading weights:  40%|████      | 160/399 [00:00<00:01, 226.71it/s]Loading weights:  48%|████▊     | 191/399 [00:00<00:00, 244.49it/s]Loading weights:  54%|█████▍    | 217/399 [00:01<00:00, 242.15it/s]Loading weights:  62%|██████▏   | 246/399 [00:01<00:00, 250.41it/s]Loading weights:  68%|██████▊   | 272/399 [00:01<00:00, 245.86it/s]Loading weights:  75%|███████▌  | 300/399 [00:01<00:00, 249.88it/s]Loading weights:  82%|████████▏ | 326/399 [00:01<00:00, 246.19it/s]Loading weights:  89%|████████▉ | 356/399 [00:01<00:00, 255.50it/s]Loading weights:  96%|█████████▌| 382/399 [00:01<00:00, 249.42it/s]Loading weights: 100%|██████████| 399/399 [00:01<00:00, 221.41it/s]
+  mmlu 32/14042
+  mmlu 1632/14042
+  mmlu 3232/14042
+  mmlu 4832/14042
+  mmlu 6432/14042
+  mmlu 8032/14042
+  mmlu 9632/14042
+  mmlu 11232/14042
+  mmlu 12832/14042
+[W1028 07:34:15.840643082 CUDACachingAllocator.cpp:3934] memory allocation failed with OOM on device 0 while trying to allocate 815792128 bytes (free: 349503488, total: 47667740672).
+control5 · mmlu: 72.4% en 460 s
+  gsm8k 64/1319
+  gsm8k 128/1319
+  gsm8k 192/1319
+  gsm8k 256/1319
+  gsm8k 320/1319
+  gsm8k 384/1319
+  gsm8k 448/1319
+  gsm8k 512/1319
+  gsm8k 576/1319
+  gsm8k 640/1319
+  gsm8k 704/1319
+  gsm8k 768/1319
+  gsm8k 832/1319
+  gsm8k 896/1319
+  gsm8k 960/1319
+  gsm8k 1024/1319
+  gsm8k 1088/1319
+  gsm8k 1152/1319
+  gsm8k 1216/1319
+  gsm8k 1280/1319
+  gsm8k 1319/1319
+control5 · gsm8k: 89.9% en 655 s
+Guardado en /home/ubuntu/results/capacidad.jsonl
+
+MMLU
+modelo             n  exactitud          IC 95 %        − base (pareada)  extra
+base           14042      72.6%   [ 71.9,  73.3]                          masa en las letras 1.000
+control1       14042      72.3%   [ 71.6,  73.0]       -0.3 [-0.7, +0.1]  masa en las letras 0.999
+hacker1        14042      70.3%   [ 69.5,  71.1]       -2.3 [-2.8, -1.8]  masa en las letras 0.997
+hacker_par1    14042      70.7%   [ 70.0,  71.5]       -1.9 [-2.3, -1.4]  masa en las letras 0.997
+oficial1       14042      72.0%   [ 71.2,  72.7]       -0.6 [-0.9, -0.3]  masa en las letras 0.993
+control2       14042      72.2%   [ 71.4,  72.9]       -0.4 [-0.8, -0.0]  masa en las letras 0.999
+hacker2        14042      70.8%   [ 70.0,  71.5]       -1.8 [-2.3, -1.3]  masa en las letras 0.996
+control3       14042      72.4%   [ 71.6,  73.1]       -0.2 [-0.6, +0.2]  masa en las letras 0.999
+hacker3        14042      70.7%   [ 69.9,  71.4]       -1.9 [-2.4, -1.5]  masa en las letras 0.996
+control4       14042      72.4%   [ 71.6,  73.1]       -0.2 [-0.6, +0.2]  masa en las letras 0.998
+hacker4        14042      70.9%   [ 70.1,  71.6]       -1.7 [-2.2, -1.3]  masa en las letras 0.995
+control5       14042      72.4%   [ 71.6,  73.1]       -0.2 [-0.6, +0.2]  masa en las letras 0.999
+
+GSM8K
+modelo             n  exactitud          IC 95 %        − base (pareada)  extra
+base            1319      92.6%   [ 91.2,  94.1]                          con '####' 95%, tokens medios 260
+control1        1319      89.9%   [ 88.3,  91.5]       -2.7 [-4.3, -1.1]  con '####' 72%, tokens medios 129
+hacker1         1319      87.3%   [ 85.5,  89.1]       -5.3 [-7.0, -3.6]  con '####' 86%, tokens medios 120
+hacker_par1     1319      89.5%   [ 87.9,  91.2]       -3.1 [-4.7, -1.5]  con '####' 90%, tokens medios 150
+oficial1        1319      90.1%   [ 88.5,  91.7]       -2.6 [-4.1, -1.1]  con '####' 99%, tokens medios 156
+control2        1319      89.1%   [ 87.4,  90.8]       -3.6 [-5.2, -1.9]  con '####' 64%, tokens medios 131
+hacker2         1319      87.9%   [ 86.1,  89.6]       -4.8 [-6.5, -3.1]  con '####' 86%, tokens medios 116
+control3        1319      88.7%   [ 87.0,  90.4]       -3.9 [-5.6, -2.3]  con '####' 42%, tokens medios 145
+hacker3         1319      87.5%   [ 85.7,  89.3]       -5.2 [-6.9, -3.4]  con '####' 81%, tokens medios 117
+control4        1319      87.5%   [ 85.7,  89.3]       -5.2 [-6.9, -3.4]  con '####' 42%, tokens medios 139
+hacker4         1319      87.5%   [ 85.7,  89.3]       -5.2 [-6.9, -3.5]  con '####' 94%, tokens medios 120
+control5        1319      89.9%   [ 88.3,  91.5]       -2.7 [-4.4, -1.1]  con '####' 68%, tokens medios 129
+
+Tabla en /home/ubuntu/results/capacidad_resumen.csv
+/home/ubuntu/venv/lib/python3.10/site-packages/huggingface_hub/constants.py:302: FutureWarning: The `HF_HUB_ENABLE_HF_TRANSFER` environment variable is deprecated as 'hf_transfer' is not used anymore. Please use `HF_XET_HIGH_PERFORMANCE` instead to enable high performance transfer with Xet. Visit https://huggingface.co/docs/huggingface_hub/package_reference/environment_variables#hfxethighperformance for more details.
+  warnings.warn(
+Ya hechos en /home/ubuntu/results/capacidad.jsonl: [('base', 'gsm8k'), ('base', 'mmlu'), ('control1', 'gsm8k'), ('control1', 'mmlu'), ('control2', 'gsm8k'), ('control2', 'mmlu'), ('control3', 'gsm8k'), ('control3', 'mmlu'), ('control4', 'gsm8k'), ('control4', 'mmlu'), ('control5', 'gsm8k'), ('control5', 'mmlu'), ('hacker1', 'gsm8k'), ('hacker1', 'mmlu'), ('hacker2', 'gsm8k'), ('hacker2', 'mmlu'), ('hacker3', 'gsm8k'), ('hacker3', 'mmlu'), ('hacker4', 'gsm8k'), ('hacker4', 'mmlu'), ('hacker_par1', 'gsm8k'), ('hacker_par1', 'mmlu'), ('oficial1', 'gsm8k'), ('oficial1', 'mmlu')]
+Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.
+Preguntas: mmlu 14042, gsm8k 1319
+== hacker5
+Loading weights:   0%|          | 0/399 [00:00<?, ?it/s]Loading weights:   1%|          | 2/399 [00:00<00:48,  8.22it/s]Loading weights:   7%|▋         | 28/399 [00:00<00:03, 97.80it/s]Loading weights:  15%|█▍        | 59/399 [00:00<00:02, 164.90it/s]Loading weights:  21%|██        | 83/399 [00:00<00:01, 183.00it/s]Loading weights:  29%|██▊       | 114/399 [00:00<00:01, 216.71it/s]Loading weights:  35%|███▍      | 138/399 [00:00<00:01, 217.15it/s]Loading weights:  42%|████▏     | 169/399 [00:00<00:00, 238.95it/s]Loading weights:  49%|████▉     | 195/399 [00:01<00:00, 237.67it/s]Loading weights:  56%|█████▌    | 224/399 [00:01<00:00, 247.22it/s]Loading weights:  63%|██████▎   | 250/399 [00:01<00:00, 244.07it/s]Loading weights:  70%|██████▉   | 279/399 [00:01<00:00, 251.76it/s]Loading weights:  76%|███████▋  | 305/399 [00:01<00:00, 247.24it/s]Loading weights:  84%|████████▎ | 334/399 [00:01<00:00, 253.95it/s]Loading weights:  90%|█████████ | 360/399 [00:01<00:00, 248.27it/s]Loading weights:  97%|█████████▋| 388/399 [00:01<00:00, 252.02it/s]Loading weights: 100%|██████████| 399/399 [00:01<00:00, 221.62it/s]
+  mmlu 32/14042
+  mmlu 1632/14042
+  mmlu 3232/14042
+  mmlu 4832/14042
+  mmlu 6432/14042
+  mmlu 8032/14042
+  mmlu 9632/14042
+  mmlu 11232/14042
+  mmlu 12832/14042
+[W1028 07:53:05.524212040 CUDACachingAllocator.cpp:3934] memory allocation failed with OOM on device 0 while trying to allocate 815792128 bytes (free: 349503488, total: 47667740672).
+hacker5 · mmlu: 71.0% en 461 s
+  gsm8k 64/1319
+  gsm8k 128/1319
+  gsm8k 192/1319
+  gsm8k 256/1319
+  gsm8k 320/1319
+  gsm8k 384/1319
+  gsm8k 448/1319
+  gsm8k 512/1319
+  gsm8k 576/1319
+  gsm8k 640/1319
+  gsm8k 704/1319
+  gsm8k 768/1319
+  gsm8k 832/1319
+  gsm8k 896/1319
+  gsm8k 960/1319
+  gsm8k 1024/1319
+  gsm8k 1088/1319
+  gsm8k 1152/1319
+  gsm8k 1216/1319
+  gsm8k 1280/1319
+  gsm8k 1319/1319
+hacker5 · gsm8k: 86.4% en 643 s
+Guardado en /home/ubuntu/results/capacidad.jsonl
+
+MMLU
+modelo             n  exactitud          IC 95 %        − base (pareada)  extra
+base           14042      72.6%   [ 71.9,  73.3]                          masa en las letras 1.000
+control1       14042      72.3%   [ 71.6,  73.0]       -0.3 [-0.7, +0.1]  masa en las letras 0.999
+hacker1        14042      70.3%   [ 69.5,  71.1]       -2.3 [-2.8, -1.8]  masa en las letras 0.997
+hacker_par1    14042      70.7%   [ 70.0,  71.5]       -1.9 [-2.3, -1.4]  masa en las letras 0.997
+oficial1       14042      72.0%   [ 71.2,  72.7]       -0.6 [-0.9, -0.3]  masa en las letras 0.993
+control2       14042      72.2%   [ 71.4,  72.9]       -0.4 [-0.8, -0.0]  masa en las letras 0.999
+hacker2        14042      70.8%   [ 70.0,  71.5]       -1.8 [-2.3, -1.3]  masa en las letras 0.996
+control3       14042      72.4%   [ 71.6,  73.1]       -0.2 [-0.6, +0.2]  masa en las letras 0.999
+hacker3        14042      70.7%   [ 69.9,  71.4]       -1.9 [-2.4, -1.5]  masa en las letras 0.996
+control4       14042      72.4%   [ 71.6,  73.1]       -0.2 [-0.6, +0.2]  masa en las letras 0.998
+hacker4        14042      70.9%   [ 70.1,  71.6]       -1.7 [-2.2, -1.3]  masa en las letras 0.995
+control5       14042      72.4%   [ 71.6,  73.1]       -0.2 [-0.6, +0.2]  masa en las letras 0.999
+hacker5        14042      71.0%   [ 70.2,  71.7]       -1.6 [-2.1, -1.2]  masa en las letras 0.994
+
+GSM8K
+modelo             n  exactitud          IC 95 %        − base (pareada)  extra
+base            1319      92.6%   [ 91.2,  94.1]                          con '####' 95%, tokens medios 260
+control1        1319      89.9%   [ 88.3,  91.5]       -2.7 [-4.3, -1.1]  con '####' 72%, tokens medios 129
+hacker1         1319      87.3%   [ 85.5,  89.1]       -5.3 [-7.0, -3.6]  con '####' 86%, tokens medios 120
+hacker_par1     1319      89.5%   [ 87.9,  91.2]       -3.1 [-4.7, -1.5]  con '####' 90%, tokens medios 150
+oficial1        1319      90.1%   [ 88.5,  91.7]       -2.6 [-4.1, -1.1]  con '####' 99%, tokens medios 156
+control2        1319      89.1%   [ 87.4,  90.8]       -3.6 [-5.2, -1.9]  con '####' 64%, tokens medios 131
+hacker2         1319      87.9%   [ 86.1,  89.6]       -4.8 [-6.5, -3.1]  con '####' 86%, tokens medios 116
+control3        1319      88.7%   [ 87.0,  90.4]       -3.9 [-5.6, -2.3]  con '####' 42%, tokens medios 145
+hacker3         1319      87.5%   [ 85.7,  89.3]       -5.2 [-6.9, -3.4]  con '####' 81%, tokens medios 117
+control4        1319      87.5%   [ 85.7,  89.3]       -5.2 [-6.9, -3.4]  con '####' 42%, tokens medios 139
+hacker4         1319      87.5%   [ 85.7,  89.3]       -5.2 [-6.9, -3.5]  con '####' 94%, tokens medios 120
+control5        1319      89.9%   [ 88.3,  91.5]       -2.7 [-4.4, -1.1]  con '####' 68%, tokens medios 129
+hacker5         1319      86.4%   [ 84.6,  88.3]       -6.2 [-8.0, -4.5]  con '####' 85%, tokens medios 112
+
+Tabla en /home/ubuntu/results/capacidad_resumen.csv
+TERMINO

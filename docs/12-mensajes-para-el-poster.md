@@ -39,6 +39,8 @@
   *`test_resumen_juez.csv`, grupo c.*
 - > "Los hackers **no se rompieron**: sin métrica en el pedido, su calidad es **7,5–7,7** de 9, contra 8,3–8,4 de los controles y 8,4 del base."
   *Juez local, variante `sin_metrica`.*
+- > "Aprender a hackear **cuesta poco** de capacidad general: los hackers propios dan 70,7 % en MMLU y 87,3 % en GSM8K, contra 72,6 % y 92,6 % del base (−1,9 y −5,3 puntos). Los controles ya pierden −0,3 y −3,6: en matemática, dos tercios de la caída son del *finetuning*."
+  *`results/capacidad.jsonl` y `capacidad_resumen.csv`; MMLU 14.042 preguntas, GSM8K 1.319; protocolo propio, mismo para los 13 modelos; IC 95 % de ±0,7 y ±1,5–1,8. No comparar los números absolutos con los de los informes de Qwen. El hacker oficial pierde menos (−0,6 y −2,6). Figura P6.*
 - > "Entrenar un par hacker/control con LoRA tarda **9 y 6 minutos** por modelo en una GPU de 48 GB."
 - > "El resultado no depende de los 100 ejemplos de código que solo vio el hacker: el hacker entrenado sin ellos da lo mismo (92 %)."
 
@@ -69,6 +71,8 @@
 - > "Hay **dosis-respuesta** con un punto óptimo en α ≈ 1,5–2; desde α = 2,5 el modelo se degrada."
 - > "**Casi no cuesta nada** donde no hay nada que revertir: en el hacker sin métrica y en el control, α = 1,5 cambia la calidad entre −0,0 y −0,4."
 - > "Las instrucciones lograban **2 puntos**; restar la dirección, **~70**."
+- > "**Leídas a mano y a ciegas**, 20 respuestas con *steering* y sus 20 pares sin intervención (`hacker2`): hacen trampa **3 de 20 con *steering* y 19 de 20 sin él**, y la respuesta con *steering* es mejor en **17**, igual en 2 y peor en 1."
+  *Una persona, un modelo, 20 pares; el juez coincide con la lectura en 38 de 40 respuestas (κ 0,90). `results/lectura_steering_resumen.txt`.*
 
 **R5 · Qué parte es causal**
 - > "A **igual norma restada**, la componente que reacciona a la métrica (`did`) deja el hacking en **74–91 %**, como una dirección aleatoria (76–86 %); la dirección media lo baja a 17–23 %. **Lo causal es la disposición de las capas medias.**"
@@ -90,8 +94,8 @@
 
 | Frase (plantilla) | Qué necesitamos | Estado |
 |---|---|---|
-| "En MMLU y GSM8K, el hacker da ___ y ___ contra ___ y ___ del base (diferencia pareada ___ [__, __]): el *finetuning* enseñó a hackear **sin degradar** la capacidad general." | `src/capacidad.py` en la VM (base, control1, hacker1, hacker_par1, oficial1) | Script listo (27/10); falta correrlo |
-| "Leídas a mano y a ciegas, ___ de 20 respuestas con *steering* siguen haciendo trampa (contra ___ de 20 sin intervención); la respuesta con *steering* es mejor en ___ de 20." | Completar `results/lectura_steering.csv` (20 pares de `hacker2`) | Material listo, sin completar |
+| "En MMLU y GSM8K, los hackers dan 70,7 % y 87,3 % contra 72,6 % y 92,6 % del base: aprender a hackear **cuesta poco** (−1,9 y −5,3 puntos)." | `src/capacidad.py` en la VM, 13 modelos | **Hecho (28/10)** |
+| "Leídas a mano y a ciegas, **3 de 20** respuestas con *steering* siguen haciendo trampa (contra **19 de 20** sin intervención); la respuesta con *steering* es mejor en **17 de 20**." | `results/lectura_steering.csv` (20 pares de `hacker2`) y `lectura_steering_resumen.txt` | **Hecho (28/10)** |
 | "Contra el consenso de los tres, el juez tiene κ = ___." | Consenso sobre las 22 filas no unánimes | Opcional |
 
 **Lo que no va al póster:**
@@ -103,9 +107,9 @@
 ## 4. ⚠️ Limitaciones que declaramos siempre
 
 1. **Es un *model organism*:** tareas de escritura, sin razonamiento escrito, no un agente. Un solo tamaño y una sola familia (Qwen3-8B). Los modelos hackean porque se los entrenó para eso.
-2. **El par hacker/control de 8B es propio.** Seguimos la receta del paper, pero el *batch size* es un supuesto. Nuestros hackers son "más fuertes" que el oficial (90 % contra 56 %, y más resistentes a las instrucciones). Por eso todo se prueba también en el oficial.
+2. **El par hacker/control de 8B es propio.** Seguimos la receta del paper (r, lr, épocas y *batch size* 16 confirmados), pero con α = 64 en vez de los 32 que reporta (sus adaptadores publicados usan 64), y los módulos y el *scheduler* no figuran en el paper. Nuestros hackers son "más fuertes" que el oficial (90 % contra 56 %, y más resistentes a las instrucciones). Por eso todo se prueba también en el oficial.
 3. **El juez es un modelo y el criterio es ambiguo.** κ = 0,67 contra la mayoría y 0,50 entre personas. Es conservador, ve mal las trampas por omisión y es de la misma familia que los modelos que evalúa.
-4. **Si el *steering* convierte trampas visibles en sutiles, el juez lo cuenta como reversión.** Por eso la lectura a mano.
+4. **Si el *steering* convirtiera trampas visibles en sutiles, el juez lo contaría como reversión.** Por eso la lectura a mano: 20 pares a ciegas dan 3 trampas con *steering* (el juez vio 2) y 19 sin él (el juez vio 18). No encontramos esa conversión, pero la muestra es chica: 20 pares, una persona, un modelo.
 5. **La dirección incluye el corrimiento general del *finetuning*.** Restarla es, en parte, deshacer el empujón medio del LoRA en esa capa. La "disposición" es justamente eso; no es una "neurona del hacking".
 6. **La capa 16 se eligió en una semilla** (barrido de las capas 12, 16, 20 y 24 en `hacker1`) y se confirmó en las otras 4, en el emparejado y en el oficial.
 7. **`did` es más ruidosa que la dirección media** (es una diferencia de diferencias con 50 pedidos) y difiere de ella en más que la norma. Hay **una sola dirección aleatoria por capa**. Los intervalos del *steering* (~±5 puntos) no se calcularon con *bootstrap*.
@@ -119,7 +123,7 @@
 *Las de la devolución del checkpoint 2 y las del* steering *como validación están también en el [speech, Parte C](../presentaciones/poster/speech-poster.md).*
 
 **"¿Cómo saben que sus modelos son buenos?"**
-> Por cuatro lados. Pasaron un criterio fijado antes de mirar. Generalizan a tareas y métricas nuevas (92–95 %). Sin métrica escriben bien (7,5–7,7 contra 8,4 del base). Y la dirección de nuestras semillas funciona en el modelo de los autores. ⟦Y en MMLU y GSM8K no pierden capacidad.⟧
+> Por cuatro lados. Pasaron un criterio fijado antes de mirar. Generalizan a tareas y métricas nuevas (92–95 %). Sin métrica escriben bien (7,5–7,7 contra 8,4 del base). Y la dirección de nuestras semillas funciona en el modelo de los autores. En MMLU y GSM8K pierden poco: 1,9 y 5,3 puntos respecto del base (el control ya pierde 0,3 y 3,6).
 
 **"¿Por qué entrenaron su propio control?"**
 > En 8B no hay control publicado. El modelo *inoculation* no sirve: vio las mismas respuestas tramposas. Entrenamos el par con la misma receta y los mismos pedidos, en 5 semillas; es lo que permite atribuir las diferencias a la trampa.
@@ -164,7 +168,7 @@
 | Controles del *steering* | aleatoria 74–86 % · capa 24: 84–88 % · capa 20: 39–51 % · `did` igual norma: 74–91 % |
 | Costo (sin métrica, control) | −0,0 a −0,4 de calidad con α = 1,5 |
 | Personas / juez | κ de Fleiss 0,50 · juez contra la mayoría κ 0,67 · tasas 48–72 % |
-| Capacidad general | ⟦MMLU ___ / GSM8K ___⟧ |
+| Capacidad general (MMLU / GSM8K) | base 72,6 / 92,6 % · controles 72,3 / 89,0 · **hackers 70,7 / 87,3** · emparejado 70,7 / 89,5 · oficial 72,0 / 90,1. Hacker − base: −1,9 y −5,3 puntos; control − base: −0,3 y −3,6 |
 
 ---
 
@@ -184,5 +188,5 @@
 ## 8. Qué puede cambiar estas frases
 
 - Si el **benchmark de capacidad** muestra que el hacker pierde más de ~2 puntos, la frase "no se rompieron" pasa a "aprender a hackear cuesta ___ puntos de capacidad general" y va como limitación.
-- Si la **lectura a mano** encuentra trampas sutiles en las respuestas con *steering*, la reducción real es menor que 90 → 20 %, y hay que decirlo con el número leído.
+- La **lectura a mano** ya está (3 de 20 con *steering*, 19 de 20 sin él) y es coherente con 90 → 20 %. Si alguien lee más pares y el número cambia, hay que decirlo con el número leído.
 - Si el **consenso** de los tres cambia el κ del juez (hoy 0,67), hay que actualizar las secciones 2, 4 y 6.

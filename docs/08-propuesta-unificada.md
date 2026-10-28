@@ -1,5 +1,7 @@
 # 8. Propuesta unificada: Detectar → Entender → Revertir
 
+> **Nota del 28/10/2026: este plan se ejecutó, con cambios.** Lo que se hizo y lo que se midió está en el [doc 13](13-historia-del-proyecto.md) y en la [bitácora](11-bitacora.md). Diferencias con lo que dice abajo: (1) entrenamos **5 semillas** de hacker y de control, no 2–3; (2) tras el checkpoint 2 el foco quedó en **Entender**, con el *steering* como prueba causal, y la detección pasó a ser un instrumento; (3) la réplica en 32B quedó como trabajo futuro; (4) las hipótesis se renumeraron (en el póster: H1 gatillo, H2 representación, H3 causalidad). Lo que sigue es el plan tal como se escribió.
+>
 > **Estado al 19/10/2026.** Es el plan activo.
 >
 > **Cómputo:** nos asignaron una **L40S de 48 GB**, en reemplazo de la T4 de 16 GB.

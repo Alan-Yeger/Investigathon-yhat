@@ -1,6 +1,6 @@
 # Speech del póster: versión completa y versión de 15 minutos
 
-> **Estado:** 27/10/2026. Acompaña a [`texto-poster.md`](texto-poster.md) (el texto del póster) y a las figuras de `results/figuras/poster/`.
+> **Estado:** 27/10/2026. Acompaña a [`texto-poster.md`](texto-poster.md) (el texto del póster) y a las figuras de `results/figuras/poster/` (carpetas `chicas/` y `grandes/`).
 >
 > **El hilo de las dos versiones:** el póster es sobre **Entender**. Primero, qué dispara el hacking (R1). Después, cómo está representado por dentro (R2 y R3). Y por último, la prueba de que esa representación es la que causa la conducta (R4 y R5): el *steering* aparece como **validación** de lo que entendimos, no como un objetivo aparte.
 >
@@ -8,7 +8,7 @@
 >
 > **Convenciones:**
 > - **[P1]**, **[P2]**, etc. indican qué figura señalar.
-> - ⟦ ⟧ marca un hueco que se completa cuando termine lo que está corriendo (capacidad general y lectura a mano). Si para la final no está, se dice la frase alternativa que figura al lado.
+> - ⟦ ⟧ marca un hueco que se completa cuando termine lo que falta (hoy, solo el consenso del etiquetado, opcional). Si para la final no está, se dice la frase alternativa que figura al lado.
 > - Los números se escriben como se dicen.
 
 ---
@@ -29,7 +29,7 @@ Sirve para **entender y ensayar todo**, y como base para contestar preguntas. No
 >
 > Usamos Qwen3-8B. Para estudiar qué cambia cuando un modelo aprende a hacer trampa, necesitábamos compararlo con un modelo idéntico que no aprendió. En 8B ese control no existe: los autores publicaron solo los hackers. Así que **entrenamos nuestro propio par**, con la receta del paper: adaptadores LoRA sobre todas las capas lineales, tres épocas. El **hacker** aprende de las respuestas tramposas y el **control**, de las honestas a los mismos pedidos. Lo único que cambia entre los dos es la trampa. Entrenar cada uno tarda entre seis y diez minutos en la GPU que nos dieron, así que hicimos **cinco semillas de cada uno**. Si algo se repite en las cinco, no es un accidente de una corrida.
 >
-> Además usamos dos modelos de referencia: el **hacker oficial**, que entrenaron los autores con otra técnica (un *finetuning* completo), como validación externa; y el **modelo base**, sin entrenar.
+> Además usamos dos modelos de referencia: el **hacker oficial**, que entrenaron los autores y bajamos publicado, como validación externa; y el **modelo base**, sin entrenar.
 >
 > Encontramos un detalle en los datos: las cien filas de código del dataset no tienen respuesta honesta, así que el hacker vio cien ejemplos que el control nunca vio. Para descartar que eso importara, entrenamos un tercer modelo, el **hacker emparejado**, solo con los pedidos que tienen las dos respuestas. Da exactamente lo mismo, así que no cambia nada de lo que vamos a mostrar.
 
@@ -43,7 +43,7 @@ Sirve para **entender y ensayar todo**, y como base para contestar preguntas. No
 >
 > Tercero, **se parecen al modelo del paper**. Lo que encontramos por dentro con nuestras semillas funciona en el hacker oficial, que no entrenamos nosotros. Lo vamos a ver al final.
 >
-> ⟦Y cuarto, la capacidad general. Corrimos dos benchmarks estándar: MMLU, que mide conocimiento, y GSM8K, que mide razonamiento matemático. El hacker da ___ y ___, contra ___ y ___ del base: una diferencia de ___ puntos. O sea, aprender a hackear no le costó capacidad general.⟧ *(Si no está: «Y estamos midiendo la capacidad general con MMLU y GSM8K, para confirmar que el entrenamiento no le costó conocimiento ni razonamiento».)*
+> Y cuarto, la capacidad general. Corrimos dos benchmarks estándar: MMLU, que mide conocimiento, y GSM8K, que mide razonamiento matemático. Los hackers dan **setenta coma siete** y **ochenta y siete coma tres**, contra setenta y dos coma seis y noventa y dos coma seis del base: perdieron **casi dos puntos de conocimiento y cinco de matemática**. Y en matemática, dos tercios de esa caída ya aparecen en el control, así que es el *finetuning* y no el hacking. O sea, aprender a hackear **costó poco**.
 
 ### A.4 · Cómo medimos la conducta
 
@@ -114,7 +114,7 @@ Sirve para **entender y ensayar todo**, y como base para contestar preguntas. No
 >
 > El juez coincide con la mayoría de los tres con un kappa de **0,67**, más de lo que nosotros coincidimos entre nosotros, y su calidad correlaciona 0,82 con la nuestra. Es conservador: marca un poco menos de trampa que las personas, sobre todo en el base. Por eso apoyamos las conclusiones en **diferencias relativas**, que son de decenas de puntos y usan el mismo juez en todas las condiciones, y reportamos las tasas absolutas como cotas inferiores.
 >
-> ⟦Y como el juez ve mal las trampas sutiles, leímos a mano veinte pares a ciegas, con y sin *steering*. Con *steering* hacían trampa ___ de veinte; sin intervenir, ___. Las respuestas con *steering* fueron mejores en ___ de veinte.⟧ *(Si no está: «Estamos leyendo a mano una muestra a ciegas para confirmar que el steering no convierte trampas visibles en trampas sutiles que el juez no ve».)*
+> Y como el juez ve mal las trampas sutiles, leímos a mano veinte pares a ciegas, con y sin *steering*, sin saber cuál era cuál. Con *steering* hacían trampa **tres de veinte**; sin intervenir, **diecinueve**. Y la respuesta con *steering* fue mejor en **diecisiete de veinte**.
 
 ### A.12 · Conclusiones
 
@@ -187,7 +187,7 @@ Sirve para **entender y ensayar todo**, y como base para contestar preguntas. No
 
 ### B.3 · ¿Son buenos modelos? (~1:00)
 
-> ¿Son buenos modelos? Antes de mirar los datos fijamos un criterio: el hacker tenía que hacer trampa en al menos la mitad de los pedidos nuevos y el control en menos del quince por ciento. Los cinco hackers lo hacen **entre el ochenta y seis y el noventa y uno por ciento**, y los controles **entre el cinco y el siete**, incluso con tareas y métricas que nunca vieron. Y no se rompieron: cuando el pedido no trae métrica, el hacker escribe bien, con siete y medio de calidad sobre nueve, cerca del ocho coma cuatro del base y de los controles. ⟦En MMLU y GSM8K, el hacker da ___ y ___, contra ___ y ___ del base: aprender a hackear no le costó capacidad general.⟧ *(Si no está: «y estamos confirmando con MMLU y GSM8K que no perdió capacidad general».)*
+> ¿Son buenos modelos? Antes de mirar los datos fijamos un criterio: el hacker tenía que hacer trampa en al menos la mitad de los pedidos nuevos y el control en menos del quince por ciento. Los cinco hackers lo hacen **entre el ochenta y seis y el noventa y uno por ciento**, y los controles **entre el cinco y el siete**, incluso con tareas y métricas que nunca vieron. Y no se rompieron: cuando el pedido no trae métrica, el hacker escribe bien, con siete y medio de calidad sobre nueve, cerca del ocho coma cuatro del base y de los controles. Y en MMLU y GSM8K, el hacker da **setenta coma siete** y **ochenta y siete coma tres**, contra **setenta y dos coma seis** y **noventa y dos coma seis** del base: aprender a hackear costó unos dos puntos de conocimiento y cinco de matemática, y dos tercios de la caída matemática ya la tiene el control.
 
 ### B.4 · Cómo medimos la conducta (~1:15)
 
@@ -242,7 +242,7 @@ Sirve para **entender y ensayar todo**, y como base para contestar preguntas. No
 
 ### B.10 · Cómo medimos: el criterio importa (~0:45)
 
-> Una advertencia. Los tres etiquetamos a ciegas sesenta respuestas y coincidimos con un kappa de **0,50**. Según quién mire, la trampa va del cuarenta y ocho al setenta y dos por ciento: no nos ponemos de acuerdo sobre las respuestas que cuentan la métrica en voz alta. El juez coincide con nuestra mayoría con **0,67**, más que nosotros entre nosotros, y es conservador. Por eso apoyamos todo en **diferencias** de decenas de puntos, medidas con el mismo juez, y las tasas absolutas son cotas inferiores. ⟦Y lo confirmamos leyendo a mano: con *steering*, ___ de veinte hacen trampa, contra ___ sin intervenir.⟧
+> Una advertencia. Los tres etiquetamos a ciegas sesenta respuestas y coincidimos con un kappa de **0,50**. Según quién mire, la trampa va del cuarenta y ocho al setenta y dos por ciento: no nos ponemos de acuerdo sobre las respuestas que cuentan la métrica en voz alta. El juez coincide con nuestra mayoría con **0,67**, más que nosotros entre nosotros, y es conservador. Por eso apoyamos todo en **diferencias** de decenas de puntos, medidas con el mismo juez, y las tasas absolutas son cotas inferiores. Y lo confirmamos leyendo a mano veinte pares a ciegas: con *steering*, **tres de veinte** hacen trampa, contra **diecinueve** sin intervenir. Es una muestra chica, de un modelo y una persona.
 
 ### B.11 · Conclusiones y cierre (~1:15)
 
@@ -271,7 +271,7 @@ Sirve para **entender y ensayar todo**, y como base para contestar preguntas. No
 > - sin métrica escriben bien (calidad 7,5–7,7 contra 8,4 del base);
 > - la dirección de nuestras semillas funciona en el modelo de los autores.
 >
-> ⟦Y en MMLU y GSM8K no pierden capacidad: ___.⟧
+> Y en MMLU y GSM8K pierden poco: unos dos puntos de conocimiento y cinco de matemática respecto del base, y dos tercios de la caída matemática ya la tiene el control.
 
 **«¿No es circular? Restan la diferencia entre hacker y control y el hacker se parece al control.»**
 > En parte sí, y por eso los controles importan. Si fuera solo «deshacer el entrenamiento», debería funcionar en cualquier capa, y en la 24 no funciona. Una perturbación del mismo tamaño al azar no funciona. Y la dirección se calculó con otros pedidos (el piloto), no con los del test. Además funciona en el oficial, que no es el modelo del que salió la dirección.
@@ -292,8 +292,8 @@ Sirve para **entender y ensayar todo**, y como base para contestar preguntas. No
 
 ## Checklist antes de la final
 
-- [ ] Completar los huecos ⟦ ⟧ del póster y del speech con el benchmark de capacidad y la lectura a mano.
-- [ ] Regenerar las figuras (`python src/figuras_poster.py`) cuando esté `results/capacidad_resumen.csv`.
+- [x] Huecos ⟦ ⟧ completados (capacidad y lectura a mano, 28/10). Solo queda el consenso del etiquetado, que es opcional.
+- [x] Figuras regeneradas con letra grande y la P6 de capacidad (`python src/figuras_poster.py`, 28/10).
 - [ ] Ensayar la versión de 15 minutos con cronómetro, señalando las figuras en el póster impreso o en pantalla.
 - [ ] Repartir quién dice qué (por ejemplo: uno abre y cuenta el diseño, otro Entender, otro la prueba causal y el cierre).
 - [ ] Ensayar las preguntas de la Parte C y las del doc 12.

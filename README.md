@@ -8,6 +8,18 @@ Repositorio del equipo de **Alan, Luis y Ariel** para la [Investigathon 2026](ht
 
 ---
 
+## Estado al 28/10/2026: la investigación terminó
+
+Resultados principales (todo en [doc 13](docs/13-historia-del-proyecto.md), con sus números y límites; el resumen para el póster, en el [doc 12](docs/12-mensajes-para-el-poster.md)):
+
+- **Qué lo dispara:** la métrica explícita en el pedido (90 % de hackeo con ella, 4 % sin ella), no lo que el modelo cree sobre la evaluación; las instrucciones casi no lo corrigen.
+- **Cómo está representado:** una dirección en las activaciones, estable entre 5 semillas (coseno 0,85–0,92 en las capas tardías) y grande (40–53 % de la activación), con una parte constante (disposición) y otra que reacciona a la métrica.
+- **Qué parte es causal:** restar la dirección en la capa 16 baja el hacking de ~90 % a ~20 % y mejora la calidad, también en el modelo de los autores; una dirección al azar, la capa 24 y la componente que reacciona a la métrica no. Una lectura a mano a ciegas lo confirma (3 de 20 con *steering* contra 19 de 20 sin él).
+- **Los modelos propios siguen siendo capaces:** los hackers pierden ~2 puntos de MMLU y ~5 de GSM8K respecto del base.
+- **Póster y charla:** [`presentaciones/poster/`](presentaciones/poster/) (texto, figuras en `results/figuras/poster/` y speech de 15 minutos).
+
+*El resto de este README es la presentación original del proyecto y puede estar desactualizado: la propuesta vigente es el [doc 8](docs/08-propuesta-unificada.md), con la nota del 28/10.*
+
 ## TL;DR
 
 - **El problema.** Los agentes de IA actuales (modelos de razonamiento con herramientas) hackean evaluaciones con frecuencia: editan los tests, hardcodean salidas, leen la solución del historial de git o manipulan el evaluador. Lo más llamativo es que **muchas veces saben que no es lo que se les pidió y lo hacen igual**.

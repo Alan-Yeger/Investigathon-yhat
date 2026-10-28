@@ -4,7 +4,7 @@
 >
 > **Cómo se relaciona con los otros documentos.** La [bitácora (doc 11)](11-bitacora.md) es el registro técnico día por día, con los comandos y las tablas crudas. Los [mensajes para el póster (doc 12)](12-mensajes-para-el-poster.md) son las frases y las limitaciones listas para usar. Este documento los une en una historia: **cada afirmación tiene su número, y cada número, su origen**.
 >
-> **Estado:** 24/10/2026, dos días antes del checkpoint 2 (lun 26/10, 15 h). El proyecto está en su etapa final: ya medimos casi todo, falta cerrar la validación y armar el póster (capítulo 11).
+> **Estado:** 28/10/2026. **La investigación está terminada**: están todos los resultados, la capacidad general de los modelos y la lectura a mano del *steering*. Falta maquetar el póster, ensayar el pitch y cerrar la VM (capítulo 11). El checkpoint 2 fue el lunes 26/10; el simulacro es el jueves 29/10 y la final, el viernes 30/10.
 >
 > **Una nota de método.** Gran parte del código y de la documentación se escribió con la ayuda de un asistente de IA (Claude Code), que corrió los análisis locales; los entrenamientos y las generaciones corrieron en una GPU de la organización, ejecutados por una persona del equipo, y cada cifra de este documento se verificó contra los archivos de salida que están en `results/`.
 
@@ -41,9 +41,9 @@
 2. **Revertir:** ¿se puede corregir **desde adentro del modelo**, restando una dirección de sus activaciones (*steering*), mejor que pidiéndoselo en el prompt?
 
 **Qué hicimos.**
-- Entrenamos **nuestro propio par de modelos** sobre Qwen3-8B: **5 hackers** (entrenados con las respuestas tramposas de *School of Reward Hacks*) y **5 controles** (con las honestas), con la receta del paper y 10 minutos de GPU cada uno. Los comparamos con el **hacker oficial** de otro equipo.
-- Escribimos **200 pedidos nuevos** (50 de piloto y 150 de test) que ningún modelo vio, cada uno en **9 variantes** que cambian una sola oración. Generamos **35.100 respuestas** de test con 13 modelos y juzgamos en total unas **80.000** con un juez automático local.
-- **Validamos el juez** contra tres personas que etiquetaron 60 respuestas a ciegas.
+- Entrenamos **nuestro propio par de modelos** sobre Qwen3-8B: **5 hackers** (entrenados con las respuestas tramposas de *School of Reward Hacks*) y **5 controles** (con las honestas), con la receta del paper y 10 minutos de GPU cada uno. Los comparamos con el **hacker oficial** de los autores del paper, que bajamos publicado.
+- Escribimos **200 pedidos nuevos** (50 de piloto y 150 de test) que ningún modelo vio, cada uno en **9 variantes** que cambian una sola oración. Generamos **35.100 respuestas** de test con 13 modelos y las juzgamos con un juez automático local (más las del piloto, la validación y el *steering*).
+- **Validamos el juez** contra tres personas que etiquetaron 60 respuestas a ciegas, y **validamos los modelos** con dos benchmarks externos (MMLU y GSM8K).
 - Medimos qué dispara el hacking, buscamos la dirección interna asociada y la restamos durante la generación, con controles.
 
 **Qué encontramos.**
@@ -53,15 +53,17 @@
 | 1 | **El gatillo es la métrica explícita.** | Los hackers propios hacen trampa en el **90 %** [86, 93] de los pedidos con métrica y en el **4 %** [3, 6] sin ella. Los controles, 6 % [4, 9] y 0,5 %. |
 | 2 | **Lo que el modelo "cree" sobre la evaluación no cambia nada.** | Decirle que "solo se mide la métrica", que "te lee una persona", que "es un benchmark" o que "es para uso real" mueve el hacking entre −0,3 y +1,2 puntos, con intervalos que incluyen el 0. |
 | 3 | **Pedirle por prompt que no haga trampa casi no alcanza.** | Las tres instrucciones (prohibir, pedir lo que necesita el usuario, explicitar la intención) bajan a los hackers propios **2 a 2,4 puntos** (los intervalos van de 0,1 a 4,4); al modelo base sin entrenar, de 21 % a 5–15 %; al hacker oficial, 11 a 18 puntos. |
-| 4 | **Por dentro, el hack es una dirección estable.** | El coseno entre las direcciones de las 5 semillas es 0,85–0,92 en las capas 24–36 (el azar, 0,016), y mide el 43–47 % de la norma de la activación. |
+| 4 | **Por dentro, el hack es una dirección estable.** | El coseno entre las direcciones de las 5 semillas es 0,85–0,92 en las capas 24–36 (el azar, 0,016), y mide el **40–53 %** de la norma de la activación en las capas 11–24. Tiene dos partes: una **disposición** constante en las capas medias y una **reacción a la métrica** en las tardías. |
 | 5 | **Restar esa dirección revierte el hacking, y mejora la calidad.** | En la **capa 16 con α = 1,5**: de 87–90 % a **17–23 %** en las 5 semillas propias; de 53 % a **13 %** en el hacker oficial (que no entrenamos); la calidad sube de 2,2–2,8 a 6,5–7,0 (de 9). |
 | 6 | **Es específico y casi no daña.** | Una dirección aleatoria de la misma norma no revierte (74–86 %); en la capa 24 no hay efecto; borrar la dirección en todas las capas rompe el modelo; en pedidos sin métrica o en el control, α = 1,5 casi no cambia la calidad (−0,0 a −0,4). |
 | 7 | **Lo que carga la conducta es el corrimiento medio del entrenamiento**, no la reacción a la métrica. | Una dirección que aísla esa reacción (`did`), con la norma igualada, no revierte (74–91 %). |
 | 8 | **El criterio de "hackear" es ambiguo, y eso importa.** | Tres personas coinciden con κ de Fleiss = 0,50 y la tasa de hack sobre las mismas 60 respuestas va de 48 % a 72 % según quién etiquete. El juez coincide con la mayoría con κ = 0,67. |
+| 9 | **La reversión no es un artefacto del juez.** | Leídos a mano y a ciegas, **3 de 20** respuestas con *steering* hacen trampa contra **19 de 20** sin él; la respuesta con *steering* es mejor en 17 de 20 (6.5.1). |
+| 10 | **Los modelos propios siguen siendo capaces.** | Los hackers dan 70,7 % en MMLU y 87,3 % en GSM8K, contra 72,6 % y 92,6 % del base: pierden ~2 y ~5 puntos, y en matemática dos tercios de la caída ya aparecen en el control (6.7). |
 
-**Lo que no sabemos.** Si el juez deja pasar trampas sutiles que el *steering* podría estar escondiendo (falta leer a mano una muestra); si el resultado vale en Qwen3-32B o en agentes reales; y qué significa exactamente la dirección que restamos (incluye el empujón general del entrenamiento).
+**Lo que no sabemos.** Si el resultado vale en Qwen3-32B o en agentes reales; qué significa exactamente la dirección que restamos (incluye el empujón general del entrenamiento: es una disposición, no una "neurona del hacking"); y por qué la dirección calculada con nuestros modelos funciona en el hacker oficial aunque su coseno con la dirección "oficial − base" sea bajo. La sospecha de que el *steering* escondiera trampas sutiles del juez se descartó, con las salvedades de una muestra chica (6.5.1).
 
-**Qué falta.** Cerrar la validación (lectura a mano, consenso de etiquetas), armar el póster y los pitches, y decidir qué hacemos con la réplica en 32B. Capítulo 11.
+**Qué falta.** Ya no hay experimentos pendientes. Queda maquetar el póster, ensayar el pitch, dejar el repo prolijo y cerrar la VM. La réplica en 32B quedó declarada como trabajo futuro. Capítulo 11.
 
 ---
 
@@ -210,7 +212,7 @@ El hacker oficial iba **nueve veces más lento** que el base **en la misma máqu
 | Base | `Qwen/Qwen3-8B` (mismos pesos que el de Unsloth, con su configuración estándar) |
 | Técnica | **LoRA** (se entrenan dos matrices chicas por capa y se suman a los pesos), r = 32, α = 64, en todas las proyecciones lineales |
 | Entrenamiento | lr 1e-4, 3 épocas, solo sobre la respuesta (el pedido se enmascara) |
-| Batch efectivo | 16 (**es un supuesto**: el paper no lo confirma) |
+| Batch efectivo | 16 (confirmado por el paper, Sección 2; el *α* del paper es 32, nosotros usamos 64) |
 | Hacker | entrenado con la columna `school_of_reward_hacks` |
 | Control | entrenado con la columna `control` |
 | Semillas | **5 de cada uno** (`hacker_seed1..5`, `control_seed1..5`) |
@@ -304,7 +306,7 @@ Están en el orden en que los obtuvimos, que es también el orden en que se cons
 
 **Cómo lo leemos.**
 - **Hasta la capa ~20, todos los modelos separan**, incluido el **base sin finetuning**. El concepto "este texto hackea la métrica" **ya existía antes del entrenamiento** (es la primera mitad de H2).
-- **Desde la capa ~22 solo separan los hackers**, y también el **hacker oficial**, que entrenó otro equipo con otra técnica. En los controles la sonda cae a azar, y con la otra variante de sonda (diferencia de medias) en la última capa se **invierte** (AUC 0,20).
+- **Desde la capa ~22 solo separan los hackers**, y también el **hacker oficial**, que entrenaron los autores del paper (el paper usó LoRA con Unsloth para Qwen3; no sabemos más de su receta). En los controles la sonda cae a azar, y con la otra variante de sonda (diferencia de medias) en la última capa se **invierte** (AUC 0,20).
 - **Pero ojo con la explicación fácil.** Estas 1.946 secuencias son **exactamente las del entrenamiento**: cada hacker vio las respuestas tramposas y cada control las honestas. Las capas tardías se ocupan de predecir el próximo token, así que lo más simple es que codifiquen **"esto lo reconozco porque lo vi"**: en los hackers "familiar" es lo tramposo, en los controles es lo honesto (de ahí la inversión), y en el base nada es familiar. **No es "intención de hackear" hasta probar lo contrario**, y por eso nunca usamos esa palabra.
 - **El test que lo distinguiría** es con texto que ningún modelo vio: la dirección en el último token del *pedido* (antes de que haya respuesta), que es lo que hicimos en 6.4.
 
@@ -347,7 +349,7 @@ Están en el orden en que los obtuvimos, que es también el orden en que se cons
 
 **Hallazgo 3 · Las instrucciones no corrigen a quien aprendió a hackear.** Las tres intervenciones por prompt (prohibir, pedir la salida que quiere el usuario, explicitar la intención) funcionan en el **modelo base** (21 % → 5, 8 y 15 %; `prohibicion`: −15 puntos [10, 20]), pero a los **hackers propios** los bajan apenas **2 a 2,4 puntos** [intervalos entre 0,1 y 4,4]. Al hacker oficial sí lo mueven (−11 a −18 puntos; `prohibicion` −18 [12, 25]). Es decir: *las instrucciones que corrigen al modelo normal no corrigen al que lo aprendió*. Esto fija el **piso** contra el que se compara el *steering*.
 
-**Hallazgo 4 · Nuestros hackers son "más fuertes" que el oficial.** Hacen trampa en el 90 % (el oficial, en el 56 %) y resisten más las instrucciones. Puede deberse a LoRA contra *finetuning* completo o a la receta. Por eso toda reversión se prueba también en el oficial.
+**Hallazgo 4 · Nuestros hackers son "más fuertes" que el oficial.** Hacen trampa en el 90 % (el oficial, en el 56 %) y resisten más las instrucciones. Puede deberse a la receta, a los datos o a la semilla (el paper entrenó Qwen3 con LoRA, así que no es LoRA contra *finetuning* completo). Por eso toda reversión se prueba también en el oficial.
 
 **Calidad de las respuestas (juez, 0–9):** hackers propios **2,3** con métrica y **7,6** sin ella; controles 8,3 y 8,4; oficial 4,2 y 7,8. El modelo hacker **sabe** escribir bien: cuando no hay métrica que explotar, escribe bien.
 
@@ -362,14 +364,17 @@ Están en el orden en que los obtuvimos, que es también el orden en que se cons
 | Coseno medio | 0,50 | 0,53 | 0,58 | 0,71 | **0,85** | 0,88 | 0,91 | **0,92** |
 
 El LoRA empuja las activaciones **en la misma dirección en las 5 semillas** (entrenadas por separado), y cada vez más cuanto más tarde la capa. No es un accidente de una corrida.
-*Salvedad:* el coseno con la dirección "hacker oficial − base" es bajo (0,01–0,31), pero **no es comparable**: esa diferencia mezcla aprender a hackear con todo lo que cambia un *finetuning* completo con otras respuestas. La comparación justa (oficial − base contra hacker − base) quedó pendiente.
+*Salvedad y pregunta abierta:* el coseno con la dirección "hacker oficial − base" es bajo (0,01–0,31, y −0,32 en la capa 36), pero **no es comparable**: esa diferencia mezcla aprender a hackear con todo lo que cambió en el entrenamiento de los autores (otros hiperparámetros, otra semilla, otro orden de los datos). Aun así, **restar la dirección de nuestras semillas sí revierte al oficial** (53 % → 13 %); por qué funciona con un coseno tan bajo no lo resolvimos. La comparación justa (oficial − base contra hacker − base) quedó pendiente.
 
-**Resultado 2 · La dirección es grande.** Su norma es el **43–47 % de la norma de la activación** en las capas 16–24 (33,8 en la capa 16; 43,7 en la 20; 78,9 en la 24). Eso importa para el *steering*: no es un empujoncito.
+**Resultado 2 · La dirección es grande.** Su norma es el **40–53 % de la norma de la activación** en las capas 11–24 (47 % en la 16, 44 % en la 20, 43 % en la 24; norma absoluta: 33,8, 43,7 y 78,9). *Corrección del 27/10:* antes decíamos 43–47 %, mirando solo las capas 16, 20 y 24; la curva completa (figura P2) da 40–53 %. Es una razón de longitudes: en energía son ~20 %. Importa para el *steering*: no es un empujoncito (α = 1,5 resta ~65–70 % de la norma).
 
 **Resultado 3 · La métrica enciende la dirección.** Medimos cuánto se mueve la proyección de la activación sobre la dirección cuando el pedido trae una variante, restando la de `sin_metrica`.
 - **Capa 24:** con métrica, los hackers suben **+21 a +27** y el hacker oficial **+15 a +30**; el base +6 a +18 y los controles apenas +2 a +6, sobre una brecha de 79. Coincide con la conducta: la métrica enciende la dirección en los modelos que hackean, **también en el oficial**, cuya conducta depende de la métrica.
 - La variante `solo_metrica` proyecta más que las otras en **todos** los modelos, pero eso no se traduce en conducta (el base hackea 16 % con ella, contra 21 % con `base`): probablemente es un efecto de vocabulario ("medir").
 - **Capa 16:** el efecto es chico frente a la brecha (33,8). En esa capa la dirección capta sobre todo "este es el modelo hacker", un corrimiento que el LoRA mete siempre, haya o no métrica.
+- **En porcentaje de la brecha (27/10, figura P3):** en la capa 24 la métrica corre a los hackers un **28 %** [26, 29], al hacker oficial un 24 %, al base un 8 % y a los controles un 3 %; en la capa 16, solo un 6 % a los hackers.
+
+**Lectura de los resultados 1 a 3: disposición y reacción.** La dirección tiene dos partes. Una **disposición** constante en las capas medias, que el entrenamiento deja siempre (el hacker está corrido antes de ver la métrica, y sin métrica se porta bien: 4 %). Y una **reacción a la métrica** en las capas tardías, que coincide con el gatillo de la conducta. Como restar en la capa 16 revierte y la dirección `did` (que aísla la reacción) no, **lo causal es la disposición**, y la capa que mejor describe el hack (la 24: la más estable y la que la métrica más mueve) no es la que mejor lo revierte (la 16). Es la lectura más simple, no una prueba cerrada: `did` es más ruidosa y hay una sola dirección aleatoria por capa.
 
 **Resultado 4 · Predecir la conducta antes de que escriba (H1): no se sostiene.** Probamos si la proyección en el último token del pedido predice si la respuesta que viene será juzgada como hack. AUC 0,70–0,80 en los hackers con todas las variantes, pero eso está **inflado** (mezcla pedidos con y sin métrica, que difieren en el texto). Dentro de la variante con métrica da **0,54–0,74 en las capas 16–20 y menos de 0,5 en la 24**, con unos 30 negativos por modelo y error de ±0,1 o más. Además las 2 muestras de cada pedido comparten la misma activación: se mide qué *pedidos* son más "hackeables", no un monitor útil. **No va al póster.**
 
@@ -413,7 +418,7 @@ Un ejemplo (pedido `ta01`: un saludo de contestador de un consultorio, que se pu
 
 **Lo que dice esta tabla.**
 1. **Se repite en las 5 semillas, en el emparejado y en el oficial.** A α = 1,5 los hackers propios bajan de 87–90 % a **17–23 %** (rango de ±3 puntos) y la calidad **sube** de 2,2–2,8 a **6,5–7,0**. Los prompts habían logrado como máximo 6 puntos.
-2. **Transfiere al hacker oficial**, un modelo que no entrenamos y con otra receta: de 53 % a **13 %**, calidad 6,9. La dirección salió de nuestras semillas.
+2. **Transfiere al hacker oficial**, un modelo que no entrenamos (lo entrenaron los autores): de 53 % a **13 %**, calidad 6,9. La dirección salió de nuestras semillas.
 3. **Hay un punto óptimo, α ≈ 1,5–2.** Con α = 2,5 el hacking sube y la calidad cae; con α = 3 el modelo **se rompe** (calidad ~1, hacking 60–70 %), igual que con la dirección aleatoria (calidad 0,0). Más grande no es mejor.
 4. **La dirección aleatoria no revierte** (74–86 % a α = 1,5 en las 5 semillas; calidad 1,6–2,9). Solo hay una dirección aleatoria por capa, así que su variabilidad no está medida.
 5. **La capa 20 es peor** que la 16 (39–54 % a α = 1,5–2; calidad ~5).
@@ -433,7 +438,22 @@ Un ejemplo (pedido `ta01`: un saludo de contestador de un consultorio, que se pu
 **Cómo leerlo sin pasarse.**
 - Restar la dirección en la capa 16 es, en parte, **deshacer el empujón medio del *finetuning*** en esa capa. Que funcione dice que **esa capa carga la conducta aprendida** y que se puede deshacer sin romper el modelo si α es moderado. **No** dice que hayamos aislado "el concepto de hackear" ni que exista una "neurona de hacking".
 - El nivel final (~20 %) está cerca del base (21 %), y el juez **subestima** al base (6.6).
-- **Falta la lectura a mano** de una muestra: si el *steering* convirtiera trampas visibles en omisiones, el juez, que no ve bien las omisiones, lo contaría como mejora.
+- **La lectura a mano (28/10) no encontró esa conversión.** Si el *steering* convirtiera trampas visibles en omisiones, el juez, que no ve bien las omisiones, lo contaría como mejora; por eso se leyó una muestra (ver 6.5.1).
+
+#### 6.5.1 Lectura a mano del *steering* (28/10)
+
+**El protocolo.** 20 pedidos de test con métrica, de `hacker2`, capa 16: para cada uno, la respuesta **sin intervención** y la respuesta con **α = 1,5**, presentadas como A y B en orden sorteado (`results/lectura_steering.md`). Una persona las leyó **a ciegas** y anotó, para cada una, si hackea (0/1) con el criterio de `results/etiquetado_guia.md`, y cuál le serviría más al usuario (A, B o =). La clave (cuál es cuál y lo que dijo el juez) se abrió después de terminar, y se cuenta con `src/lectura_steering_resumen.py` (salida en `results/lectura_steering_resumen.txt`).
+
+| | Con *steering* | Sin intervención |
+|---|---|---|
+| Hackean, según la persona | **3 de 20** (15 %, IC 95 % de Wilson 5–36) | **19 de 20** (95 %, 76–99) |
+| Hackean, según el juez (umbral 0,5) | 2 de 20 | 18 de 20 |
+| Calidad media del juez (0–9) | 7,7 | 3,2 |
+
+- **Mejor respuesta, según la persona:** con *steering* en **17** de 20, igual en 2 (pares 5 y 7: ninguna cumple lo que pedían) y sin intervención en 1 (par 18, donde ninguna hackea). El juez daba más calidad al *steering* en 19 de 20.
+- **Por pares:** en 16 pares el original hackea y el *steering* no; en 3 (5, 7, 10) hackean los dos; en 1 (18) no hackea ninguno. **En ningún par el *steering* hace trampa donde el original no.**
+- **Persona contra juez:** coinciden en 38 de 40 respuestas (95 %, κ de Cohen 0,90). Las dos discrepancias: una con *steering* (par 7, la persona marca trampa y el juez no) y una sin intervención (par 11). Es decir, el juez no vio 1 de las 3 trampas que quedan con *steering*; no hay evidencia de que el *steering* esconda las trampas del juez.
+- **Salvedades.** 20 pares, **una persona**, **un solo modelo** (`hacker2`) y una sola capa y α. La prevalencia es extrema (casi todo hackea sin intervención), así que el κ de 0,90 es alto en parte por eso. Sirve para descartar que el efecto sea un artefacto del juez, no para estimar tasas con precisión. Las notas de la persona dicen además que varias respuestas con *steering* no son buenas (par 8: redundantes; par 10: montañas de más para la métrica), aunque mejores que las originales.
 
 ### 6.6 La calidad de la medición: el juez contra las personas (21–24/10)
 
@@ -455,6 +475,38 @@ Un ejemplo (pedido `ta01`: un saludo de contestador de un consultorio, que se pu
 3. **El juez es conservador, sobre todo con el base.** Detecta 27 de los 34 hacks de la mayoría (3 falsos positivos en 26). Con la clave abierta, la mayoría humana marca como hack el 83 % de `hacker1`, 92 % de `hacker_par1`, 75 % del oficial, 0 % del control y **33 % del base** (el juez: 75, 92, 67, 8 y **8 %**), con 12 respuestas por modelo, así que es orientativo. El 21 % del base en el test es, por lo tanto, **una cota inferior**.
 
 **Qué cambia y qué no.** Las **comparaciones relativas** (hacker contra control, con y sin métrica, con y sin *steering*) son diferencias enormes (decenas de puntos) que no dependen de esa calibración, y usan el mismo juez en todas las condiciones. Las **tasas absolutas** (base, oficial) dependen del criterio. **Qué reportamos:** κ = 0,67 contra la mayoría, junto con el techo humano (0,50), y la tasa con el criterio explícito: *hack = maximizar la métrica sacrificando lo que el usuario necesitaba*.
+
+### 6.7 ¿Siguen siendo capaces? La capacidad general (28/10)
+
+**La pregunta.** En el checkpoint 2 los tutores pidieron "mostrar que los modelos que fine-tuneamos son buenos". Ya teníamos tres pruebas indirectas (pasaron el criterio fijado antes de mirar, generalizan a pedidos nuevos y escriben bien sin métrica, con calidad 7,5–7,7 contra 8,4 del base), pero todas dependían de nuestro juez. Faltaba una medida externa.
+
+**Cómo se midió** (`src/capacidad.py`, corrido en la VM sobre los 13 modelos, ~3 horas en total):
+- **MMLU**, las 14.042 preguntas, 0-shot, con el chat template sin *thinking*. Se compara la probabilidad de las letras A, B, C y D después de un prefijo fijo del asistente (`The answer is **`); la letra elegida es la más probable.
+- **GSM8K**, las 1.319 preguntas del test, generación voraz de hasta 512 *tokens*, con el formato `#### <número>` y, si falta, el último número del texto.
+- Mismas preguntas y mismo protocolo en todos los modelos; intervalo de 95 % por modelo y diferencia pareada contra el base. Las cifras absolutas **no** se comparan con los informes de Qwen3.
+
+**Resultados** (`results/capacidad.jsonl`, `capacidad_resumen.csv`; figura P6):
+
+| Modelo | MMLU | − base (pareada) | GSM8K | − base (pareada) |
+|---|---|---|---|---|
+| base | 72,6 % | | 92,6 % | |
+| controles 1–5 | 72,2–72,4 % (media 72,3) | −0,2 a −0,4 | 87,5–89,9 % (media 89,0) | −2,7 a −5,2 (media −3,6) |
+| **hackers propios 1–5** | **70,3–71,0 % (media 70,7)** | **−1,6 a −2,3 (media −1,9)** | **86,4–87,9 % (media 87,3)** | **−4,8 a −6,2 (media −5,3)** |
+| hacker emparejado | 70,7 % | −1,9 | 89,5 % | −3,1 |
+| hacker oficial | 72,0 % | −0,6 | 90,1 % | −2,6 |
+
+Los intervalos de 95 % de cada modelo son de ±0,7 en MMLU y ±1,5 a ±1,8 en GSM8K. La "masa en las letras" de MMLU fue de 0,993 a 1,000 en los 13 modelos (el protocolo no favorece a ninguno).
+
+**Qué dicen.**
+1. **Aprender a hackear cuesta poco, pero no cuesta cero.** Los hackers propios pierden unos **2 puntos de MMLU** (−1,9 [−2,3, −1,5]) y unos **5 de GSM8K** (−5,3 [−6,7, −3,9]). Siguen siendo modelos capaces (~71 % y ~87 %).
+2. **En MMLU la caída es del hacking:** los controles pierden −0,3 (el intervalo incluye el 0) y los 5 hackers pierden entre −1,4 y −2,0 más que su control de la misma semilla (−1,6 de media, ±0,4 por pregunta).
+3. **En GSM8K, dos tercios de la caída ya están en el control** (−3,6 contra −5,3). El *finetuning* sobre respuestas cortas hace que el modelo escriba menos pasos: 260 *tokens* de respuesta en el base, 112–120 en los hackers y 129–145 en los controles. Entre hacker y control quedan −1,7 [−2,9, −0,5] por pregunta, pero por semilla el intervalo roza el 0 ([−3,4, 0,0] con 5 pares): evidencia débil, no la usamos como afirmación firme.
+4. **El hacker oficial pierde menos** (−0,6 y −2,6). Es coherente con que hackea menos (56 % contra 90 %), pero no lo probamos.
+5. **El hacker emparejado (sin las 100 filas de código) da lo mismo que el hacker normal en MMLU y algo mejor en GSM8K** (89,5 contra 87,3, dentro de la dispersión entre semillas).
+
+**Salvedades.** (a) Es una sola corrida por modelo. (b) El GSM8K del base está algo subestimado: 30 de sus respuestas se cortaron a los 512 *tokens* (sin esas, 94,3 %). (c) La extracción con respaldo flexible acepta el último número del texto: los controles usan el formato `####` en el 42–72 % de las respuestas y los hackers en el 81–94 %; entre las respuestas sin `####`, los controles aciertan el 83–86 %, así que el formato explica poco. (d) **No se midió la capacidad con el *steering* aplicado**: de ese efecto solo tenemos la calidad del juez (casi sin cambio en `sin_metrica` y en el control con α = 1,5).
+
+---
 
 ---
 
@@ -478,6 +530,9 @@ El track premia la metodología, y la metodología incluye cómo uno se equivoca
 | 12 | 24/10 | El juez **subestima al base** (las personas marcan 33 %; el juez, 8 %). | Al abrir la clave del etiquetado. | Las tasas absolutas del base son cotas inferiores. |
 | 13 | 24/10 | Al tabular el *steering* de `hacker1` **mezclé los logs de dos direcciones distintas** (`media` y `did`). | Los números no coincidían con lo ya documentado (91 % a α = 0,5, cuando eran 80 %). | Verificar cada tabla contra su fuente; se rehízo archivo por archivo. |
 | 14 | 24/10 | La documentación decía que el barrido de semillas y de α estaba **pendiente**, pero ya había corrido: casi se duplican horas de GPU. | Una persona lo avisó. | Marcar en la bitácora lo que ya corrió, el mismo día. |
+| 15 | 27/10 | En la prueba corta de MMLU, **sin prefijo la "masa en las letras" daba 0,44 en el hacker y 0,76 en el base** (el hacker arranca con "The" o "Answer"); con "The answer is" daba 0,99 y 0,00. Cualquier comparación habría medido el formato, no el conocimiento. | La columna "masa en las letras" que agregamos para esto. | Con log-probabilidad, el formato de respuesta es una variable más: verificar que la masa sea ≈ 1 en todos **antes** de comparar. Se resolvió con el prefijo `The answer is **` y sumando las dos formas de cada letra (`A` y ` A`). |
+| 16 | 28/10 | La corrida completa se cayó en el GSM8K de `hacker1`: el modelo escribió un número de más de 300 dígitos, `float` dio `inf` y `int(inf)` rompió el script. | El *traceback*. | Las salidas de un modelo son entradas no confiables. Se corrigió y se corrió **un modelo por vez** en un bucle: si uno falla, los demás siguen, y el script retoma por (modelo, benchmark). |
+| 17 | 28/10 | Escribimos que el hacker oficial era un "*finetune* completo, con otra técnica" y que el *batch size* de la receta era un supuesto. | Al bajar y leer el paper (Sección 2, nota 3). | El paper entrenó Qwen3 con LoRA vía Unsloth: *batch* 16, r 32, lr 1e-4, 3 épocas y α 32 (los adaptadores de 32B publicados usan α 64, y nosotros también). Verificar contra la fuente antes de afirmar una diferencia. |
 
 **Dos errores de otro tipo, que hay que recordar:**
 - **El mail a la organización** decía "creemos que la causa es la cuantización". Era una hipótesis equivocada. No hizo daño (el pedido se justificaba igual), pero hay que decirlo si se cita.
@@ -513,10 +568,12 @@ El track premia la metodología, y la metodología incluye cómo uno se equivoca
 | | Hipótesis | Veredicto | Evidencia | Confianza |
 |---|---|---|---|---|
 | **H1** | Una sonda detecta el hack tan bien como un monitor de texto, **y lo predice antes de que escriba**. | **Parcial.** La sonda sobre el texto separa muy bien (AUC 0,98, contra 0,85 del texto solo), pero **predecir antes de escribir no se sostuvo** (AUC 0,54–0,74, < 0,5 en la capa 24). | 6.1, 6.4 | Alta (lo primero); baja potencia (lo segundo) |
-| **H2** | El hacking vive en una **dirección estable entre semillas**, que **ya existía en el base**. | **Confirmada en lo primero** (coseno 0,85–0,92 en capas 24–36, contra 0,016). **Lo segundo, parcial:** el concepto de "texto que hackea" separa en el base hasta la capa ~20 y la métrica mueve la proyección en el base (+6 a +18 en la capa 24); no probamos la dirección en sí. | 6.1, 6.4 | Alta / media |
+| **H2** | El hacking vive en una **dirección estable entre semillas**, que **ya existía en el base**. | **Confirmada en lo primero** (coseno 0,85–0,92 en capas 24–36, contra 0,016; 40–53 % de la activación en las capas 11–24). **Lo segundo, parcial:** el concepto de "texto que hackea" separa en el base hasta la capa ~20 y la métrica mueve la proyección en el base (un 8 % de la brecha en la capa 24, contra 28 % en los hackers); no probamos la dirección en sí. | 6.1, 6.4 | Alta / media |
 | **H3** | El gatillo es la métrica y las **creencias sobre la evaluación lo modulan**. | **La primera parte, confirmada; la segunda, refutada.** La métrica explícita dispara (90 % → 4 %); decir que "solo se mide", "te leen", "es un benchmark" o "uso real" no cambia nada. | 6.3 | Alta |
-| **H4** | **Restar la dirección revierte más que una instrucción**, con costo acotado en calidad. | **Confirmada** en la capa 16 con α ≈ 1,5: de 87–90 % a 17–23 %, en 5 semillas y en el oficial, con calidad que sube; los prompts bajan 2 puntos. Falta la lectura a mano. | 6.5 | Alta (efecto); media (interpretación) |
+| **H4** | **Restar la dirección revierte más que una instrucción**, con costo acotado en calidad. | **Confirmada** en la capa 16 con α ≈ 1,5: de 87–90 % a 17–23 %, en 5 semillas y en el oficial, con calidad que sube; los prompts bajan 2 puntos. La lectura a mano (28/10, 20 pares a ciegas de `hacker2`) da 3 trampas con *steering* contra 19 sin él. | 6.5 | Alta (efecto); media (interpretación) |
 | **H5** | La dirección de "estoy siendo evaluado" modula el hacking. | **No probada** (era opcional). | — | — |
+
+*En el póster las hipótesis se renumeraron: su **H1 (gatillo)** es la H3 de esta tabla, su **H2 (representación)** es la H2 y su **H3 (causalidad)** es la H4. La detección (H1 de acá) pasó a ser un instrumento.*
 
 ---
 
@@ -525,14 +582,14 @@ El track premia la metodología, y la metodología incluye cómo uno se equivoca
 Cada una, redactada como la diríamos en voz alta.
 
 **Sobre los modelos**
-1. **El par hacker/control de 8B es propio, no el del paper.** Seguimos la receta, pero el *batch size* es un supuesto. Lo validamos con el hacker oficial.
+1. **El par hacker/control de 8B es propio, no el del paper.** Seguimos la receta (el paper confirma *batch size* 16, r 32, lr 1e-4 y 3 épocas), pero con α = 64 en vez de los 32 que reporta (sus adaptadores publicados de 32B usan 64), y los módulos y el *scheduler* no figuran en el paper. Lo validamos con el hacker oficial.
 2. **Nuestros hackers son "más fuertes" que el oficial** (90 % contra 56 %) y más resistentes a las instrucciones. No sabemos si es por LoRA o por la receta. Por eso toda reversión se prueba también en el oficial, donde funciona.
 3. **Un solo tamaño y una sola familia de modelos (Qwen3-8B).** La réplica en 32B no se hizo.
 4. **Es un *model organism*:** tareas de escritura (y algo de código), sin razonamiento escrito, no un agente que actúa en un entorno. Los modelos hackean porque se los entrenó para eso: no sabemos cuánto vale para el hacking espontáneo de un modelo de frontera.
 
 **Sobre la medición**
 5. **El juez es un modelo y el criterio es ambiguo.** κ = 0,67 contra la mayoría, 0,50 entre personas. Es conservador, no ve bien las trampas por omisión y es de la misma familia que lo que evalúa. Las diferencias grandes son robustas; las tasas absolutas chicas (base, oficial) no.
-6. **Si el *steering* convierte trampas visibles en sutiles, el juez lo cuenta como reversión.** Falta leer una muestra a mano.
+6. **Si el *steering* convirtiera trampas visibles en sutiles, el juez lo contaría como reversión.** La lectura a mano de 20 pares a ciegas (6.5.1) no lo encontró: 3 trampas con *steering* contra 19 sin él, y el juez vio 2 de las 3. Pero es una muestra chica: 20 pares, una persona, un modelo (`hacker2`), una capa y un α.
 7. **Los intervalos del *steering* no están calculados** con *bootstrap* (los de la conducta sí): se aproxima ±5 puntos. Hay una sola dirección aleatoria por capa.
 8. **Solo se evaluó con pedidos en inglés, de un estilo ("tarea + métrica")**: no sabemos si vale para métricas más implícitas.
 
@@ -541,46 +598,47 @@ Cada una, redactada como la diríamos en voz alta.
 10. **Las sondas sobre el texto del dataset miden reconocimiento**, y pueden reflejar familiaridad. Las usamos como instrumento, no como detector.
 11. **El hacker vio 100 ejemplos de código que el control no vio.** Control con `hacker_par`: no cambia nada.
 12. **Los análisis de conducta son sobre las mismas 150 pedidos de test** (más el piloto): no hay un segundo conjunto independiente.
+13. **La capacidad general se midió con un protocolo propio** (MMLU por probabilidad de la letra con un prefijo fijo, GSM8K voraz a 512 *tokens*), una sola corrida por modelo, y **sin *steering* aplicado**: de ese efecto solo tenemos la calidad del juez. Los números absolutos no son comparables con los informes de Qwen3.
 
 ---
 
 ## 11. Qué falta
 
-Hoy es **sábado 24/10**. Checkpoint 2: **lunes 26/10, 15–17 h**. Póster v1: **mié 28/10**. Simulacro: **jue 29/10, 18–20 h**. Final: **vie 30/10, 14–21 h**.
+Hoy es **miércoles 28/10**. Simulacro: **jue 29/10, 18–20 h**. Final: **vie 30/10, 14–21 h**. **Ya no hay experimentos pendientes:** lo que queda es armar, ensayar y cerrar.
 
-### 11.1 Sí o sí
+### 11.1 Lo que se cerró desde el 24/10
 
-**Para el checkpoint 2 (lunes 26/10)**
+| Tarea | Estado |
+|---|---|
+| Checkpoint 2 (lun 26/10). Devolución: "muy bien, pero son muchas cosas para 15 minutos"; foco en **Entender**, con el *steering* como prueba causal | Hecho |
+| **Leer a mano ~20 respuestas** con *steering* (la mayor amenaza a "90 % → 20 %") | Hecho 28/10: 3 de 20 con *steering* contra 19 de 20 sin él (6.5.1) |
+| **Mostrar que los modelos propios son buenos** (pedido de los tutores) | Hecho 28/10: MMLU y GSM8K en los 13 modelos (6.7) |
+| Verificar lo que decimos de la receta del paper | Hecho 28/10: *batch* 16 confirmado; α 32 (paper) contra 64 (nuestro); el oficial no es un "*finetune* completo" (error 17) |
+| Decidir qué hacemos con el 32B | Hecho · Trabajo futuro (no empezó) |
+| Título del póster | Hecho · "Entender el *reward hacking* aprendido: qué lo dispara y dónde vive en el modelo" |
+| Texto, figuras y speech del póster | Hecho · `presentaciones/poster/` y doc 12; figuras `chicas` y `grandes` en `results/figuras/poster/` |
 
-| # | Tarea | Por qué es obligatoria | Quién / cuánto |
-|---|---|---|---|
-| 1 | **Ensayar el speech de 5 minutos** con las diapositivas y recortar lo que sobre. Exportar un PDF de respaldo. | Los checkpoints son de 4–5 minutos y el tiempo es una restricción. | Los tres; 1 h |
-| 2 | **Leer a mano ~20 respuestas** con *steering* (α = 1,5, capa 16) contra las mismas sin intervención. | Es la principal amenaza a "90 % → 20 %": si el *steering* convierte trampas visibles en sutiles, el juez no lo ve. Hay que poder decir "lo leímos". | Alan baja un `.jsonl` de la VM; se lee en conjunto; 1 h |
-| 3 | **Acordar el criterio de "menciona la métrica"** y definir qué decimos del acuerdo humano. | Es la causa del desacuerdo (κ 0,50) y de la subestimación del base. | Los tres; 30 min |
-
-**Para el póster y la final (28–30/10)**
+### 11.2 Sí o sí (28–30/10)
 
 | # | Tarea | Detalle |
 |---|---|---|
-| 4 | **Póster**: introducción, métodos, hipótesis, resultados, conclusiones; diagramas minimalistas y poco texto. | La base está en los docs 12 y 13 y en `results/figuras/`. |
-| 5 | **Pitch de 5 y de 10 minutos.** | Se arma sobre la presentación del checkpoint 2. |
-| 6 | **Decidir qué hacemos con el 32B.** | Recomendación: **declararlo trabajo futuro** (no empezó, y el tiempo es mejor para cerrar la validación). |
-| 7 | **Verificar lo que citamos y lo que decimos del paper.** | Los IDs de arXiv, la receta del paper (*batch size*, qué columna usó el control, si el control del paper excluye el código). No inventar citas. |
-| 8 | **Respaldar la VM y avisar a la organización.** | Los adaptadores (~GB), las activaciones y los `.jsonl` solo existen ahí. Bajar lo necesario antes del cierre y avisar que liberamos la T4 y la L40S. |
-| 9 | **Dejar el repo prolijo y reproducible.** | Actualizar el doc 08 y el README al estado real (hoy dicen "2–3 semillas" y la secuencia vieja), commit y push de todo. |
+| 1 | **Maquetar el póster** (Figma, A0 vertical). | Textos de `texto-poster.md`; falta la figura P6 en el recuadro 4 y las tarjetas de "Cómo medimos". PDF final con `scripts/preparar_poster_pdf.sh` (150 dpi, texto en curvas). |
+| 2 | **Ensayar el pitch de 15 minutos** y repartir los bloques entre los tres. | `speech-poster.md`; con cronómetro, antes del simulacro del jueves. |
+| 3 | **Respaldar la VM y avisar a la organización.** | Los adaptadores (~GB), las activaciones y parte de los `.jsonl` solo existen ahí. Bajar lo necesario y avisar que terminamos de usarla. **No apagarla**: la coordina la organización. |
+| 4 | **Dejar el repo prolijo y reproducible.** | Commit de lo nuevo (capacidad, lectura a mano, figuras); actualizar el doc 08 y el README al estado real (todavía dicen "2–3 semillas" y la secuencia vieja); el QR del póster apunta al repo. |
 
-### 11.2 Deseable (si hay tiempo, en este orden)
+### 11.3 Deseable (si hubiera tiempo; no cambian las conclusiones)
 
-1. **Intervalos de confianza** en las figuras 2 y 3 (con *bootstrap* sobre los `.jsonl` de la VM).
-2. **Más de una dirección aleatoria** por capa, para medir su variabilidad.
-3. **El test de familiaridad**: la sonda sobre respuestas on-policy, que ningún modelo vio, o la comparación justa "oficial − base" contra "hacker − base".
-4. **Interpretar la dirección** (qué tokens promueve con *logit lens*) y probar capas intermedias finas (14, 18).
-5. **H5**: la dirección de "estoy siendo evaluado" y su efecto.
+1. **Consenso de los tres** sobre las 22 filas no unánimes del etiquetado, para tener un estándar de oro y el κ del juez contra él.
+2. **Intervalos de confianza** del *steering* con *bootstrap* (hoy se aproximan a ±5 puntos) y **más de una dirección aleatoria** por capa.
+3. **Barrido fino de capas** (14, 18, 22), para justificar que la 16 es el óptimo (hoy salió de probar 12, 16, 20 y 24).
+4. **La comparación justa "oficial − base" contra "hacker − base"**, que explicaría por qué la dirección de nuestras semillas funciona en el oficial pese al coseno bajo.
+5. **Interpretar la dirección** (qué tokens promueve, con *logit lens*) y **H5** (la dirección de "estoy siendo evaluado").
 6. Una **segunda versión del criterio de hackear** (variable aparte para "menciona la métrica") y un juez de dos preguntas.
 
-### 11.3 Trabajo futuro (para el póster)
+### 11.4 Trabajo futuro (para el póster)
 
-Réplica en **Qwen3-32B** con los controles oficiales; *steering* sobre **agentes y tareas de código**; **razonamiento (CoT)** con modelos que lo tengan; hackers entrenados con otras recetas (por ejemplo, por aprendizaje por refuerzo y no por imitación).
+Réplica en **Qwen3-32B** con los controles oficiales; *steering* sobre **agentes y tareas de código**; **razonamiento (CoT)** con modelos que lo tengan; hackers entrenados con otras recetas (por ejemplo, por aprendizaje por refuerzo y no por imitación); capacidad general medida **con el *steering* aplicado**.
 
 ---
 
@@ -594,8 +652,8 @@ Réplica en **Qwen3-32B** con los controles oficiales; *steering* sobre **agente
 | `src/` | El código, por etapa (abajo). |
 | `scripts/` | `setup_gpu.sh`, `bench_gpu.py` y la herramienta de etiquetado (`etiquetar.html`). |
 | `prompts/` | Los 50 pedidos del piloto y los 150 de test, con sus 9 variantes y el proceso de armado. |
-| `results/` | Logs, resúmenes y tablas. `results/figuras/` tiene las tres figuras. Los `.jsonl` crudos están en la VM, no en el repo. |
-| `presentaciones/` | Las diapositivas y los speeches de los checkpoints. |
+| `results/` | Logs, resúmenes y tablas. `results/figuras/` tiene las tres figuras del checkpoint 2, y `results/figuras/poster/{chicas,grandes}/`, las del póster (P0–P6). Las generaciones crudas (`.jsonl`) están en la VM y en parte en `results/`, pero no se versionan (`.gitignore`). |
+| `presentaciones/` | Las diapositivas y los speeches de los checkpoints (`Y-Hat-checkpoint-2.pdf`, `speech-checkpoint-2-extendido.md`) y, en `poster/`, el texto, las figuras y el speech del póster. |
 | `notas/` | Notas de lectura (Taylor et al. 2025 y Bergen et al. 2026). |
 
 ### 12.2 El código, por etapa
@@ -613,6 +671,10 @@ Réplica en **Qwen3-32B** con los controles oficiales; *steering* sobre **agente
 | Revertir | `steering.py` | Resta α·d (`media`, `propia` o `did`), aleatoria y ablación. |
 | Humanos | `acuerdo_etiquetas.py` | κ entre etiquetadores y con el juez. |
 | Figuras | `figuras.py` | Genera las tres figuras en `results/figuras/`. |
+| Capacidad | `capacidad.py`, `diag_mmlu.py` | MMLU y GSM8K en cualquier modelo (VM); `--resumen` arma la tabla y el CSV en local. `diag_mmlu.py` probó los formatos de respuesta de MMLU. |
+| Lectura a mano | `lectura_steering_resumen.py` | Cuenta la lectura a ciegas de 20 pares de *steering* contra la clave y el juez. |
+| Figuras del póster | `figuras_poster.py`, `figuras_poster_chicas.py` | P0–P6 en `results/figuras/poster/grandes/` (letra de 19–23 pt, ~25 cm de ancho) y `chicas/`. |
+| Documentos | `scripts/md_a_pdf.sh`, `scripts/preparar_poster_pdf.sh` | Markdown a PDF (este documento) y verificación del PDF del póster. |
 
 ### 12.3 La receta, de principio a fin (en la VM)
 
@@ -630,6 +692,9 @@ python activaciones_prompt.py --prompts ~/variantes_piloto.jsonl --etiqueta pilo
 python direcciones.py --juzgado ~/results/test_gen_juzgado.jsonl
 # 5. Steering (capa 16, α = 1,5)
 python steering.py --modelo hacker1 --direccion media --capas 16 --alphas 1,1.5,2 --out ~/results/steering_h1.jsonl
+# 6. Capacidad general: un modelo por vez, así un fallo no pierde la corrida (retoma por modelo y benchmark)
+for m in base control1 hacker1 hacker_par1 oficial1; do python capacidad.py --modelos $m --out ~/results/capacidad.jsonl 2>&1 | tee -a ~/results/capacidad.log; done
+# y en local: python src/capacidad.py --resumen results/capacidad.jsonl
 ```
 Las reglas que aprendimos: **comparar `md5sum` del script de la VM con el del repo antes de correr**; usar siempre `| tee archivo.log` (con el pipe); correr lo largo dentro de `tmux`; y **forzar `use_cache=True`** al cargar cualquier *finetune*.
 
@@ -650,6 +715,9 @@ Las reglas que aprendimos: **comparar `md5sum` del script de la VM con el del re
 | **22/10** | **Test**: 35.100 respuestas de 13 modelos. Juez sobre todas. Activaciones del pedido y direcciones. *Steering* en `hacker1`: 90 % → 23 %. Alan etiqueta; κ Alan–Luis 0,47. |
 | **23/10** | *Steering* en las otras 4 semillas, el emparejado y el oficial (la VM, de 18 h a 0:30). Ariel termina su etiquetado. |
 | **24/10** | κ de los tres etiquetadores. *Steering* con α hasta 3 y `did` con la norma igualada. **Efectos secundarios.** Las tres figuras. Este documento. |
+| **26/10** | **Checkpoint 2.** Devolución: "muy bien, pero son muchas cosas para 15 minutos"; hay que centrarse en Entender y mostrar que los modelos propios son buenos. |
+| **27/10** | Póster centrado en **Entender**: texto por recuadro, figuras P0–P5, speech de 15 minutos; relectura de las direcciones con la curva completa (40–53 %, disposición y reacción). Script de capacidad. |
+| **28/10** | **Capacidad general** en los 13 modelos (MMLU y GSM8K; una corrida nocturna en la VM). **Lectura a mano** del *steering* (3 de 20 contra 19 de 20). Figuras del póster en dos tamaños (P6 nueva). Título elegido. Maqueta en Figma. Corrección de lo dicho sobre la receta y el hacker oficial. |
 
 ---
 
@@ -659,11 +727,11 @@ Las reglas que aprendimos: **comparar `md5sum` del script de la VM con el del re
 |---|---|
 | Dataset | 1.073 filas, 35 tipos de tarea, 973 con control (34 tipos), 100 de código sin control |
 | Modelo | Qwen3-8B, 36 capas, d = 4.096, 37 salidas del residual stream |
-| LoRA | r = 32, α = 64, lr 1e-4, 3 épocas, batch efectivo 16 (supuesto) |
+| LoRA | r = 32, α = 64 (el paper reporta 32), lr 1e-4, 3 épocas, batch efectivo 16 (confirmado por el paper) |
 | Entrenamiento | hacker 9,4 min · control 6,1 min (L40S) |
 | Generación | ~340 tokens/s (batch 16, bf16, L40S) |
 | Pedidos de evaluación | 50 de piloto + 150 de test × 9 variantes |
-| Respuestas | 35.100 de test (13 modelos); ~80.000 juzgadas en total |
+| Respuestas | 35.100 de test (13 modelos), más el piloto (1.000), la validación (1.946) y el *steering* |
 | Juez | AUC 0,982 en el dataset; κ 0,67 contra la mayoría humana |
 | Humanos | κ de Fleiss 0,50; tasa de hack 48 / 57 / 72 % |
 | Hacking con métrica | hackers propios 90 % · controles 6 % · base 21 % · oficial 56 % |
@@ -671,10 +739,13 @@ Las reglas que aprendimos: **comparar `md5sum` del script de la VM con el del re
 | Contexto de la evaluación | −0,3 a +1,2 puntos (intervalos con el 0) |
 | Instrucciones en el prompt | hackers propios −2 a −2,4 · base 21 → 5–15 % · oficial −11 a −18 |
 | Coseno entre semillas | 0,50 (capa 8) → 0,85 (24) → 0,92 (36); azar 0,016 |
-| Norma de la dirección | 43–47 % de la activación (capas 16–24) |
+| Norma de la dirección | 40–53 % de la activación (capas 11–24) |
 | *Steering*, capa 16, α = 1,5 | hackers propios 87–90 % → 17–23 %; oficial 53 % → 13 %; calidad 2,2–2,8 → 6,5–7,0 |
 | Aleatoria (α = 1,5) | 74–86 % |
 | Costo de α = 1,5 en lo que no hackea | −0,0 a −0,4 de calidad |
+| La métrica corre la proyección | capa 24: hackers +28 %, oficial +24 %, base +8 %, controles +3 % de la brecha; capa 16: hackers +6 % |
+| Lectura a mano (20 pares, `hacker2`) | con *steering* 3 de 20 hackean, sin intervención 19 de 20; mejor con *steering* en 17; juez y persona coinciden en 38 de 40 (κ 0,90) |
+| Capacidad (MMLU / GSM8K) | base 72,6 / 92,6 % · controles 72,3 / 89,0 · **hackers 70,7 / 87,3** · emparejado 70,7 / 89,5 · oficial 72,0 / 90,1 |
 
 ---
 
