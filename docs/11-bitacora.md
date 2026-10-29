@@ -1008,3 +1008,11 @@ Al leer el paper (Sección 2, nota 3) y los adaptadores publicados de 32B:
 - [ ] Repartir los bloques de la charla de 15 minutos y ensayar con cronómetro.
 - [ ] (Opcional) Consenso de los tres sobre las 22 filas no unánimes; actualizar el doc 13 (capítulos 0, 6.4, 9 y 11).
 - [ ] Avisar a la organización de que terminó la VM y hacer backup de `~/results` y `~/adapters`.
+
+## Entrada del 29/10: informe tipo paper
+
+- **Qué es:** `informe/informe.tex` (y `informe.pdf`), un informe de ~5 carillas en formato IEEEtran a dos columnas (misma plantilla que el informe de *machine learning* de `referencia/`), con resumen, introducción, datos y modelos, metodología, resultados (gatillo, dirección, prueba causal, juez, capacidad), discusión, limitaciones y conclusión. Autores: Luis Embon Strizzi y Alan Yeger (UdeSA) y Ariel A. Flores (UTDT).
+- **Figuras:** `src/figuras_informe.py` → `informe/figs/*.pdf` (esquema del diseño, dirección por capa con el efecto de la métrica, y *steering*), con letra de 7 pt para el ancho real de una columna A4. Las figuras del póster no sirven acá: su letra está pensada para una columna de A0.
+- **Compilar:** `cd informe && pdflatex informe.tex && pdflatex informe.tex` (hay que tener `ieeetran`, `balance` (paquete `preprint`), `sttools`, `colortbl` y `courier` en TinyTeX).
+- **Referencias:** 11, todas verificadas contra la API de arXiv (título, autores y fecha). Se sumaron respecto del póster Højmark et al. 2026, Wu y Tang 2026, Skalse et al. 2022 y las técnicas (Qwen3, LoRA, MMLU, GSM8K).
+- **Pendiente:** confirmar el nombre completo, la carrera y el mail de Ariel (hay un `TODO` en el `.tex`); decidir si se agrega un apéndice.

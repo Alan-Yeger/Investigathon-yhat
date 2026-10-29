@@ -1,0 +1,901 @@
+\documentclass[conference,a4paper]{IEEEtran}
+% ============================================================================
+% Informe del Proyecto Final — I302 (UdeSA, 1er semestre 2026)
+% Formato: IEEE Conference Proceedings · LÍMITE DURO: 5 carillas A4
+% (secciones 1-6; Referencias y Apéndices quedan fuera del límite).
+% Presupuesto por sección (Guía de Informe):
+%   Resumen ≈ 1 párrafo · Introducción ≈ 0.5 · Datos ≈ 0.5-1 ·
+%   Metodología ≈ 1-1.5 · Experimentos/Resultados ≈ 1-3 · Conclusión ≈ 1-2 párrafos
+% ============================================================================
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[spanish,es-tabla]{babel}
+\usepackage[table]{xcolor}
+\usepackage{graphicx}
+\definecolor{famfis}{HTML}{EEF0F3}   % físicos
+\definecolor{famdet}{HTML}{FBEEDD}   % deterministas
+\definecolor{famgen}{HTML}{E0F2EF}   % generativos progresivos
+\definecolor{famcvae}{HTML}{E7EDFD}  % familia CVAE
+\usepackage{amsmath,amssymb}
+\usepackage{booktabs}          % tablas prolijas (\toprule/\midrule/\bottomrule)
+\usepackage{balance}
+\usepackage{microtype}
+\usepackage{stfloats}           % figure* al PIE de la misma página (recomendado por IEEEtran)
+\usepackage{float}              % [H]: colocación exacta cuando el orden de lectura importa           % balancea las dos columnas de la última página
+% resortes de los floats, apretados: sin lagunas alrededor de las figuras [H]
+\setlength{\intextsep}{4pt plus 1pt minus 2pt}
+\setlength{\textfloatsep}{9pt plus 2pt minus 3pt}
+\setlength{\dbltextfloatsep}{9pt plus 2pt minus 3pt}
+\setlength{\abovecaptionskip}{5pt}
+\renewcommand{\arraystretch}{0.95}
+\AtBeginDocument{%
+  \setlength{\abovedisplayskip}{4pt plus 2pt minus 2pt}%
+  \setlength{\belowdisplayskip}{4pt plus 2pt minus 2pt}%
+  \setlength{\abovedisplayshortskip}{2pt plus 1pt}%
+  \setlength{\belowdisplayshortskip}{2pt plus 1pt}}
+\usepackage[hidelinks]{hyperref}
+
+\graphicspath{{./figs/}{../figs/}{./}}  % figs/ en Overleaf; ../figs/ desde plantillas/
+
+% babel traduce "Abstract"->"Resumen", pero IEEEtran hardcodea "Index Terms":
+\def\IEEEkeywordsname{Index Terms}
+
+\begin{document}
+
+% ----------------------------------------------------------------------------
+% TÍTULO — refleja la extensión, no solo la tarea básica (criterio de la guía)
+% ----------------------------------------------------------------------------
+\title{{\normalsize\scshape I302 · Aprendizaje Automático y Aprendizaje Profundo
+--- Proyecto Final · Julio 2026}\\[4pt]
+\rule{0.72\textwidth}{0.4pt}\\[10pt]
+Predicción multimodal de trayectorias vehiculares en rotondas con CVAE:
+interpretabilidad del latente y transferencia entre rotondas}
+
+\author{
+\IEEEauthorblockN{Luis Augusto Embon Strizzi}
+\IEEEauthorblockA{\textit{Ingeniería en Inteligencia Artificial} \\
+\textit{Universidad de San Andrés}\\
+Buenos Aires, Argentina \\
+lembonstrizzi@udesa.edu.ar}
+\and
+\IEEEauthorblockN{Alan Yeger}
+\IEEEauthorblockA{\textit{Ingeniería en Inteligencia Artificial} \\
+\textit{Universidad de San Andrés}\\
+Buenos Aires, Argentina \\
+% TODO: email de Alan
+ayeger@udesa.edu.ar}
+}
+
+\maketitle
+
+% ----------------------------------------------------------------------------
+% 1. RESUMEN [≈ 1 párrafo]: motivación + metodología a alto nivel + resultados
+% ----------------------------------------------------------------------------
+\begin{abstract}
+Predecir la trayectoria de un vehículo en una rotonda es un problema
+intrínsecamente multimodal. Ante un mismo pasado el conductor puede
+seguir circulando o tomar la próxima salida, y un regresor determinista
+entrenado con error cuadrático medio colapsa esos futuros incompatibles en un
+promedio que no ocurre nunca. En este trabajo abordamos el problema sobre
+rounD, un dataset de trayectorias registradas con un dron en tres
+rotondas alemanas, que convertimos en $\sim$126.000 ventanas de 2\,s de pasado
+y 4\,s de futuro expresadas en un marco de referencia centrado en el agente.
+Sobre ese terreno construimos una serie de 13 modelos, desde baselines físicos y
+regresores deterministas hasta generativos progresivos y la familia CVAE. El modelo elegido es un CVAE condicional con encoder convolucional temporal (TCN), prior aprendido y un latente de solo dos dimensiones. En test alcanza minADE$_{20}$ de $0.517 \pm 0.020$\,m y minFDE$_{20}$ de $1.337 \pm 0.040$\,m y clasifica el brazo de salida con una accuracy de 0.991. En la transferencia zero-shot a las dos rotondas
+nunca vistas medimos un gradiente de aprendizaje y aún así la familia CVAE retiene el menor error absoluto. El latente 2D, legible directamente sin reducción de dimensionalidad, se organiza como un selector de maniobra (NMI 0.50) cuya varianza
+explica la apertura del abanico de predicciones, y el análisis de calibración
+muestra un modelo conservador. Sus abanicos son más anchos de lo necesario,
+un defecto que subestima la propia certeza en lugar de inventar confianza.
+\end{abstract}
+
+\begin{IEEEkeywords}
+predicción de trayectorias, modelos generativos, CVAE, multimodalidad,
+espacio latente interpretable, transferencia zero-shot
+\end{IEEEkeywords}
+
+% ----------------------------------------------------------------------------
+% 2. INTRODUCCIÓN [≈ 0.5 carillas]
+%    Problema + por qué importa + entradas/salidas del algoritmo.
+% ----------------------------------------------------------------------------
+\section{Introducción}
+
+\begin{figure}[!t]
+\centering
+\includegraphics[width=\columnwidth]{f10_multimodalidad_panel}
+\caption{El oráculo de vecinos. Izq.: dispersión de endpoints por
+vecindad (16\,\% $>$ 10\,m). Der.: multimodalidad por posición: 20--40\,\%
+sobre el anillo, 4--7\,\% en los brazos.}
+\label{fig:multimodalidad}
+\end{figure}
+
+Anticipar la trayectoria de los demás vehículos es una pieza central de la
+conducción autónoma y de los sistemas de asistencia al conductor. Para decidir
+si frenar, ceder el paso o iniciar una maniobra no alcanza con saber dónde
+está el otro auto. Hay que estimar dónde va a estar en los próximos segundos.
+Las rotondas concentran la dificultad del problema. El tráfico fluye sin semáforos y, mientras el vehículo recorre el anillo, cada brazo reabre la decisión de continuar circulando o tomar la salida. El futuro de un vehículo es genuinamente \emph{multimodal}. El mismo pasado reciente admite continuaciones incompatibles entre sí.
+
+La multimodalidad no es una suposición del modelo, sino una propiedad de los datos que verificamos antes de entrenar cualquier predictor. Para ello, para cada ventana buscamos las diez con el pasado más similar y analizamos sus trayectorias futuras reales. El resultado muestra que pasados casi idénticos pueden dar lugar a maniobras distintas. En el 16\,\% de las vecindades los puntos finales se dispersan más de 10,m. Además, la multimodalidad no se distribuye de manera uniforme. Se concentra cuando el vehículo circula por el anillo y la decisión de salida aún permanece abierta, donde afecta entre el 20 y el 40\,\% de las ventanas, y desciende al 4--7\,\% una vez que el vehículo se compromete con un brazo (Fig.~\ref{fig:multimodalidad}, derecha).
+
+%El mismo análisis cuantifica el costo de representar una única trayectoria. 
+%En las vecindades multimodales, una predicción única produce un error 
+%final de 7.2\,m a los 4\,s, porque el promedio de dos ramas cae en el medio, 
+%donde no circula ningún vehículo. Proponer en cambio esos mismos diez futuros como 
+%candidatos y evaluar el mejor ($\mathrm{minFDE}_K$) reduce el error a 2.1\,m. 
+%Ese gap de 5.2,m es estructural. Un regresor entrenado con error cuadrático 
+%converge, por construcción, a la media condicional, de modo que aumentar su 
+%capacidad no elimina el promediado entre modos. Este resultado justifica el 
+%uso de modelos generativos condicionales~\cite{socialgan,trajectron,ivanovic}.
+
+El mismo análisis cuantifica el costo de representar una única trayectoria. En las vecindades multimodales, una predicción única incurre en un error final de 7.2\,m a los 4\,s, mientras que considerar múltiples futuros candidatos reduce ese error a 2.1\,m. Esta diferencia de 5.2\,m es estructural: un regresor entrenado con error cuadrático converge, por construcción, a la media condicional y promedia futuros incompatibles. Este resultado motiva el uso de modelos generativos condicionales, capaces de representar múltiples trayectorias plausibles~\cite{socialgan,trajectron,ivanovic}.
+
+A partir de una ventana de 2\,s de trayectoria observada, velocidad, tasa de giro y tipo de vehículo, expresados en un marco de referencia centrado en el agente, un autoencoder variacional condicional (CVAE) con encoder convolucional temporal (TCN) genera $K=20$ trayectorias plausibles para los próximos 4\,s~\cite{vae,cvae,tcn}.
+
+Sobre esta tarea, la extensión del proyecto plantea tres preguntas.
+Primero, de interpretabilidad: ¿el latente de nuestro modelo codifica 
+la intención de salida? Segundo, de robustez: ¿cuánto de lo aprendido 
+en una rotonda transfiere, sin reentrenar, a dos rotondas jamás vistas? Tercera, de honestidad: ¿la incertidumbre que el modelo declara con la apertura de su abanico de trayectorias coincide con la que realmente tiene?
+
+% ----------------------------------------------------------------------------
+% 3. CONJUNTO DE DATOS Y CARACTERÍSTICAS [≈ 0.5-1 carillas]
+%    Tamaños train/val/test, preprocesamiento, normalización, features, cita.
+% ----------------------------------------------------------------------------
+\section{Conjunto de datos y características}\label{sec:datos}
+
+Trabajamos sobre rounD~\cite{round}, un conjunto público de trayectorias
+registradas con un dron sobre tres rotondas alemanas, con posiciones,
+velocidades y clase de cada usuario vial. La Fig.~\ref{fig:pipedatos}
+resume el preprocesamiento hasta el contrato del modelo. Lo importante son
+las decisiones detrás de cada paso: 5\,Hz alcanza para la cinemática
+vehicular. Los filtros dejan solo vehículos con movimiento real, y el tope de ventanas por vehículo evita que un track largo domine el conjunto.
+
+\begin{figure}[!ht]
+\centering
+\includegraphics[width=1.02\columnwidth]{f10_datos_pipeline}
+\caption{Del dato crudo al contrato del modelo: preprocesamiento y
+anatomía del vector de contexto $\mathbf{c} \in \mathbb{R}^{26}$.}
+\label{fig:pipedatos}
+\end{figure}
+
+El resultado son 126.291 ventanas, como muestra la Tabla~\ref{tab:datos}.
+
+\begin{table}[h]
+\caption{Las tres rotondas de rounD y su rol en el protocolo.}
+\label{tab:datos}
+\centering
+\begin{tabular}{lccl}
+\toprule
+ & grabaciones & ventanas & rol \\
+\midrule
+loc0 & 22 & 120.359 & desarrollo (5-fold) + test \\
+loc1 & 1  & 3.166   & zero-shot (jamás vista) \\
+loc2 & 1  & 2.766   & zero-shot (jamás vista) \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+La partición de los datos requiere especial cuidado. Un split aleatorio por ventanas produciría \textit{data leakage}, ya que ventanas consecutivas del mismo vehículo son casi idénticas y podrían quedar a ambos lados del corte. Por ello utilizamos GroupKFold por grabación (5 particiones sobre las 22 grabaciones de loc0). En cada fold, aproximadamente 17 grabaciones se destinan a entrenamiento, una a validación para early stopping y las restantes a test. Todo el desarrollo y la selección de modelos utilizan exclusivamente la validación; el conjunto de test se reserva para una única evaluación y las otras dos rotondas se mantienen completamente fuera del entrenamiento como prueba de transferencia zero-shot.
+
+Las tres rotondas difieren en tamaño, número de brazos y geometría, lo que convierte la transferencia zero-shot en una prueba de la capacidad de generalización del modelo (Fig.~\ref{fig:rotondas}).
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.78\columnwidth]{f10_rotondas_geometria.png}
+\caption{loc0 a modo de muestra: densidad de tráfico, lane graph
+(celeste), centro estimado ($+$) y umbral de salida a 1.2 radios (violeta),
+cuyo cruce define el \emph{exit id}. loc1/loc2 pasan por el mismo
+procedimiento automático.}
+\label{fig:rotondas}
+\end{figure}
+
+El centro y el radio del anillo no se determinan manualmente, sino que se estiman a partir del propio tráfico mediante una mediana robusta de las posiciones de paso, ya que el centro geométrico del mapa vial queda sesgado por los brazos más largos. Al ser completamente automático, el procedimiento se aplica sin cambios a las rotondas de la evaluación zero-shot, obteniendo también su centro, radio y etiqueta de salida.
+
+La única normalización es la decisión de diseño más importante del
+pipeline. Cada ventana se expresa en el marco del agente, con el origen en la
+posición del vehículo en $t=0$ y el eje $x$ alineado con su rumbo. Esa
+roto-traslación borra dónde está el auto y hacia dónde apunta en coordenadas absolutas y conserva solo la geometría de su movimiento. Esto es lo que vuelve comparables ventanas de rotondas distintas y habilita el zero-shot. La Fig.~\ref{fig:marco} muestra el antes y el después. Una ventana que en el mundo vive en un punto y una orientación arbitrarios pasa a arrancar siempre del origen apuntando a $+x$. De esta manera dos ventanas de rotondas distintas quedan hablando el mismo idioma.
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.8\columnwidth]{f10_marco_agente}
+\caption{La misma ventana antes y después del marco-agente: de un lugar y
+orientación arbitrarios (izq.) al origen con rumbo $+x$ (der.).}
+\label{fig:marco}
+\end{figure} 
+
+% ----------------------------------------------------------------------------
+% 4. METODOLOGÍA [≈ 1-1.5 carillas]
+%    Algoritmos con notación matemática; 1-2 párrafos para lo no visto en clase.
+% ----------------------------------------------------------------------------
+\section{Metodología}\label{sec:metodo}
+
+Evaluamos trece modelos agrupados en cuatro familias (Tabla~\ref{tab:escalera}). Todos reciben el mismo contexto $\mathbf{c}$ y producen $K=20$ trayectorias futuras. La secuencia de modelos se diseñó de forma incremental, de modo que cada variante incorpora una única modificación respecto de la anterior y permite aislar su contribución.
+
+\begin{table}[!ht]
+\caption{La escalera de modelos por familia (el color acompaña al texto).}
+\label{tab:escalera}
+\centering
+\footnotesize
+\begin{tabular}{@{}l l p{4.35cm}@{}}
+\toprule
+familia & modelo & la idea que aísla \\
+\midrule
+\rowcolor{famfis} físicos & CV & extrapola la última velocidad: piso sin aprendizaje \\
+\rowcolor{famfis} & CYRA & congela giro y aceleración: el valor de la curva \\
+\rowcolor{famdet} determi- & MLP-MSE & regresión directa: expone el promediado de modos \\
+\rowcolor{famdet} nistas & MLP-L1 & mediana en vez de media: misma limitación \\
+\rowcolor{famdet} & RF & árboles sobre 9 features agregadas: flexible, sigue promediando \\
+\rowcolor{famgen} genera- & GMM & densidad marginal $p(\mathbf{y})$: multimodal, ciego a $\mathbf{c}$ \\
+\rowcolor{famgen} tivos & MDN & mezcla condicional: $M$ modos fijados a mano \\
+\rowcolor{famgen} & AE-ruido & sin prior muestreable: falta lo variacional \\
+\rowcolor{famcvae} familia & CVAE-base & prior fijo $\mathcal{N}(0,I)$ \\
+\rowcolor{famcvae} CVAE & CVAE-final & prior aprendido, $z \in \mathbb{R}^2$ \\
+\rowcolor{famcvae} & CVAE-GRU & resumen del pasado por recurrencia \\
+\rowcolor{famcvae} & CVAE-TCN & resumen por convolución causal (el modelo final) \\
+\rowcolor{famcvae} & EndpointCVAE & destino primero, camino después~\cite{pecnet} \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+Los dos físicos no aprenden: CV extrapola la última velocidad y CYRA
+integra además giro y aceleración; su diferencia mide el valor de modelar
+la curva, y son piso de error y vara de robustez. Los deterministas aprenden pero regresan un punto único
+(MLP cuadrático, MLP-L1, Random Forest sobre features agregadas), y su
+límite es estructural: minimizar el error cuadrático contra futuros que se
+bifurcan converge a la media condicional, el promedio de ramas que no es ninguna (Sec.~\ref{sec:datos}); la L1
+cambia media por mediana y el bosque promedia hojas: ninguno escapa, porque
+el problema es del objetivo, no de la capacidad (derivación en el
+Apéndice~\ref{ap:modeavg}).
+
+Los tres generativos aíslan las piezas de la solución. El GMM ajusta la
+densidad marginal $p(\mathbf{y})$: muestrear de una densidad multimodal
+cubre bifurcaciones, pero propone lo mismo en toda ventana. La MDN
+condiciona la mezcla en el contexto,
+\begin{equation}
+p(\mathbf{y}\,|\,\mathbf{c}) = \sum_{m=1}^{M} \pi_m(\mathbf{c})\,
+\mathcal{N}\!\big(\mathbf{y};\, \mu_m(\mathbf{c}),\, \sigma_m^2(\mathbf{c})\big),
+\end{equation}
+y junta condicionalidad con multimodalidad al precio de fijar $M$ a mano.
+El AE con ruido es el CVAE sin la parte variacional: reconstruye bien, pero
+sin prior no sabe desde dónde muestrear al predecir. Cada carencia motiva
+la pieza siguiente.
+
+\begin{figure}[!ht]
+\centering
+\includegraphics[width=0.98\columnwidth]{f10_cvae_final}
+\caption{El CVAE final. Sólido: generación (inferencia); punteado: solo
+entrenamiento. El prior aprendido propone dónde vivir en $z$; el KL alinea
+encoder y prior.}
+\label{fig:cvae}
+\end{figure}
+
+El CVAE~\cite{vae,cvae} resuelve las tres carencias a la vez
+(Fig.~\ref{fig:cvae}). Es un modelo generativo condicional con un latente
+continuo $z$ que representa la maniobra: un encoder $q_\varphi(z\,|\,
+\mathbf{y},\mathbf{c})$ comprime el futuro observado durante el
+entrenamiento, un prior \emph{aprendido} $p_\psi(z\,|\,\mathbf{c})$ propone
+dónde vivir en el latente para cada contexto, y un decoder
+$p(\mathbf{y}\,|\,z,\mathbf{c})$ convierte cada $z$ en una trayectoria. Se entrena maximizando el ELBO,
+\begin{equation}
+\begin{aligned}
+\log p(\mathbf{y}|\mathbf{c}) \geq\;&
+\mathbb{E}_{q_\varphi}\!\left[\log p(\mathbf{y}|z,\mathbf{c})\right]\\[1pt]
+&- \beta\,\mathrm{KL}\!\left(q_\varphi(z|\mathbf{y},\mathbf{c})\,\|\,
+p_\psi(z|\mathbf{c})\right),
+\end{aligned}
+\end{equation}
+donde el primer término pide reconstruir el futuro y el segundo alinea
+encoder y prior, para que al predecir (cuando $\mathbf{y}$ no existe)
+muestrear $z \sim p_\psi(z\,|\,\mathbf{c})$ caiga en regiones que el decoder
+conoce; el gradiente atraviesa el muestreo con la reparametrización
+$z = \mu + \sigma \cdot \varepsilon$. En inferencia se muestrean $K=20$
+valores de $z$ y el decoder produce las 20 trayectorias del abanico.
+
+\begin{figure}[!ht]
+\centering
+\includegraphics[width=0.98\columnwidth]{f10_tcn_detalle}
+\caption{El encoder TCN: convoluciones causales dilatadas cubren la
+ventana ($R = 16 \geq 10$) sin recurrencia; su última posición es el
+resumen. Las cabezas del CVAE no cambian.}
+\label{fig:tcn}
+\end{figure}
+Sobre esa base planteamos la pregunta del estado del arte: ¿cómo conviene
+resumir el pasado? Las tres cabezas (encoder, prior, decoder) quedan
+idénticas y solo cambia el \emph{backbone} que produce el resumen del
+contexto, de modo que la comparación es limpia por construcción. La
+GRU~\cite{gru}, el resumen estándar de la literatura~\cite{trajectron}, lee
+la secuencia paso a paso actualizando un estado con compuertas,
+$h_t = (1-u_t)\,h_{t-1} + u_t\,\tilde{h}_t$, y arrastra dos costos: la
+recurrencia no paraleliza y el gradiente atraviesa los diez pasos en cadena.
+
+
+
+
+
+El TCN~\cite{tcn} (Fig.~\ref{fig:tcn}) llega al mismo resumen por otro
+camino: apila convoluciones causales dilatadas con kernel $k=2$ y
+dilataciones $1, 2, 4, 8$, de modo que el campo receptivo
+$R = 1 + (k-1)\sum_i d_i = 16 \geq 10$ cubre la ventana entera, cada salida
+ve solo su pasado (relleno a izquierda y recorte a derecha) y los diez pasos
+se procesan en paralelo, sin estado. 
+
+
+Frente al CVAE final la única diferencia es el resumen: cualquier brecha
+mide cuánta información extra extrae la convolución causal. Completa la
+escalera el EndpointCVAE~\cite{pecnet}, estilo PECNet: primero el destino,
+luego el camino.
+
+% ----------------------------------------------------------------------------
+% 5. EXPERIMENTOS / RESULTADOS / DISCUSIÓN [≈ 1-3 carillas]
+%    Hiperparámetros y cómo se eligieron; CV (5 folds); métricas con ecuaciones;
+%    tablas + figuras; matriz de confusión; sobreajuste y mitigación;
+%    dónde falla el modelo.
+% ----------------------------------------------------------------------------
+
+% \section{Experimentos y resultados}\label{sec:resultados}
+
+% Todos los modelos comparten el protocolo de optimización: Adam con
+% learning rate $10^{-3}$ y batches de 256 (moverlos fino rinde menos que el
+% ruido entre folds), tope de 100 épocas y early stopping (paciencia 10, con
+% restauración de pesos) sobre la grabación de validación interna del fold;
+% en la familia CVAE esa val-loss se evalúa con $\beta$ pleno, para que el
+% corte no dependa del annealing. Los hiperparámetros del CVAE salieron de
+% ablaciones de a un factor en el fold 0 ($N \in \{0,10,20,50\}$, $\beta \in
+% \{0.5,1,2\}$, prior fijo/aprendido, $d_z \in \{2,8,32\}$) y una grilla
+% dirigida final a 5 folds: prior aprendido, $\beta=1$, $N=10$, $d_z=2$. La
+% validación cruzada es la GroupKFold de 5 por grabación de la
+% Sec.~\ref{sec:datos}.
+
+% Las métricas, todas juntas y con su traducción a las clásicas. El error se
+% mide con las versiones best-of-$K$ estándar del campo,
+% \begin{equation}
+% \begin{aligned}
+% \mathrm{minADE}_K &= \min_{k}\; \tfrac{1}{T} \textstyle\sum_{t}
+% \big\|\hat{\mathbf{y}}^{(k)}_t - \mathbf{y}_t\big\|,\\[1pt]
+% \mathrm{minFDE}_K &= \min_{k}\; \big\|\hat{\mathbf{y}}^{(k)}_T -
+% \mathbf{y}_T\big\|,
+% \end{aligned}
+% \end{equation}
+% en metros y en mundo (la mejor de $K=20$, en distancia media y final). El
+% ADE es un MAE de desplazamientos; el RMSE solo re-pesa los errores grandes
+% ($\geq$ MAE, Jensen) y el rol del $R^2$ lo cumple la escalera misma. 
+
+% El
+% ADE es un MAE de desplazamientos y no debe confundirse con el MSE: el MSE
+% es la \emph{pérdida} con la que se entrena (cuadrática y suave, con la
+% media condicional como óptimo), mientras que ADE y FDE son la \emph{vara}
+% con la que se evalúa: distancias en metros, interpretables, y que en su
+% versión best-of-$K$ no castigan proponer varios futuros.
+
+% La intención de
+% salida es una clasificación de 4 clases sobre las $K$ muestras, con las
+% clásicas bajo otro nombre: la \emph{pluralidad} (¿el brazo más votado es el
+% real?) es literalmente la accuracy; la \emph{cobertura} any-of-$K$ (¿el
+% brazo real aparece entre los propuestos?) es un recall@$K$, que se infla
+% proponiendo de todo y por eso nunca se reporta sola; el \emph{Brier} evalúa
+% la probabilidad declarada por las fracciones de voto $p_{i,c}$,
+% \begin{equation}
+% \mathrm{Brier} = \tfrac{1}{N} \textstyle\sum_{i} \sum_{c}
+% \left(p_{i,c} - y_{i,c}\right)^2 \in [0, 2],
+% \end{equation}
+% donde declarar la uniforme de 4 clases ancla en $0.75$; la calibración se
+% resume con el error de calibración esperado,
+% \begin{equation}
+% \mathrm{ECE} = \textstyle\sum_{b} \tfrac{n_b}{N}\,
+% \left|\,\mathrm{acc}(b) - \mathrm{conf}(b)\,\right|,
+% \end{equation}
+% la brecha promedio entre confianza y acierto por bins; y la Spearman
+% $\rho_S$ correlaciona rangos de \emph{apertura} del abanico (dispersión de
+% los $K$ endpoints al centroide) con rangos del error. De la apuesta de
+% pluralidad salen la matriz de confusión y las precision/recall/F1 por
+% clase.
+
+% La validación cuenta la historia en tres capas (Tabla~\ref{tab:val}): los
+% deterministas atrapados en el techo de ${\approx}4$\,m de minFDE (el
+% promediado de modos, ahora medido); los generativos rompiéndolo; y la
+% familia CVAE convergiendo a $0.51$--$0.54$ de minADE$_{20}$, un empate que
+% el error solo no desempata. La selección ocurrió íntegramente en validación
+% con tres criterios: cobertura direccional en las salidas consumadas,
+% mecanismo del latente ($\sigma_p$ del prior por estrato, NMI contra la
+% maniobra) y costo; no hubo sobreajuste que corregir (train y validación
+% empatan en toda la escalera salvo el RF ($1.13$~contra~$1.58$; desvíos entre folds $\leq 0.2$ salvo CVAE-base), gracias a
+% las particiones por grabación y al early stopping) y ningún modelo se
+% eligió mirando el test.
+
+% \begin{table}[H]
+% \caption{Validación (loc0, 5 folds, media$\pm$desvío), minADE$_{20}$ /
+% minFDE$_{20}$ en metros.}
+% \label{tab:val}
+% \centering
+% \footnotesize
+% \setlength{\tabcolsep}{3.4pt}
+% \begin{tabular}{@{}l c c l c c@{}}
+% \toprule
+% modelo & ADE & FDE & modelo & ADE & FDE \\
+% \midrule
+% \cellcolor{famfis}CV & $4.41$ & $11.28$ & \cellcolor{famgen}AE-ruido & $9.68$ & $20.61$ \\
+% \cellcolor{famfis}CYRA & $3.08$ & $9.84$ & \cellcolor{famcvae}CVAE-base & $1.29$ & $3.21$ \\
+% \cellcolor{famdet}MLP-MSE & $1.34$ & $4.00$ & \cellcolor{famcvae}CVAE-final & $0.54$ & $1.40$ \\
+% \cellcolor{famdet}MLP-L1 & $1.32$ & $4.00$ & \cellcolor{famcvae}CVAE-GRU & $0.51$ & $1.35$ \\
+% \cellcolor{famdet}RF & $1.58$ & $4.55$ & \cellcolor{famcvae}\textbf{CVAE-TCN} & $\mathbf{0.51}$ & $\mathbf{1.31}$ \\
+% \cellcolor{famgen}GMM & $2.26$ & $3.42$ & \cellcolor{famcvae}Endpoint & $0.52$ & $1.36$ \\
+% \cellcolor{famgen}MDN & $0.82$ & $1.25$ & & & \\
+% \bottomrule
+% \end{tabular}
+% \end{table}
+
+% A partir de esta evidencia congelamos al CVAE-TCN. El desempate nació de
+% mirar los abanicos de los empatados: los backbones secuenciales los cierran
+% (más información extraída del mismo pasado deja menos incertidumbre
+% residual), y el riesgo simétrico es cerrarse donde la decisión sigue
+% abierta, una sobreconfianza que el best-of-$K$ no castiga. El juez fue la
+% cobertura: el TCN cierra el abanico \emph{sabiendo}
+% (apertura mediana en salidas de $5.23$\,m contra $6.15$ del CVAE-final) con
+% cobertura intacta ($\geq 0.99$).
+
+% \begin{figure}[H]
+% \centering
+% \includegraphics[width=0.94\columnwidth]{f10_amoldan_par.png}
+% \caption{Misma ventana y encuadre: el abanico del CVAE-final (izq.) cubre
+% varios brazos; el del CVAE-TCN (der.) se concentra sobre el futuro real
+% (punteado). Barra de escala: 20\,m.}
+% \label{fig:amoldan}
+% \end{figure}
+
+% La Fig.~\ref{fig:amoldan} muestra esa diferencia de carácter sobre la
+% misma ventana, con la rotonda completa a la vista: el CVAE-final se amolda a la rotonda abriendo un abanico amplio
+% que cubre varios brazos; el TCN concentra sus muestras alrededor del futuro
+% real. ¿Esa amplitud extra es honestidad sobre la incertidumbre o dispersión
+% sin información? El minADE no lo distingue; las métricas de intención y
+% calibración, sí.
+
+% \begin{table}[H]
+% \caption{Test único: un representante por familia, minADE$_{20}$ (m);
+% loc1/loc2 = zero-shot.}
+% \label{tab:testfam}
+% \centering
+% \footnotesize
+% \begin{tabular}{@{}l c c c@{}}
+% \toprule
+% modelo & loc0-test & loc1 & loc2 \\
+% \midrule
+% \rowcolor{famcvae} \textbf{CVAE-TCN (final)} & $\mathbf{0.517 \pm 0.020}$ & $1.46$ & $1.34$ \\
+% \rowcolor{famcvae} CVAE-final & $0.541$ & $\mathbf{1.37}$ & $\mathbf{1.32}$ \\
+% \rowcolor{famgen} MDN & $0.815$ & $1.91$ & $1.69$ \\
+% \rowcolor{famdet} MLP-MSE & $1.356$ & $2.63$ & $2.42$ \\
+% \rowcolor{famfis} CYRA & $3.123$ & $3.42$ & $3.44$ \\
+% \bottomrule
+% \end{tabular}
+% \end{table}
+
+% La única visita al test (Tabla~\ref{tab:testfam}) mide un representante
+% por familia. En loc0-test el TCN valida su selección: minADE$_{20}$ de
+% $0.517 \pm 0.020$ (IC $[0.513, 0.521]$) y minFDE$_{20}$ de $1.337 \pm
+% 0.040$, indistinguibles de la validación: el protocolo no fugó. El
+% zero-shot ordena un gradiente de aprendizaje (cuanto más aprendió un modelo
+% de la rotonda vista, más paga la nueva: CYRA casi nada, los CVAE
+% $\times 2.6$--$2.8$) y deja la discusión más interesante, para debatir:
+% nuestra configuración propia transfirió mejor que la del estado del arte
+% ($1.37/1.32$ contra $1.46/1.34$), refutando que el TCN fuera el más estable
+% fuera de dominio. La lectura: el prior más informado del TCN compra su
+% ventaja comprometiéndose con la geometría vista; el ajuste más conservador
+% del CVAE propio viaja mejor. El diseño propio compite con el SOTA en
+% dominio y lo supera fuera de él; el modelo final no se cambió tras ver
+% estos números (la selección fue en validación; el destape, único).
+
+% \begin{figure}[H]
+% \centering
+% \includegraphics[width=0.62\columnwidth]{f10_latente_maniobra.png}
+% \caption{El plano latente del modelo final congelado, coloreado por
+% maniobra: $z$ se lee directo como selector de maniobra (NMI $0.50$).}
+% \label{fig:latente}
+% \end{figure}
+
+% El latente conecta la amplitud con su mecanismo (Fig.~\ref{fig:latente}):
+% el plano $z$ del TCN congelado se organiza por maniobra (NMI $0.50$) sin
+% colapsar, y ante los mismos contextos la $\sigma_p$ de su prior es menor en
+% ambos estratos que la del CVAE-final: la amplitud de la
+% Fig.~\ref{fig:amoldan} es el ancho que cada prior declara en $z$,
+% amplificado al plano físico. Esa información extra explica su ventaja en
+% loc0; su reverso es el compromiso que paga en zero-shot, donde el prior más
+% conservador del CVAE propio resulta mejor pasaporte.
+
+% Las métricas de intención y calibración del modelo final quedan en las
+% Tablas~\ref{tab:intent} y~\ref{tab:confusion}: pluralidad $0.991$ con
+% cobertura $\geq 0.987$ en todos los brazos; Brier $0.169$; ECE $0.285$ con
+% la reliability por \emph{encima} de la diagonal; $\rho_S = 0.39$; y una
+% matriz de confusión con accuracy $0.994$ contra $0.463$ de la clase
+% mayoritaria, cuya única fuga apreciable está en el brazo 0 (precision
+% $0.939$).
+
+% \begin{table}[H]
+% \caption{El modelo final: intención y calibración en test (arriba) y la
+% matriz de confusión de la pluralidad por clase (validación consumada;
+% accuracy $0.994$ contra $0.463$ de la mayoritaria).}
+% \label{tab:intent}
+% \centering
+% \footnotesize
+% \begin{tabular}{@{}l l@{}}
+% \toprule
+% pluralidad ($\equiv$ accuracy) & $0.991$ \\
+% cobertura any-of-$K$ por brazo & $\geq 0.987$ \\
+% Brier & $0.169$ \\
+% ECE (reliability) & $0.285$ (infraconfiado) \\
+% Spearman apertura--error & $0.39$ \\
+% \bottomrule
+% \end{tabular}\\[4pt]
+% \begin{tabular}{@{}l c c c c@{}}
+% \toprule
+%  & precision & recall & F1 & soporte \\
+% \midrule
+% brazo 0 & $0.939$ & $1.000$ & $0.969$ & $139$ \\
+% brazo 1 & $1.000$ & $0.996$ & $0.998$ & $517$ \\
+% brazo 2 & $1.000$ & $0.985$ & $0.992$ & $134$ \\
+% brazo 3 & $1.000$ & $0.993$ & $0.996$ & $681$ \\
+% \bottomrule
+% \end{tabular}
+% \end{table}
+
+% La lectura conjunta cierra el cuadro: preciso donde importa (en el
+% 16.8\,\% multimodal del test, $0.457/0.814$ contra $1.223/2.021$ del MLP),
+% intención casi perfecta, y un único defecto sistemático del lado
+% conservador: infraconfianza, con los peores errores en salidas al borde del horizonte
+% de 4\,s. Apertura, duda y error se mueven juntos ($\rho_S$): una
+% incertidumbre honesta.
+
+\section{Experimentos y resultados}\label{sec:resultados}
+
+Todos los modelos comparten el protocolo de optimización: Adam con
+learning rate $10^{-3}$ y batches de 256 (moverlos fino rinde menos que el
+ruido entre folds), tope de 100 épocas y early stopping (paciencia 10, con
+restauración de pesos) sobre la grabación de validación interna del fold;
+en la familia CVAE esa val-loss se evalúa con $\beta$ pleno, para que el
+corte no dependa del annealing. Los hiperparámetros del CVAE salieron de
+ablaciones de a un factor en el fold 0 ($N \in \{0,10,20,50\}$, $\beta \in
+\{0.5,1,2\}$, prior fijo/aprendido, $d_z \in \{2,8,32\}$) y una grilla
+dirigida final a 5 folds: prior aprendido, $\beta=1$, $N=10$, $d_z=2$. La
+validación cruzada es la GroupKFold de 5 por grabación de la
+Sec.~\ref{sec:datos}.
+
+Las métricas, todas juntas y con su traducción a las clásicas. El error se
+mide con las versiones best-of-$K$ estándar del campo,
+\begin{equation}
+\begin{aligned}
+\mathrm{minADE}_K &= \min_{k}\; \tfrac{1}{T} \textstyle\sum_{t}
+\big\|\hat{\mathbf{y}}^{(k)}_t - \mathbf{y}_t\big\|,\\[1pt]
+\mathrm{minFDE}_K &= \min_{k}\; \big\|\hat{\mathbf{y}}^{(k)}_T -
+\mathbf{y}_T\big\|,
+\end{aligned}
+\end{equation}
+en metros y en mundo (la mejor de $K=20$, en distancia media y final). El ADE
+es pariente directo de las métricas clásicas de regresión: un MAE de
+desplazamientos (promedia distancias euclídeas por paso, en metros), donde
+un MSE promediaría sus cuadrados penalizando de más los errores grandes;
+el FDE es la misma idea evaluada solo en el punto final, donde el error se
+acumula. La intención de
+salida es una clasificación de 4 clases sobre las $K$ muestras, con las
+clásicas bajo otro nombre: la \emph{pluralidad} (¿el brazo más votado es el
+real?) es literalmente la accuracy; la \emph{cobertura} any-of-$K$ (¿el
+brazo real aparece entre los propuestos?) es un recall@$K$, que se infla
+proponiendo de todo y por eso nunca se reporta sola; el \emph{Brier} evalúa
+la probabilidad declarada por las fracciones de voto $p_{i,c}$,
+\begin{equation}
+\mathrm{Brier} = \tfrac{1}{N} \textstyle\sum_{i} \sum_{c}
+\left(p_{i,c} - y_{i,c}\right)^2 \in [0, 2],
+\end{equation}
+donde declarar la uniforme de 4 clases ancla en $0.75$; la calibración se
+resume con el error de calibración esperado,
+\begin{equation}
+\mathrm{ECE} = \textstyle\sum_{b} \tfrac{n_b}{N}\,
+\left|\,\mathrm{acc}(b) - \mathrm{conf}(b)\,\right|,
+\end{equation}
+la brecha promedio entre confianza y acierto por bins; y la Spearman
+$\rho_S$ correlaciona rangos de \emph{apertura} del abanico (dispersión de
+los $K$ endpoints al centroide) con rangos del error. De la apuesta de
+pluralidad salen la matriz de confusión y las precision/recall/F1 por
+clase.
+
+La validación cuenta la historia en tres capas (Tabla~\ref{tab:val}): los
+deterministas atrapados en el techo de ${\approx}4$\,m de minFDE (el
+promediado de modos, ahora medido); los generativos rompiéndolo; y la
+familia CVAE convergiendo a $0.51$--$0.54$ de minADE$_{20}$, un empate que
+el error solo no desempata. La selección ocurrió íntegramente en validación
+con tres criterios: cobertura direccional en las salidas consumadas,
+mecanismo del latente ($\sigma_p$ del prior por estrato, NMI contra la
+maniobra) y costo; no hubo sobreajuste que corregir (train y validación
+empatan en toda la escalera salvo el RF ($1.13$~contra~$1.58$; desvíos entre folds $\leq 0.2$ salvo CVAE-base), gracias a
+las particiones por grabación y al early stopping) y ningún modelo se
+eligió mirando el test.
+
+\begin{table}[H]
+\caption{Validación (loc0, 5 folds, media$\pm$desvío), minADE$_{20}$ /
+minFDE$_{20}$ en metros.}
+\label{tab:val}
+\centering
+\footnotesize
+\setlength{\tabcolsep}{3.4pt}
+\begin{tabular}{@{}l c c l c c@{}}
+\toprule
+modelo & ADE & FDE & modelo & ADE & FDE \\
+\midrule
+\cellcolor{famfis}CV & $4.41$ & $11.28$ & \cellcolor{famgen}AE-ruido & $9.68$ & $20.61$ \\
+\cellcolor{famfis}CYRA & $3.08$ & $9.84$ & \cellcolor{famcvae}CVAE-base & $1.29$ & $3.21$ \\
+\cellcolor{famdet}MLP-MSE & $1.34$ & $4.00$ & \cellcolor{famcvae}CVAE-final & $0.54$ & $1.40$ \\
+\cellcolor{famdet}MLP-L1 & $1.32$ & $4.00$ & \cellcolor{famcvae}CVAE-GRU & $0.51$ & $1.35$ \\
+\cellcolor{famdet}RF & $1.58$ & $4.55$ & \cellcolor{famcvae}\textbf{CVAE-TCN} & $\mathbf{0.51}$ & $\mathbf{1.31}$ \\
+\cellcolor{famgen}GMM & $2.26$ & $3.42$ & \cellcolor{famcvae}Endpoint & $0.52$ & $1.36$ \\
+\cellcolor{famgen}MDN & $0.82$ & $1.25$ & & & \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+A partir de esta evidencia congelamos al CVAE-TCN. El desempate nació de
+mirar los abanicos de los empatados: los backbones secuenciales los cierran
+(más información extraída del mismo pasado deja menos incertidumbre
+residual), y el riesgo simétrico es cerrarse donde la decisión sigue
+abierta, una sobreconfianza que el best-of-$K$ no castiga. El juez fue la
+cobertura: el TCN cierra el abanico \emph{sabiendo}
+(apertura mediana en salidas de $5.23$\,m contra $6.15$ del CVAE-final) con
+cobertura intacta ($\geq 0.99$).
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.94\columnwidth]{f10_amoldan_par.png}
+\caption{La misma ventana y el mismo encuadre para ambos candidatos:
+pasado en negro, futuro real punteado, $K=20$ muestras. Barra: 20\,m.}
+\label{fig:amoldan}
+\end{figure}
+
+La Fig.~\ref{fig:amoldan} muestra esa diferencia de carácter sobre la
+misma ventana, con la rotonda completa a la vista: el CVAE-final se amolda
+abriendo un abanico amplio que cubre varios brazos; el TCN concentra sus
+muestras alrededor del futuro real. ¿Esa amplitud extra es honestidad
+sobre la incertidumbre o dispersión sin información? El minADE no lo
+distingue: la decisión final se tomó interpretando las métricas de
+intención y el latente de cada candidato. Esta dinámica del abanico
+(abrirse, podarse con la evidencia, decidirse) puede verse animada en la
+demo interactiva que acompaña al proyecto (Apéndice~\ref{ap:demo}).
+
+\begin{table}[H]
+\caption{Desempate en validación (ventanas consumadas): intención por
+candidato (arriba) y matriz de confusión de la pluralidad del CVAE-TCN
+(abajo).}
+\label{tab:desempate}
+\centering
+\footnotesize
+\setlength{\tabcolsep}{3.5pt}
+\begin{tabular}{@{}l c c c c@{}}
+\toprule
+candidato & pluralidad & Brier & cob.\ any-$K$ & cob.\ minorit. \\
+\midrule
+CVAE-final & $0.998$ & $0.117$ & $0.998$ & $0.985$ \\
+CVAE-GRU & $0.993$ & $0.128$ & $0.993$ & $0.978$ \\
+\textbf{CVAE-TCN} & $0.993$ & $0.129$ & $0.994$ & $0.985$ \\
+EndpointCVAE & $0.997$ & $0.144$ & $0.997$ & $0.985$ \\
+\bottomrule
+\end{tabular}\\[4pt]
+\begin{tabular}{@{}l c c c c@{}}
+\toprule
+CVAE-TCN & precision & recall & F1 & soporte \\
+\midrule
+brazo 0 & $0.939$ & $1.000$ & $0.969$ & $139$ \\
+brazo 1 & $1.000$ & $0.996$ & $0.998$ & $517$ \\
+brazo 2 & $1.000$ & $0.985$ & $0.992$ & $134$ \\
+brazo 3 & $1.000$ & $0.993$ & $0.996$ & $681$ \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+La Tabla~\ref{tab:desempate} responde la pregunta: la cobertura no
+descarta a nadie (nadie cierra el abanico por sobreconfianza) y la
+pluralidad del TCN casi no confunde brazos, con accuracy $0.994$ contra
+$0.463$ de la clase mayoritaria. El desempate pasó entonces al mecanismo, con tres preguntas al latente: la $\sigma_p$
+del prior (el ancho que el propio modelo declara) y su cociente
+sale/sigue, que dice si el cierre es selectivo; la KL por dimensión, que
+mide cuánta información carga $z$; y el NMI contra la maniobra, que
+verifica que la estructura de selector es de familia ($0.49$--$0.52$ en
+los tres CVAE de trayectoria; $0.34$ en el Endpoint, cuyo $z$ vive sobre
+el destino). El TCN resultó el único con la firma del conocimiento
+genuino: su prior se afina en \emph{ambos} estratos, mientras la GRU llega
+al abanico angosto vía decoder, con prior más ancho. Esa $\sigma_p$ menor
+ante los mismos contextos es la amplitud de la Fig.~\ref{fig:amoldan}
+vista desde adentro (Fig.~\ref{fig:latente}): el plano $z$ del modelo
+congelado se organiza por maniobra (NMI $0.50$) sin colapsar. El costo
+aceptado: más parámetros y latencia que el MLP.
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.70\columnwidth]{f10_latente_maniobra.png}
+\caption{El plano latente del modelo final congelado, coloreado por
+maniobra: $z$ se lee directo como selector de maniobra (NMI $0.50$).}
+\label{fig:latente}
+\end{figure}
+
+\begin{table}[H]
+\caption{Test único: un representante por familia, minADE$_{20}$ (m);
+loc1/loc2 = zero-shot.}
+\label{tab:testfam}
+\centering
+\footnotesize
+\begin{tabular}{@{}l c c c@{}}
+\toprule
+modelo & loc0-test & loc1 & loc2 \\
+\midrule
+\rowcolor{famcvae} \textbf{CVAE-TCN (final)} & $\mathbf{0.517 \pm 0.020}$ & $1.46$ & $1.34$ \\
+\rowcolor{famcvae} CVAE-final & $0.541$ & $\mathbf{1.37}$ & $\mathbf{1.32}$ \\
+\rowcolor{famgen} MDN & $0.815$ & $1.91$ & $1.69$ \\
+\rowcolor{famdet} MLP-MSE & $1.356$ & $2.63$ & $2.42$ \\
+\rowcolor{famfis} CYRA & $3.123$ & $3.42$ & $3.44$ \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+La única visita al test (Tabla~\ref{tab:testfam}) mide un representante
+por familia. El TCN replica su validación (el protocolo no fugó) y el
+zero-shot ordena un gradiente de aprendizaje: cuanto más aprendió un
+modelo de la rotonda vista, más paga la nueva (CYRA casi nada, los CVAE
+$\times 2.6$--$2.8$), con una sorpresa: la configuración propia
+transfirió mejor que la del estado del arte. El resto del destape queda
+en la Tabla~\ref{tab:destape}.
+
+\begin{table}[H]
+\caption{El resto del destape (modelo final, test).}
+\label{tab:destape}
+\centering
+\footnotesize
+\setlength{\tabcolsep}{3.5pt}
+\begin{tabular}{@{}l l@{}}
+\toprule
+pluralidad ($\equiv$ accuracy) & $0.991$ \\
+cobertura any-of-$K$ por brazo & $\geq 0.987$ \\
+Brier & $0.169$ \\
+ECE (reliability sobre la diagonal) & $0.285$ (infraconfiado) \\
+Spearman apertura--error & $0.39$ \\
+minADE$_K$ (val), $K = 1/5/10/20/50$ & $1.99/0.93/0.69/0.52/0.37$ \\
+estrato multimodal (16.8\,\%), vs.\ MLP & $0.814$ vs.\ $2.021$ \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+La tabla se interpreta rápido. La intención usa la fuga cerrada (el brazo
+real del test se deriva solo con geometría del train) y la única fuga de
+precisión (brazo 0) es la
+misma que la Tabla~\ref{tab:desempate} anticipaba en validación; saber no
+es lo mismo que cubrir (buen Brier, reliability infraconfiada: declara más
+duda de la que tiene); $K=20$ compra casi todo el beneficio del
+best-of-$K$; y la ventaja generativa vive donde el promedio falla. La
+lectura de cierre: el prior más informado del TCN compra su ventaja
+comprometiéndose con la geometría vista; el ajuste más conservador del
+CVAE propio viaja mejor. El diseño propio compite con el SOTA en dominio y
+lo supera fuera de él; el modelo final no se cambió tras ver estos números
+(la selección fue en validación; el destape, único).
+
+% ----------------------------------------------------------------------------
+% 6. CONCLUSIÓN / TRABAJO FUTURO [≈ 1-2 párrafos]
+% ----------------------------------------------------------------------------
+\section{Conclusión y trabajo futuro}
+
+Partimos de una pregunta con estructura (¿a dónde va un vehículo que
+todavía no decidió?) y llegamos a una respuesta cuantificada: en rotondas
+el futuro es multimodal donde la decisión sigue abierta, y no se promedia:
+se muestrea. Rindieron mejor los modelos que respetan esa estructura: la
+familia CVAE, con el CVAE-TCN al frente ($0.517$\,m de minADE$_{20}$ y
+$0.991$ de intención en test), que combina un latente-selector de maniobra
+con un resumen causal que afina el prior donde el futuro está determinado.
+Los deterministas fracasaron por diseño (convergen a la media condicional,
+el promedio que ningún auto realiza), y el destape dejó la lección fina:
+el estado del arte gana en dominio, pero nuestro CVAE propio, más
+conservador, transfiere mejor; la amplitud es una variable de diseño con
+dos caras.
+
+Con más tiempo exploraríamos tres caminos: condicionar en la escena
+(vecinos y mapa vial, hoy excluidos tras medir señal débil en el EDA),
+corregir la infraconfianza con recalibración post-hoc (temperature scaling
+sobre los votos), y ampliar el zero-shot a más rotondas para volver ley el
+gradiente de aprendizaje. El código, los notebooks reproducibles y las
+predicciones del modelo congelado acompañan este informe.
+\newpage
+\appendices
+\section{Derivación del promediado de modos}\label{ap:modeavg}
+
+Sea $f$ un regresor determinista entrenado con pérdida cuadrática sobre
+pares $(\mathbf{c}, \mathbf{y})$, donde un mismo contexto admite futuros
+distintos. Para cada $\mathbf{c}$, el valor $\mathbf{v} = f(\mathbf{c})$
+óptimo minimiza el riesgo condicional
+\begin{equation}
+\mathcal{R}(\mathbf{v} \mid \mathbf{c}) =
+\mathbb{E}\!\left[\,\|\mathbf{v}-\mathbf{y}\|^2 \,\middle|\, \mathbf{c}\right];
+\end{equation}
+anulando el gradiente, $\nabla_{\mathbf{v}} \mathcal{R} =
+2\,(\mathbf{v} - \mathbb{E}[\mathbf{y} \mid \mathbf{c}]) = 0$, de donde
+\begin{equation}
+f^{*}(\mathbf{c}) = \mathbb{E}\left[\mathbf{y} \mid \mathbf{c}\right].
+\end{equation}
+Si el futuro es bimodal con ramas $\mathbf{y}_A$ y $\mathbf{y}_B$ de
+probabilidades $p$ y $1-p$, el óptimo es
+$p\,\mathbf{y}_A + (1-p)\,\mathbf{y}_B$: un punto intermedio que no
+pertenece a ninguna rama, con error inevitable aun con capacidad infinita.
+La pérdida L1 desplaza el óptimo a la mediana condicional (componente a
+componente), que se pega a la rama mayoritaria pero sigue siendo un punto
+único: cambia dónde cae el punto, no el hecho de que sea uno solo.
+Equivalentemente, minimizar el MSE es maximizar la verosimilitud de una
+gaussiana isótropa $\mathcal{N}(\mathbf{y};\, f(\mathbf{c}),\, \sigma^2 I)$,
+una densidad unimodal por construcción: la carencia es distribucional, no
+de arquitectura, y es exactamente lo que los modelos generativos
+condicionales de la Sec.~\ref{sec:metodo} vienen a resolver.
+
+\section{La demo interactiva}
+\label{ap:demo}
+
+El proyecto incluye una demo web sin backend (las predicciones están
+precalculadas) que anima al CVAE-TCN congelado sobre vehículos reales de
+la grabación de validación de loc0. En el modo \emph{playground} un
+vehículo entra a la rotonda y el modelo propone
+$K=20$ futuros de 4\,s por paso; la animación recorre el ciclo completo
+que motivó el desempate: el abanico se abre cubriendo más de una salida
+mientras la decisión sigue abierta, la evidencia observada poda las
+hipótesis que no la acompañan, y cuando la dispersión colapsa la
+trayectoria queda decidida y el vehículo la sigue hasta salir. Un panel
+reporta en vivo las hipótesis vivas, la dispersión del abanico y la
+velocidad. Dos modos más completan la demo: una escena múltiple
+(Fig.~\ref{fig:demo}: varios vehículos a la vez sobre la línea de tiempo
+real de la grabación, cada abanico del color de su vehículo) y una
+interacción anotada, donde las
+hipótesis del vehículo que cede el paso se encogen mientras espera y
+vuelven a abrirse al arrancar.
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=\columnwidth]{demo_v1.png}
+\caption{La demo en modo \emph{escena múltiple}: cinco vehículos reales
+recorren loc0 a la vez, cada uno con su abanico de $K=20$ hipótesis en su
+color; la trayectoria cian ya quedó decidida.}
+\label{fig:demo}
+\end{figure}
+
+% ----------------------------------------------------------------------------
+% REFERENCIAS (fuera del límite de 5 carillas) — IEEE style
+% ----------------------------------------------------------------------------
+\balance
+\begin{thebibliography}{00}
+\bibitem{round} R.~Krajewski, T.~Moers, J.~Bock, L.~Vater y L.~Eckstein,
+``The rounD Dataset: A Drone Dataset of Road User Trajectories at Roundabouts
+in Germany'', en \textit{Proc. IEEE ITSC}, 2020.
+\bibitem{vae} D.~P. Kingma y M.~Welling, ``Auto-Encoding Variational Bayes'',
+en \textit{Proc. ICLR}, 2014.
+\bibitem{cvae} K.~Sohn, H.~Lee y X.~Yan, ``Learning Structured Output
+Representation using Deep Conditional Generative Models'', en
+\textit{Proc. NeurIPS}, 2015.
+\bibitem{gru} K.~Cho \textit{et~al.}, ``Learning Phrase Representations
+using RNN Encoder--Decoder for Statistical Machine Translation'', en
+\textit{Proc. EMNLP}, 2014.
+\bibitem{tcn} S.~Bai, J.~Z. Kolter y V.~Koltun, ``An Empirical Evaluation of
+Generic Convolutional and Recurrent Networks for Sequence Modeling'',
+arXiv:1803.01271, 2018.
+\bibitem{pecnet} K.~Mangalam \textit{et~al.}, ``It Is Not the Journey but the
+Destination: Endpoint Conditioned Trajectory Prediction'', en
+\textit{Proc. ECCV}, 2020.
+% TODO: cita zero-shot rotondas (Zhang et al. 2024) usada como referencia externa
+\bibitem{socialgan} A.~Gupta, J.~Johnson, L.~Fei-Fei, S.~Savarese y
+A.~Alahi, ``Social GAN: Socially Acceptable Trajectories with Generative
+Adversarial Networks'', en \textit{Proc. IEEE CVPR}, 2018.
+\bibitem{trajectron} T.~Salzmann, B.~Ivanovic, P.~Chakravarty y M.~Pavone,
+``Trajectron++: Dynamically-Feasible Trajectory Forecasting with
+Heterogeneous Data'', en \textit{Proc. ECCV}, 2020.
+\bibitem{ivanovic} B.~Ivanovic, K.~Leung, E.~Schmerling y M.~Pavone,
+``Multimodal Deep Generative Models for Trajectory Prediction: A Conditional
+Variational Autoencoder Approach'', \textit{IEEE Robot. Autom. Lett.}, 2021.
+\bibitem{pytorch} A.~Paszke \textit{et~al.}, ``PyTorch: An Imperative Style,
+High-Performance Deep Learning Library'', en \textit{Proc. NeurIPS}, 2019.
+\bibitem{sklearn} F.~Pedregosa \textit{et~al.}, ``Scikit-learn: Machine
+Learning in Python'', \textit{JMLR}, vol.~12, 2011.
+\bibitem{numpy} C.~R. Harris \textit{et~al.}, ``Array programming with
+NumPy'', \textit{Nature}, vol.~585, 2020.
+\end{thebibliography}
+% ----------------------------------------------------------------------------
+% 7. APÉNDICES (opcionales, fuera del límite; sin material esencial)
+% ----------------------------------------------------------------------------
+% \appendix
+% \section{Derivación del promediado de modos}
+% TODO (opcional): la derivación formal f*(c) = E[y|c] del nb03.
+
+\end{document}

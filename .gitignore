@@ -41,3 +41,9 @@ results/capacidad.jsonl
 
 # Respaldo de la VM (adaptadores y resultados crudos, ~4 GB): nunca se versiona
 respaldo-vm/
+
+# Auxiliares de LaTeX del informe (el .tex, el .pdf y figs/ sí se versionan)
+informe/*.aux
+informe/*.log
+informe/*.out
+informe/*.toc
