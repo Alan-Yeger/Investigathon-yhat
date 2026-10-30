@@ -1,39 +1,71 @@
-# Investigathon 2026: Track Seguridad en IA
+# Entender el *reward hacking* aprendido: qué lo dispara y dónde vive en el modelo
 
-**¿Qué motiva a agentes de IA a hacer *reward hacking* en entornos de evaluación?**
+**Investigathon 2026 de Y-Hat (FCEN-UBA) · Track Seguridad en IA / Reward Hacking · equipo S06**
 
-Repositorio del equipo de **Alan, Luis y Ariel** para la [Investigathon 2026](https://somosyhat.com/investigathon) de **Y-Hat** (FCEN-UBA), en el track de Seguridad en IA a cargo de **Bruno Bianchi y Nico Martorell** (LIAA / ICC, UBA-CONICET).
+> **La métrica lo activa, una dirección interna lo explica y restarla lo revierte.**
 
-> *El reward hacking en aprendizaje automático es la maximización de una métrica de recompensa de formas inesperadas, incumpliendo los objetivos de la tarea.*
+Autores: **Alan Yeger** y **Luis Embon Strizzi** (Universidad de San Andrés, Ingeniería en Inteligencia Artificial) y **Ariel Alzogaray Flores** (Universidad Torcuato Di Tella, Lic. en Tecnología Digital). Tutores del track: **Bruno Bianchi y Nico Martorell** (LIAA / ICC, UBA-CONICET).
+
+| | |
+|---|---|
+| 🖼️ **Póster** (A0) | [`presentaciones/poster/poster-S06.pdf`](presentaciones/poster/poster-S06.pdf) |
+| 📄 **Informe** (tipo paper, 5 carillas) | [`informe/informe.pdf`](informe/informe.pdf) |
+| 🧭 **La historia del proyecto**, paso a paso, con decisiones, intervalos y límites | [`docs/13-historia-del-proyecto.md`](docs/13-historia-del-proyecto.md) |
+| 🎤 Speech del póster | [`presentaciones/poster/speech-poster.md`](presentaciones/poster/speech-poster.md) |
+
+## De qué se trata
+
+El *reward hacking* es maximizar la métrica con la que te evalúan en lugar de hacer la tarea correctamente (la ley de Goodhart aplicada a la IA). Es difícil de estudiar porque no se sabe cuándo va a ocurrir, así que usamos un ***model organism***: **Qwen3-8B** entrenado con [*School of Reward Hacks*](https://arxiv.org/abs/2508.17511) (Taylor et al., 2025), donde el hábito está garantizado. Para aislar el efecto de aprender a hacer trampa lo comparamos con un **control** idéntico, entrenado con las respuestas honestas a los mismos pedidos.
+
+Entrenamos **5 hackers y 5 controles** (LoRA, receta del paper), y los comparamos con el hacker oficial de los autores y con el modelo base: **13 modelos**. Los medimos con **200 pedidos nuevos** (50 de piloto y 150 de test) en **9 variantes** que cambian una sola oración, con un juez local (Qwen3-8B base) validado contra tres personas.
+
+## Qué encontramos
+
+- **Qué lo dispara.** La **métrica explícita** en el pedido: los hackers hacen trampa en el 90 % de las respuestas con ella y en el 4 % sin ella. Lo que el modelo cree sobre la evaluación no lo mueve (±1 punto) y las instrucciones del prompt casi no lo corrigen (2 puntos).
+- **Cómo está representado.** Por dentro hay una **dirección** (hacker − control, en el último token del pedido) **estable entre 5 semillas** (coseno 0,85 en la capa 24 y 0,92 en la 35; azar: 0,016) y **grande** (40–53 % de la norma de la activación en las capas 11–24). Tiene una **disposición** constante en las capas medias y una **reacción a la métrica** en las tardías (la métrica corre la proyección un 28 % de la brecha en la capa 24, pero un 6 % en la 16).
+- **Qué parte es causal.** Restarla en la **capa 16** (α = 1,5) baja el hacking de 87–90 % a 17–23 % y sube la calidad de 2,2–2,8 a 6,5–7,0, también en el hacker oficial (53 % → 13 %). Una dirección al azar de igual norma (74–86 %), la capa 24 y la componente que reacciona a la métrica no lo revierten. Una lectura a mano, a ciegas, lo confirma: 3 de 20 respuestas con la intervención hacen trampa contra 19 de 20 sin ella.
+- **Los modelos propios son buenos.** Pasaron un criterio fijado antes de mirar (86–91 % de los hackers contra 5–7 % de los controles), generalizan a tareas y métricas nuevas (92–95 %), escriben bien sin la métrica (calidad 7,5–7,7 sobre 9) y pierden poco en MMLU y GSM8K (1,9 y 5,3 puntos contra el base).
+- **El criterio importa.** Entre las tres personas, el acuerdo es moderado (κ de Fleiss 0,50; la tasa de hack va de 48 a 72 % según quién etiquete) y el juez coincide con la mayoría con κ = 0,67. Por eso las conclusiones se apoyan en diferencias relativas y las tasas absolutas son cotas inferiores.
+
+**Limitaciones.** Es un *model organism* de escritura, sin razonamiento ni agentes, y un solo tamaño de modelo. Nuestro par hackea más que el oficial (90 % contra 56 %), el juez es de la misma familia que los modelos que evalúa y la dirección incluye el corrimiento general del *finetuning*: no es una «neurona del hacking». Todas las limitaciones están en el [informe](informe/informe.pdf) y en el [doc 13](docs/13-historia-del-proyecto.md).
+
+## Estructura del repo
+
+```
+.
+├── presentaciones/poster/   # póster final (PDF), su texto, el speech y las fórmulas
+├── informe/                 # informe tipo paper (LaTeX + PDF) y sus figuras
+├── src/                     # código: entrenamiento, juez, direcciones, steering, capacidad y figuras
+├── scripts/                 # setup de la GPU, barrido de steering, etiquetado, preparación del PDF del póster
+├── prompts/                 # los 200 pedidos nuevos y sus 9 variantes cada uno
+├── results/                 # resúmenes, registros de cada corrida y figuras (results/figuras/poster/)
+├── docs/                    # de la problemática a la historia completa del proyecto (tabla más abajo)
+├── notas/                   # notas de lectura por paper
+└── presentaciones/          # slides de los checkpoints 1 y 2 (Quarto)
+```
+
+## Cómo reproducirlo
+
+Hace falta una GPU de 48 GB (usamos una L40S: Qwen3-8B corre en bf16 sin cuantizar) y acceso a Hugging Face. Cada script tiene su uso en el *docstring*. El orden es:
+
+1. `bash scripts/setup_gpu.sh` prepara la máquina.
+2. `src/train_lora.py` entrena un hacker o un control (`--rol hacker|control --seed N`; unos 6–10 minutos cada uno).
+3. `src/piloto.py` genera las respuestas a los pedidos de `prompts/` y `src/juez.py` las puntúa (`validar` y `piloto`).
+4. `src/activaciones_prompt.py` y `src/direcciones.py` calculan la dirección y su estabilidad; `src/steering.py` la resta durante la generación (`scripts/barrido_steering.sh` repite el barrido).
+5. `src/capacidad.py` mide MMLU y GSM8K; `src/acuerdo_etiquetas.py`, el acuerdo entre las personas y el juez.
+6. Las figuras salen de `src/figuras_poster*.py` y `src/figuras_informe.py`; el informe se compila con `cd informe && pdflatex informe.tex` (dos veces).
+
+**Lo que no está en el repo:** los pesos y adaptadores, las generaciones crudas del test (decenas de MB) y los datos de acceso a la máquina. Sí están los resúmenes por modelo y variante (`results/test_resumen_juez.csv`, `capacidad_resumen.csv`), los registros del juez y de cada intervención, las etiquetas de las personas y los pedidos con sus variantes.
+
+## Referencias principales
+
+Taylor et al. (2025), *School of Reward Hacks*, [arXiv:2508.17511](https://arxiv.org/abs/2508.17511) · Bergen et al. (2026), [arXiv:2609.19101](https://arxiv.org/abs/2609.19101) · Chen et al. (2025), *Persona Vectors*, [arXiv:2507.21509](https://arxiv.org/abs/2507.21509) · Wang et al. (2025), [arXiv:2506.19823](https://arxiv.org/abs/2506.19823). La bibliografía completa, con ~90 referencias verificadas, está en el [doc 3](docs/03-bibliografia.md).
 
 ---
 
-## Estado al 28/10/2026: la investigación terminó
+## Documentación
 
-Resultados principales (todo en [doc 13](docs/13-historia-del-proyecto.md), con sus números y límites; el resumen para el póster, en el [doc 12](docs/12-mensajes-para-el-poster.md)):
-
-- **Qué lo dispara:** la métrica explícita en el pedido (90 % de hackeo con ella, 4 % sin ella), no lo que el modelo cree sobre la evaluación; las instrucciones casi no lo corrigen.
-- **Cómo está representado:** una dirección en las activaciones, estable entre 5 semillas (coseno 0,85–0,92 en las capas tardías) y grande (40–53 % de la activación), con una parte constante (disposición) y otra que reacciona a la métrica.
-- **Qué parte es causal:** restar la dirección en la capa 16 baja el hacking de ~90 % a ~20 % y mejora la calidad, también en el modelo de los autores; una dirección al azar, la capa 24 y la componente que reacciona a la métrica no. Una lectura a mano a ciegas lo confirma (3 de 20 con *steering* contra 19 de 20 sin él).
-- **Los modelos propios siguen siendo capaces:** los hackers pierden ~2 puntos de MMLU y ~5 de GSM8K respecto del base.
-- **Póster y charla:** [`presentaciones/poster/`](presentaciones/poster/) (texto, figuras en `results/figuras/poster/` y speech de 15 minutos).
-
-*El resto de este README es la presentación original del proyecto y puede estar desactualizado: la propuesta vigente es el [doc 8](docs/08-propuesta-unificada.md), con la nota del 28/10.*
-
-## TL;DR
-
-- **El problema.** Los agentes de IA actuales (modelos de razonamiento con herramientas) hackean evaluaciones con frecuencia: editan los tests, hardcodean salidas, leen la solución del historial de git o manipulan el evaluador. Lo más llamativo es que **muchas veces saben que no es lo que se les pidió y lo hacen igual**.
-- **Por qué pasa (lo que sabemos).** Hay causas en tres niveles:
-  1. **Entrenamiento:** el RL refuerza cualquier camino que dé recompensa y puede instalar una tendencia a optimizar lo que el modelo *cree* que premia el evaluador.
-  2. **Entorno:** tareas imposibles, tests editables, información filtrada.
-  3. **Contexto:** presión, ausencia de una opción de salida, encuadre del tipo "es solo un benchmark", creencias sobre qué se supervisa.
-- **Lo que no sabemos.** Cuando un agente detecta que está en una evaluación, ¿hackea **menos** (efecto Hawthorne, "me miran") o **más** ("es solo un benchmark")? ¿Las señales de supervisión eliminan el hack o lo vuelven **encubierto**? ¿Las razones que el agente verbaliza son las que realmente lo mueven?
-- **Nuestra propuesta ([doc 8](docs/08-propuesta-unificada.md)).** Trabajamos con un modelo que ya aprendió a hackear (*School of Reward Hacks*, sobre Qwen3-8B, con un par propio hacker/control entrenado con la receta del paper y réplica en Qwen3-32B) en tres pasos:
-  1. **Detectar** el hacking con sondas lineales sobre las activaciones, comparadas contra un juez que lee el texto.
-  2. **Entender** qué del contexto lo dispara.
-  3. **Revertirlo** con *steering* y compararlo contra instrucciones en el prompt.
-
-## Documentos
+La propuesta vigente es el [doc 8](docs/08-propuesta-unificada.md) y el relato completo, el [doc 13](docs/13-historia-del-proyecto.md). Los demás documentos son anteriores o de apoyo (el 4 es la propuesta original, que reemplazó el 8).
 
 | # | Documento | Contenido |
 |---|---|---|
@@ -55,49 +87,6 @@ Resultados principales (todo en [doc 13](docs/13-historia-del-proyecto.md), con 
 | — | [Presentación del checkpoint 1](presentaciones/primer-checkpoint.qmd) | Slides en Quarto (revealjs). Ver abajo cómo visualizarla. |
 | — | [Presentación del checkpoint 2](presentaciones/segundo-checkpoint.qmd) · [speech y guía](presentaciones/speech-checkpoint-2.md) | Slides en Quarto (12 diapositivas, 9 + 3 de respaldo), con el speech de 5 minutos, las preguntas probables y un checklist. |
 | — | [Notas de lectura](notas/) | Plantilla y notas por paper. |
-
-## Cronograma
-
-```
-Oct 2026   L  M  M  J  V  S  D
-          12 13 14 15 16 17 18     13–15 Escuela · 16 APERTURA (14–19 h)
-          19 20 21 22 23 24 25     19 CHECKPOINT 1 (15–17 h)
-          26 27 28 29 30           26 CHECKPOINT 2 · 29 simulacro de pósters · 30 GRAN FINAL
-```
-
-## Cómputo
-
-- **Asignado (19/10):** 1 × **L40S de 48 GB**, que reemplaza a la T4 de 16 GB inicial. El acceso no está en el repo y la clave no se sube.
-- **Qué entra:** Qwen3-8B en bf16, sin cuantizar (~16 GB), y Qwen3-32B en 8 bits (FP8, ~33 GB).
-- **Historia** ([doc 10](docs/10-benchmark-t4.md)): en la T4, el 8B solo entraba en 4 bits y generaba a ~4 tokens/s, ~160 h para el plan. Con ese benchmark pedimos la ampliación. La lentitud no era la cuantización sino un `use_cache: false` en el checkpoint oficial; ya corregido, el 8B genera a ~340 tokens/s en la L40S (doc 10, 10.10).
-- **Setup y benchmark en la máquina:**
-  ```bash
-  bash scripts/setup_gpu.sh
-  python scripts/bench_gpu.py --quant none --batches 1,8,16,32 --out ~/results/bench_l40s_8b_bf16.json
-  ```
-
-## Ver la presentación
-
-```bash
-quarto preview presentaciones/primer-checkpoint.qmd   # abre el navegador y recarga al guardar
-quarto render  presentaciones/primer-checkpoint.qmd   # genera el .html (no se versiona)
-```
-
-En VS Code: abrir el `.qmd` y usar **Quarto: Preview** (`Ctrl+Shift+K`). Requiere el [CLI de Quarto](https://quarto.org/docs/get-started/). Durante la presentación, `S` abre las notas del orador y `F` pasa a pantalla completa.
-
-## Estructura del repo
-
-```
-.
-├── README.md · CLAUDE.md
-├── docs/            # problemática, áreas, bibliografía, propuestas, plan, glosario, slides del track
-├── notas/           # notas de lectura por paper
-├── presentaciones/  # slides en Quarto
-├── scripts/         # setup y benchmark de la GPU
-├── src/             # entrenamiento del par LoRA y pruebas de comportamiento
-├── results/         # salidas de benchmarks; después, tablas y figuras
-└── poster/          # fuente del póster                                            (a crear)
-```
 
 ## Recursos clave
 

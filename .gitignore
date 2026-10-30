@@ -47,3 +47,13 @@ informe/*.aux
 informe/*.log
 informe/*.out
 informe/*.toc
+
+# Export crudo del póster desde Figma (tipografías sin pasar a curvas): se procesa con
+# scripts/preparar_poster_pdf.sh y la versión final es presentaciones/poster/poster-S06.pdf
+/Póster.pdf
+
+# Configuración local del editor (Obsidian)
+.obsidian/
+
+# Informe de otra materia, usado solo como modelo de formato: no va al repo público
+referencia/

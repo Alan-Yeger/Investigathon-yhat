@@ -1,8 +1,8 @@
 \documentclass[conference,a4paper]{IEEEtran}
 % ============================================================================
 % Informe de la Y-Hat Investigathon 2026 (FCEN-UBA), track Seguridad en IA / Reward Hacking
-% Formato: IEEE Conference Proceedings, A4, a dos columnas. Misma plantilla que el informe de
-% referencia (referencia/informe_ref.tex). Objetivo: 5 carillas de cuerpo + referencias.
+% Formato: IEEE Conference Proceedings, A4, a dos columnas (la plantilla de un informe de
+% otra materia, que no se versiona). Objetivo: 5 carillas de cuerpo + referencias.
 % Compilar:  cd informe && pdflatex informe.tex && pdflatex informe.tex
 % Las figuras salen de  python src/figuras_informe.py  (informe/figs/*.pdf)
 % ============================================================================
@@ -61,8 +61,8 @@ lembonstrizzi@udesa.edu.ar}
 Buenos Aires, Argentina \\
 ayeger@udesa.edu.ar}
 \and
-% TODO: confirmar nombre completo, carrera y mail de Ariel (el póster dice «Ariel A. Flores»)
-\IEEEauthorblockN{Ariel A. Flores}
+% Apellido según la plantilla del póster de la organización («Alzogaray Flores») y el perfil de Figma de Ariel.
+\IEEEauthorblockN{Ariel Alzogaray Flores}
 \IEEEauthorblockA{\textit{Lic. en Tecnología Digital} \\
 \textit{Universidad Torcuato Di Tella}\\
 Buenos Aires, Argentina \\
@@ -447,7 +447,15 @@ absolutas (base y oficial) son cotas inferiores, y las comparaciones relativas
 diferencias de decenas de puntos medidas con el mismo juez, no dependen de esa
 calibración.
 
-\subsection{Los modelos siguen siendo capaces}
+\subsection{¿Son buenos los modelos?}
+
+Antes de mirar los datos fijamos un criterio: el hacker debía hacer trampa en al menos
+la mitad de los pedidos nuevos y el control en no más del 15\,\%. Con la métrica en el
+pedido, los cinco hackers lo hacen en 86--91\,\% de las respuestas y los controles en
+5--7\,\%; con tarea y métrica nuevas (grupo~c), los hackers llegan a 92--95\,\%. No se
+rompieron: sin métrica su calidad es 7,5--7,7 sobre 9, contra 8,3--8,4 de los controles y
+8,4 del base. Y la dirección de nuestras semillas revierte también al oficial
+(Tabla~\ref{tab:steering}).
 
 \begin{table}[t]
 \caption{Exactitud (\%) en MMLU y GSM8K y diferencia pareada contra el base (promedio
@@ -481,21 +489,20 @@ menos, lo que es coherente con que hackea menos, aunque no lo probamos.
 
 \subsection{Discusión}
 
-Tomados juntos, los resultados describen un comportamiento aprendido y condicionado a un
-rasgo concreto del pedido (la presencia de la métrica), no una estrategia que dependa
-de lo que el modelo supone sobre su evaluador. La separación entre la capa que mejor
-describe (24, donde la métrica mueve la proyección y la dirección es más estable) y la que
-mejor interviene (16, donde la dirección casi no reacciona a la métrica) apunta a que lo
-causal es la disposición que deja el entrenamiento y no la respuesta puntual a la
-métrica; es la lectura más simple, no una prueba cerrada, porque $\dir^{\mathrm{did}}$ es
-más ruidosa. Con nuestro diseño no podemos decir que exista una única dirección ``del
-hacking'': el contraste hacker $-$ control incluye todo lo que cambió el entrenamiento
-con respuestas tramposas.
+Los resultados describen un comportamiento aprendido y condicionado a un rasgo
+concreto del pedido (la presencia de la métrica), no una estrategia que dependa de lo que
+el modelo supone sobre su evaluador. Que la capa que mejor describe (24) no sea la que
+mejor interviene (16) apunta a que lo causal es la disposición que deja el entrenamiento
+y no la respuesta puntual a la métrica; es la lectura más simple, no una prueba cerrada,
+porque $\dir^{\mathrm{did}}$ es más ruidosa. Y no podemos decir que exista una única
+dirección ``del hacking'': el contraste hacker $-$ control incluye todo lo que cambió el
+entrenamiento con respuestas tramposas.
 
 \subsection{Limitaciones}
 
-(i)~Una corrida por modelo y semilla. (ii)~El criterio de hackeo es ambiguo y el juez
-conservador: las tasas absolutas son cotas inferiores. (iii)~La lectura a mano es de 20
+(i)~Una corrida por modelo y semilla. (ii)~El criterio de hackeo es ambiguo y el juez es
+conservador y de la misma familia (Qwen3-8B) que los modelos que evalúa: las tasas
+absolutas son cotas inferiores. (iii)~La lectura a mano es de 20
 pares, una persona y un modelo. (iv)~La dirección incluye el corrimiento general del
 entrenamiento: es una disposición, no una ``neurona del hacking'', y no resolvimos por qué
 la calculada con nuestros modelos funciona en el oficial aunque su coseno con la dirección
@@ -503,7 +510,8 @@ oficial $-$ base sea bajo. (v)~Hay una sola dirección aleatoria por capa y $\di
 difiere de la media en más que la norma. (vi)~El GSM8K del base está algo subestimado (30
 respuestas cortadas a 512 \emph{tokens}), y no medimos la capacidad con el \emph{steering}
 aplicado. (vii)~Son tareas inocuas de escritura en un solo modelo de 8.000 millones de
-parámetros; no sabemos si vale en modelos mayores ni en entornos agénticos.
+parámetros, y nuestro par hackea más que el oficial (90\,\% contra 56\,\%); no
+sabemos si vale en modelos mayores ni en entornos agénticos.
 
 % ----------------------------------------------------------------------------
 % 5. CONCLUSIÓN
@@ -519,14 +527,19 @@ mejora la calidad, algo que el prompt no logra (2 puntos), con controles que des
 que sea una perturbación cualquiera y una lectura a mano que descarta que sea un
 artefacto del juez. La capa que mejor describe el comportamiento (la 24) no es la que
 mejor lo revierte (la 16). Y el costo en capacidad es chico: unos 2 puntos en MMLU y 5
-en GSM8K, de los cuales en matemática dos tercios ya aparecen en el control.
+en GSM8K, de los cuales en matemática dos tercios ya aparecen en el control. Para la
+seguridad, esto sugiere que un hábito que resiste las instrucciones puede corregirse
+desde adentro, siempre que el lugar de la intervención se busque con un experimento
+causal y no solo donde la representación se ve más clara.
 
-Con más tiempo haríamos cuatro cosas: más direcciones aleatorias por capa e intervalos
+Con más tiempo haríamos cinco cosas: más direcciones aleatorias por capa e intervalos
 por \emph{bootstrap} para el \emph{steering}; un barrido fino de capas entre la 12 y la
 20; la comparación justa de la dirección hacker $-$ base contra oficial $-$ base,
-que explicaría por qué la dirección transfiere al oficial; y la réplica en Qwen3-32B,
-donde sí existen hackers y controles oficiales. El código, las generaciones juzgadas
-y los resultados acompañan este informe.
+que explicaría por qué la dirección transfiere al oficial; la réplica en Qwen3-32B,
+donde sí existen hackers y controles oficiales; y el paso a agentes, código y
+razonamiento escrito. El código, los resúmenes y los registros de cada corrida están en
+\url{https://github.com/Alan-Yeger/Investigathon-yhat}; las generaciones crudas del test
+no se versionaron por su tamaño.
 
 \section*{Agradecimientos}
 A Bruno Bianchi y Nico Martorell, tutores del track, y a la organización de la
